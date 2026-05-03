@@ -1,0 +1,95 @@
+\section{Abstract complete curves and vector bundles}
+
+\begin{definition} \label{def:abstract-complete-curve}
+By an \emph{abstract complete curve} we mean a connected, separated, regular $1$-dimensional Noetherian scheme $X$,
+together with a \emph{degree} function from closed points of $X$ to positive integers with the property that the induced linear map $\deg\colon \Div(X) \to \Z$ is zero on all principal divisors.
+\end{definition}
+
+\begin{definition}
+\uses{def:abstract-complete-curve}
+Since the degree map $\Div(X) \to \Z$ vanishes on principal divisors, it induces a map $\Pic(X) \to \Z$
+which we use to define a \emph{degree} homomorphism $\deg\colon K_0(X) \to \Z$.
+\end{definition}
+
+\begin{definition}
+\uses{def:abstract-complete-curve}
+Let $F \subseteq G$ be an inclusion of vector bundles on $X$.
+Then there is a unique intermediate bundle $F'$ such that $\rank(F) = \rank(F')$ and $G/F'$ is a vector bundle, called the \emph{saturation} of $F$ in $G$.
+We then have $\deg(F) \leq \deg(F')$ with equality if and only if $F' = F$.
+\end{definition}
+
+\begin{lemma} \label{lem:filtration by line bundles}
+\uses{def:abstract-complete-curve}
+Every vector bundle $F$ on $X$ admits a filtration of the form
+\[
+0 = F_0 \subset \cdots \subset F_n = F
+\]
+in which $F_i/F_{i-1}$ is a vector bundle of rank $1$ for $i=1,\dots,n$.
+\end{lemma}
+\begin{proof}
+We proceed by induction on $\rank(F)$, the case of rank 0 serving as a trivial base case.
+For the induction step, use the ampleness of $\cO_X(1)$ to construct a surjection $\cO_X^{\oplus d} \to F(m)$ for some positive integers $d$ and $m$. In particular, there exists a nonzero (hence injective) map $\cO_X(m) \to F$ for some integer $m$; let $F_1$ be the saturation of the image of this map. 
+We then apply the induction hypothesis to $F/F_1$ to conclude.
+\end{proof}
+
+
+\begin{definition}
+\uses{def:abstract-complete-curve}
+Let $F$ be a nonzero vector bundle on $X$.
+We define the \emph{slope} of $F$ as 
+\[
+\mu(F) := \frac{\deg(F)}{\rank(F)}.
+\]
+The bundle $F$ is \emph{stable} if there is no nonzero proper subbundle $G$ of $F$ with $\mu(G) \geq \mu(F)$.
+The bundle $F$ is \emph{semistable} if there is no nonzero subbundle $G$ of $F$ with $\mu(G) > \mu(F)$.
+The bundle $F$ is \emph{polystable} if it is a direct sum of stable vector bundles, all of the same slope.
+\end{definition}
+
+\begin{lemma} \label{lem:map of stable}
+\uses{def:abstract-complete-curve}
+Let $F,G$ be two stable vector bundles on $X$ of the same slope $\mu$.
+Then any nonzero morphism $f\colon F \to G$ is an isomorphism.
+\end{lemma}
+\begin{proof}
+Let $H \neq 0$ be the image of $f$.
+Let $H'$ be the saturation of $H$ in $G$. 
+Then
+\[
+\mu = \mu(F) \leq \mu(H) \leq \mu(H') \leq \mu(G) = \mu
+\]
+so all of these inequalities must be equalities. Since $G$ is stable this means that $H = H' = G$, and since $F$ is stable the kernel of $f$ must be zero.
+\end{proof}
+
+\begin{proposition} \label{prop:HN filtration}
+\uses{def:abstract-complete-curve}
+Every vector bundle $F$ on $X$ admits a unique filtration
+\[
+0 = F_0 \subset F_1 \subset \cdots \subset F_l = F
+\]
+in which each successive quotient $F_i/F_{i-1}$ is a semistable vector bundle of some slope $\mu_i$ and $\mu_1 > \cdots > \mu_l$.
+\end{proposition}
+\begin{proof}
+%See for example \cite[Th\'eor\`eme~5.5.2]{FaFoCfv}.
+\end{proof}
+
+\begin{definition}
+\uses{def:abstract-complete-curve}
+For $F$ a vector bundle on $X$, the filtration on $F$ described in \Cref{prop:HN filtration}
+is called the  \emph{Harder--Narasimhan filtration}, or \emph{HN filtration}, of $F$.
+We define the multiset of \emph{HN slopes} of $F$ to consist of $\mu_i = \deg(F_i/F_{i-1})/\rank(F_i/F_{i-1})$ with multiplicity $\rank(F_i/F_{i-1})$.
+\end{definition}
+
+\begin{lemma} \label{lem:semistable-from-product}
+\uses{def:abstract-complete-curve}
+Let $F,G$ be two nonzero vector bundles on $X$. If $F \otimes G$ is semistable, then so are $F$ and $G$.
+\end{lemma}
+\begin{proof}
+Let $F_1, G_1$ be the first steps in the respective HN filtrations of $F$ and $G$;
+then $\mu(F_1) \geq \mu(F)$, $\mu(G_1) \geq \mu(G)$. 
+Then $F_1 \otimes G_1$ is a nonzero subbundle of $F \otimes G$ of slope $\mu(F_1)+\mu(G_1)$; since
+$F \otimes G$ is semistable, we must have 
+\[
+\mu(F_1)+\mu(G_1) \leq \mu(F \otimes G) = \mu(F) + \mu(G) \leq \mu(F_1) + \mu(G_1).
+\]
+We conclude that $\mu(F_1) = \mu(F), \mu(G_1) = \mu(G)$ and so $F$ and $G$ are semistable.
+\end{proof}

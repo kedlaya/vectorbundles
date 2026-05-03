@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vector bundles on Fargues-Fontaine curves</title>
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/showmore.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<div class="titlepage">
+<h1>Vector bundles on Fargues-Fontaine curves</h1>
+<p class="authors">
+<span class="author">Kiran S. Kedlaya</span>
+</p>
+</div>
+<h1 id="a0000000002">1 Abstract complete curves and vector bundles</h1>
+<div class="definition_thmwrapper theorem-style-definition" id="def:abstract-complete-curve">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">1</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#def:abstract-complete-curve">#</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p> By an <em>abstract complete curve</em> we mean a connected, separated, regular \(1\)-dimensional Noetherian scheme \(X\), together with a <em>degree</em> function from closed points of \(X\) to positive integers with the property that the induced linear map \(\deg \colon \operatorname{Div}(X) \to \mathbb {Z}\) is zero on all principal divisors. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="a0000000003">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">2</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#a0000000003">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="index.html#def:abstract-complete-curve">Definition 1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p> Since the degree map \(\operatorname{Div}(X) \to \mathbb {Z}\) vanishes on principal divisors, it induces a map \(\operatorname{Pic}(X) \to \mathbb {Z}\) which we use to define a <em>degree</em> homomorphism \(\deg \colon K_0(X) \to \mathbb {Z}\). </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="a0000000004">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">3</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#a0000000004">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="index.html#def:abstract-complete-curve">Definition 1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p> Let \(F \subseteq G\) be an inclusion of vector bundles on \(X\). Then there is a unique intermediate bundle \(F'\) such that \(\operatorname{rank}(F) = \operatorname{rank}(F')\) and \(G/F'\) is a vector bundle, called the <em>saturation</em> of \(F\) in \(G\). We then have \(\deg (F) \leq \deg (F')\) with equality if and only if \(F' = F\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:filtration by line bundles">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">4</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#lem:filtration by line bundles">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000005"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="index.html#def:abstract-complete-curve">Definition 1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Every vector bundle \(F\) on \(X\) admits a filtration of the form </p>
+<div class="displaymath" id="a0000000006">
+  \[  0 = F_0 \subset \cdots \subset F_n = F  \]
+</div>
+<p> in which \(F_i/F_{i-1}\) is a vector bundle of rank \(1\) for \(i=1,\dots ,n\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000005">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>We proceed by induction on \(\operatorname{rank}(F)\), the case of rank 0 serving as a trivial base case. For the induction step, use the ampleness of \(\mathcal{O}_X(1)\) to construct a surjection \(\mathcal{O}_X^{\oplus d} \to F(m)\) for some positive integers \(d\) and \(m\). In particular, there exists a nonzero (hence injective) map \(\mathcal{O}_X(m) \to F\) for some integer \(m\); let \(F_1\) be the saturation of the image of this map. We then apply the induction hypothesis to \(F/F_1\) to conclude. </p>
+
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="a0000000007">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">5</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#a0000000007">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="index.html#def:abstract-complete-curve">Definition 1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p> Let \(F\) be a nonzero vector bundle on \(X\). We define the <em>slope</em> of \(F\) as </p>
+<div class="displaymath" id="a0000000008">
+  \[  \mu (F) := \frac{\deg (F)}{\operatorname{rank}(F)}.  \]
+</div>
+<p> The bundle \(F\) is <em>stable</em> if there is no nonzero proper subbundle \(G\) of \(F\) with \(\mu (G) \geq \mu (F)\). The bundle \(F\) is <em>semistable</em> if there is no nonzero subbundle \(G\) of \(F\) with \(\mu (G) {\gt} \mu (F)\). The bundle \(F\) is <em>polystable</em> if it is a direct sum of stable vector bundles, all of the same slope. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:map of stable">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">6</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#lem:map of stable">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000009"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="index.html#def:abstract-complete-curve">Definition 1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Let \(F,G\) be two stable vector bundles on \(X\) of the same slope \(\mu \). Then any nonzero morphism \(f\colon F \to G\) is an isomorphism. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000009">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Let \(H \neq 0\) be the image of \(f\). Let \(H'\) be the saturation of \(H\) in \(G\). Then </p>
+<div class="displaymath" id="a0000000010">
+  \[  \mu = \mu (F) \leq \mu (H) \leq \mu (H') \leq \mu (G) = \mu  \]
+</div>
+<p> so all of these inequalities must be equalities. Since \(G\) is stable this means that \(H = H' = G\), and since \(F\) is stable the kernel of \(f\) must be zero. </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:HN filtration">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">7</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#prop:HN filtration">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="index.html#def:abstract-complete-curve">Definition 1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p>  Every vector bundle \(F\) on \(X\) admits a unique filtration </p>
+<div class="displaymath" id="a0000000011">
+  \[  0 = F_0 \subset F_1 \subset \cdots \subset F_l = F  \]
+</div>
+<p> in which each successive quotient \(F_i/F_{i-1}\) is a semistable vector bundle of some slope \(\mu _i\) and \(\mu _1 {\gt} \cdots {\gt} \mu _l\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000012">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  
+  </div>
+</div>
+<div class="definition_thmwrapper theorem-style-definition" id="a0000000013">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">8</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#a0000000013">#</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="index.html#def:abstract-complete-curve">Definition 1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p> For \(F\) a vector bundle on \(X\), the filtration on \(F\) described in ??prop:HN filtration is called the <em>Harder–Narasimhan filtration</em>, or <em>HN filtration</em>, of \(F\). We define the multiset of <em>HN slopes</em> of \(F\) to consist of \(\mu _i = \deg (F_i/F_{i-1})/\operatorname{rank}(F_i/F_{i-1})\) with multiplicity \(\operatorname{rank}(F_i/F_{i-1})\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:semistable-from-product">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">9</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#lem:semistable-from-product">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000014"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="index.html#def:abstract-complete-curve">Definition 1</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p>  Let \(F,G\) be two nonzero vector bundles on \(X\). If \(F \otimes G\) is semistable, then so are \(F\) and \(G\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000014">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Let \(F_1, G_1\) be the first steps in the respective HN filtrations of \(F\) and \(G\); then \(\mu (F_1) \geq \mu (F)\), \(\mu (G_1) \geq \mu (G)\). Then \(F_1 \otimes G_1\) is a nonzero subbundle of \(F \otimes G\) of slope \(\mu (F_1)+\mu (G_1)\); since \(F \otimes G\) is semistable, we must have </p>
+<div class="displaymath" id="a0000000015">
+  \[  \mu (F_1)+\mu (G_1) \leq \mu (F \otimes G) = \mu (F) + \mu (G) \leq \mu (F_1) + \mu (G_1).  \]
+</div>
+<p> We conclude that \(\mu (F_1) = \mu (F), \mu (G_1) = \mu (G)\) and so \(F\) and \(G\) are semistable. </p>
+
+  </div>
+</div>
+<h1 id="a0000000016">2 Classification of vector bundles</h1>
+<div class="definition_thmwrapper theorem-style-definition" id="a0000000017">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">10</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#a0000000017">#</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>Let \(P := \bigoplus _{d \geq 0} P_d\) be a graded ring satisfying the following conditions. </p>
+<ul class="itemize">
+  <li><p>The subring \(P_0\) of \(P\) is a field and \(P_1 \neq 0\). </p>
+</li>
+  <li><p>The multiplicative monoid </p>
+<div class="displaymath" id="a0000000018">
+  \[  \left( \bigcup _{n=0}^\infty P_n \setminus \{ 0\}  \right)/P_0^\times  \]
+</div>
+<p> is generated by \((P_1 \setminus \{ 0\} )/P_{0}^{\times }\). </p>
+</li>
+  <li><p>For each nonzero \(s \in P_1\), there exists a graded ring isomorphism </p>
+<div class="equation" id="eq:graded ring isom mod s">
+<p>
+  <div class="equation_content">
+    \begin{equation}  \label{eq:graded ring isom mod s} P/sP \cong P_0 \oplus T L_s[T] \end{equation}
+  </div>
+  <span class="equation_label">1</span>
+</p>
+</div>
+<p> for some field \(L_s\) containing \(P_0\). </p>
+</li>
+</ul>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:abstract curve2">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">11</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#prop:abstract curve2">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000019"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p> The degree map \(\deg \colon \operatorname{Div}(X) \to \mathbb {Z}\) induces an isomorphism \(\operatorname{Pic}(X) \cong \mathbb {Z}\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000019">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>The map \(\operatorname{Pic}(X) \to \mathbb {Z}\) carries \(\mathcal{O}_X(n)\) to \(n\), so we need only check injectivity. This follows from the fact that for any nonzero \(s \in P_1\), \(P[s^{-1}]_0\) is a principal ideal domain. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:H1 of line bundles">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">12</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#lem:H1 of line bundles">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000020"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> We have \(H^i(X, \mathcal{O}_X(n)) = 0\) for all \(n \geq 0\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000020">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>For any \(s,t \in P_1\) which are linearly independent over \(P_0\), by <a href="index.html#eq:graded ring isom mod s" class="eqref">1</a> we have \(P_2 = P_1 s + P_1 t\). By induction on \(m+n+k\) we deduce that \(P_{m+n+k} = P_{m+k} s^n + P_{n+k} t^m\) for any \(m,n {\gt}0\) and \(k \geq 0\), and hence </p>
+<div class="displaymath" id="a0000000021">
+  \[  H^1(X, \mathcal{O}_X(n)) = \frac{P[(st)^{-1}]_n}{P[s^{-1}]_n + P[t^{-1}]_n} = \varinjlim _m \frac{P_{n+2m}}{P_{n+m}s^m + P_{n+m} t^m} = 0. \qedhere  \]
+</div>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:filtration by line bundles">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">13</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#lem:filtration by line bundles">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000022"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> Every vector bundle \(F\) on \(X\) admits a filtration of the form </p>
+<div class="displaymath" id="a0000000023">
+  \[  0 = F_0 \subset \cdots \subset F_n = F  \]
+</div>
+<p> in which each successive quotient \(F_i/F_{i-1}\) is isomorphic to \(\mathcal{O}_X(m_i)\) for some \(m_i \in \mathbb {Z}\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000022">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Consider the filtration in Lemma&#160;<a href="index.html#lem:filtration by line bundles">13</a>. By ??prop:abstract curve2, each successive quotient is isomorphic to \(\mathcal{O}_X(m_i)\) for some \(m_i \in \mathbb {Z}\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="L:rank 2 extension">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">14</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#L:rank 2 extension">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000024"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> Let \(F\) be a vector bundle on \(X\) admitting a filtration with successive quotients \(\mathcal{O}_X(-1), \mathcal{O}_X^{\oplus n}, \mathcal{O}_X(1)\) for some \(n \geq 0\). Then \(H^0(X, F) \neq 0\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000024">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Choose \(s \in P_1\) nonzero and let \(x \in |X|\) be the unique closed point at which \(s\) vanishes. Define the bundle \(H\) to fit into the commutative diagram </p>
+<div class="displaymath" id="a0000000025">
+  \[  \begin{tikzcd} \end{tikzcd} 0 \arrow {r} &  \mathcal{O}_X(-1) \arrow {r} \arrow {d} &  F \arrow {r}\arrow {d} &  F/\mathcal{O}_X(-1) \arrow {r} \arrow [d,equal] &  0 \\ 0 \arrow {r} &  \mathcal{O}_X \arrow {r} &  H \arrow {r} &  F/\mathcal{O}_X(-1) \arrow {r} &  0 \end{tikzcd}  \]
+</div>
+<p> in which the left vertical arrow is injective with cokernel supported at \(x\). Since \(\operatorname{Ext}^1_X(\mathcal{O}_X, \mathcal{O}_X) = H^1(X, \mathcal{O}_X)\) vanishes by Lemma&#160;<a href="index.html#lem:H1 of line bundles">12</a>, \(H\) admits a filtration with successive quotients \(\mathcal{O}_X^{\oplus (n+1)}, \mathcal{O}_X(1)\). </p>
+<p>We may assume that \(H^0(X, H(-1)) = 0\), as otherwise \(H\) contains the subbundle \(\mathcal{O}_X(1)\) whose intersection with \(F\) has degree \(\geq 0\) and hence by Proposition&#160;<a href="index.html#prop:abstract curve2">11</a> is either \(\mathcal{O}_X\) or \(\mathcal{O}_X(1)\). Then \(H^0(X, H)\) injects into \(H^0(X, H/H(-1))\), which we reinterpret as the fiber \(H_x\) of \(H\) at \(x\). Using the exact sequence </p>
+<div class="displaymath" id="a0000000026">
+  \[  0 \to H^0(X, \mathcal{O}_X^{\oplus n+1}) \to H^0(X, H) \to H^0(X, \mathcal{O}_X(1)) \to H^1(X, \mathcal{O}_X^{\oplus n}) = 0  \]
+</div>
+<p> (where the last equality comes from ??lem:H1 of line bundles), we express the image of \(H^0(X, H) \to H_x\) as \(P_0 e_1 + \cdots + P_0 e_{n+1} + L_s e_{n+2}\) for some basis \(e_1,\dots ,e_{n+2}\) of \(H_x\) over \(L_s\). </p>
+<p>Meanwhile, the image of \(H^0(X, F) \subset H^0(X, H)\) in \(H_x\) is the intersection of the image of \(H^0(X, H)\) with the image of \(F_x \to H_x\); the latter is a codimension 1 subspace of \(H_x\) and so can be written as the kernel of a nonzero \(L_s\)-linear functional \(\lambda \colon H_x \to L_s\). Define \(a \in P_0\), \(b \in L_s\) by </p>
+<div class="displaymath" id="a0000000027">
+  \[  (a,b) := \begin{cases}  (0, 1) &  \lambda (e_{n+2}) = 0 \\ (1, -\lambda (e_1)/\lambda (e_{n+2})) &  \lambda (e_{n+2}) \neq 0; \end{cases}  \]
+</div>
+<p> then \(ae_1 + be_{n+2}\) is the image in \(H_x\) of a nonzero element of \(H^0(X, F)\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:filtration by line bundles2">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">15</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#lem:filtration by line bundles2">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000028"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> With notation as in Lemma&#160;<a href="index.html#lem:filtration by line bundles">13</a>, we can further ensure that </p>
+<div class="displaymath" id="a0000000029">
+  \[  m_j \leq m_i+1 \qquad (1 \leq i {\lt} j \leq n).  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000028">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Among filtrations as in Lemma&#160;<a href="index.html#lem:filtration by line bundles">13</a>, choose one to minimize \(\sum _{i=1}^n (n-i) m_i\). We prove that this filtration has the desired property by induction on \(j-i\). </p>
+<p>We start with the base case \(j=i+1\). Suppose by way of contradiction that this fails for some \(i\). We then have an exact sequence </p>
+<div class="displaymath" id="a0000000030">
+  \[  0 \to \mathcal{O}_X(m_i) \to F_{i+1}/F_{i-1} \to \mathcal{O}_X(m_{i+1}) \to 0.  \]
+</div>
+<p> By choosing an embedding \(\mathcal{O}_X(m_i+2) \to \mathcal{O}_X(m_{i+1})\), we obtain a subbundle \(G\) of \(F_{i+1}/F_{i-1}\) and an exact sequence </p>
+<div class="displaymath" id="a0000000031">
+  \[  0 \to \mathcal{O}_X(m_i) \to G \to \mathcal{O}_X(m_i+2) \to 0.  \]
+</div>
+<p> By Lemma&#160;<a href="index.html#L:rank 2 extension">14</a>, \(G\) admits \(\mathcal{O}_X(m_{i}+1)\) as a (not necessarily saturated) subbundle. We can thus replace the terms \(m_i, m_{i+1}\) in our original sequence by new terms \(m_i', m_{i+1}'\) with \(m_i' {\gt} m_i\) and \(m_i' + m_{i+1}' = m_i + m_{i+1}\), contradicting minimality. </p>
+<p>We next proceed to the induction step \(j-i{\gt} 1\). Suppose by way of contradiction that this fails for some \(i\). By the induction hypothesis, we have \(m_{j-1} \leq m_i+1\) and \(m_j \leq m_{j-1}+1\), so both of these must be equalities; in particular, \(m_j = m_i + 2\). For \(k=i+1,\dots ,j-1\), the induction hypothesis yields \(m_i + 1 \leq m_k \leq m_j-1\), so the sequence \((m_i, \dots , m_j)\) looks like \((m-1, m, \dots , m, m+1)\) for some \(m\). That is, \(F_j/F_i\) admits a filtration with successive quotients \(\mathcal{O}_X(m-1), \mathcal{O}_X(m)^{\oplus (j-i-1)}, \mathcal{O}_X(m+1)\). By Lemma&#160;<a href="index.html#L:rank 2 extension">14</a> again, \(F_j/F_i\) admits \(\mathcal{O}_X(m)\) as a (not necessarily saturated) subbundle, but again this would contradict minimality. </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:semistable slope 0">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">16</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#prop:semistable slope 0">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000032"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p> Every vector bundle on \(X\) which is semistable of slope \(0\) is trivial. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000032">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Let \(F\) be a semistable vector bundle of degree \(0\) and rank \(n\), and choose a filtration as in Lemma&#160;<a href="index.html#lem:filtration by line bundles2">15</a>. Since \(\sum _{i=1}^n m_i = \deg (F) = 0\), we have </p>
+<div class="displaymath" id="a0000000033">
+  \[  0 \leq \max _i\{ m_i\}  \leq m_1 + 1  \]
+</div>
+<p> and so \(m_1 \geq -1\); moreover, if \(m_1 = -1\) we deduce that \(\sum _{i=1}^n m_i {\lt} m_1 + \sum _{i=2}^n m_i \leq -1 + 0 {\lt} 0\), a contradiction. Hence \(m_1 = 0\), and similar logic yields \(m_n = 0\); by semistability we deduce that \(m_1 = \cdots = m_n = 0\). Since \(\operatorname{Ext}^1_X(\mathcal{O}_X, \mathcal{O}_X) = H^1(X, \mathcal{O}_X)\) vanishes by Lemma&#160;<a href="index.html#lem:H1 of line bundles">12</a>, it follows that \(F\) is trivial. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:one-step-modification">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">17</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#lem:one-step-modification">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000034"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> Let \(F\) be a vector bundle on \(X\) with all HN slopes in \([0,1)\). Then for any closed point \(x \in |X|\), for \(j_x \colon x \to X\) the canonical inclusion, there exist a coherent sheaf \(G\) on \(x\) and an exact sequence </p>
+<div class="displaymath" id="a0000000035">
+  \[  0 \to \mathcal{O}_X^{\oplus \operatorname{rank}(F)} \to F \to j_x^* G \to 0  \]
+</div>
+<p> of coherent sheaves on \(X\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000034">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>We show that for \(i=1,\dots ,\deg (F)\), we can find an exact sequence </p>
+<div class="equation" id="eq:modification">
+<p>
+  <div class="equation_content">
+    \begin{equation}  \label{eq:modification} 0 \to H_i \to F \to j_x^* G_i \to 0 \end{equation}
+  </div>
+  <span class="equation_label">4</span>
+</p>
+</div>
+<p> in which \(H_i\) is a vector bundle of the same rank \(F\) with degree \(\deg (F)-i\) and all HN slopes nonnegative (and hence in \([0,1)\)). For \(i = \deg (F)\), \(H_i\) will then be semistable of degree \(0\), and hence trivial by Proposition&#160;<a href="index.html#prop:semistable slope 0">16</a>. </p>
+<p>In the case \(i=1\), it suffices to check the claim after replacing \(F\) with its maximum quotient having all HN slopes in \((0,1)\); at this point, <em>every</em> exact sequence of the form <a href="index.html#eq:modification" class="eqref">4</a>, in which \(H_1\) is a vector bundle of the same rank \(F\) with degree \(\deg (F)-1\), has the property that the HN slopes of \(H_1\) are nonnegative. We achieve the general case by applying this argument repeatedly. </p>
+
+  </div>
+</div>
+<div class="corollary_thmwrapper theorem-style-plain" id="cor:slopes to sections">
+  <div class="corollary_thmheading">
+    <span class="corollary_thmcaption">
+    Corollary
+    </span>
+    <span class="corollary_thmlabel">18</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#cor:slopes to sections">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000036"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="corollary_thmcontent">
+  <p> Let \(F\) be a nonzero vector bundle on \(X\) whose HN slopes are all nonnegative. Then \(F\) is generated by global sections and \(H^1(X, F) = 0\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000036">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>By replacing \(F\) with the first step of its HN filtration, we may reduce to the case where \(F\) is semistable. By twisting, we may further ensure that \(\mu (F) \in [0,1)\). We then deduce both claims from Lemma&#160;<a href="index.html#lem:H1 of line bundles">12</a> and Lemma&#160;<a href="index.html#lem:one-step-modification">17</a>. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:end of semistable">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">19</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#lem:end of semistable">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000037"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> For any semistable vector bundle \(F\) on \(X\), \(F^\vee \otimes F\) is trivial. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000037">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>We immediately reduce to the case where \(F\) is stable with slope in \([0,1)\). In this case, suppose by way of contradiction that \(F^\vee \otimes F\) is not semistable, and let \(G\) be the first step of its HN filtration. Since \(G \otimes G\) has slope \(2\mu (G) {\gt} \mu (G)\), the composition map \((F^\vee \otimes F) \otimes (F^\vee \otimes F) \to F^\vee \otimes F\) restricts to zero on \(G \otimes G\). By Corollary&#160;<a href="index.html#cor:slopes to sections">18</a>, \(G\) is generated by global sections; consequently, \(G \otimes G\) is generated by nonzero global sections of the form \(s_1 \otimes s_2\). Any such section corresponds to a pair of nonzero endomorphisms \(F \to F\) which compose to zero; this contradicts Lemma&#160;<a href="index.html#lem:map of stable">6</a>. We deduce that \(F^\vee \otimes F\) is semistable of slope \(0\), and hence trivial by Proposition&#160;<a href="index.html#prop:semistable slope 0">16</a>. </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:tensor product of semistable">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">20</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#prop:tensor product of semistable">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000038"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p> The tensor product of any two semistable vector bundles on \(X\) is semistable. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000038">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Let \(F,G\) be two semistable vector bundles on \(X\). By Lemma&#160;<a href="index.html#lem:end of semistable">19</a>, </p>
+<div class="displaymath" id="a0000000039">
+  \[  (F^\vee \otimes G^\vee ) \otimes (F \otimes G) \cong (F^\vee \otimes F) \otimes (G^\vee \otimes G)  \]
+</div>
+<p> is semistable. By Lemma&#160;<a href="index.html#lem:semistable-from-product">9</a>, \(F \otimes G\) must be semistable. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="cor:split sequence in order">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">21</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#cor:split sequence in order">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000040"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> Any exact sequence of vector bundles on \(X\) of the form </p>
+<div class="displaymath" id="a0000000041">
+  \[  0 \to F_1 \to F \to F_2 \to 0,  \]
+</div>
+<p> in which every HN slope of \(F_1\) is greater than or equal to every HN slope of \(F_2\), is split. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000040">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>By Proposition&#160;<a href="index.html#prop:tensor product of semistable">20</a>, \(F_2^\vee \otimes F_1\) has nonnegative HN slopes. Now \(\operatorname{Ext}^1_X(F_2, F_1) = H^1(X, F_2^\vee \otimes F_1)\) which vanishes by Corollary&#160;<a href="index.html#cor:slopes to sections">18</a>. </p>
+
+  </div>
+</div>
+<div class="proposition_thmwrapper theorem-style-plain" id="prop:decompose as stables">
+  <div class="proposition_thmheading">
+    <span class="proposition_thmcaption">
+    Proposition
+    </span>
+    <span class="proposition_thmlabel">22</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#prop:decompose as stables">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000042"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="proposition_thmcontent">
+  <p> Every vector bundle on \(X\) splits (nonuniquely) as a direct sum of stable bundles. In particular, the HN filtration always splits and every semistable bundle is <em>polystable</em> (i.e., a direct sum of stable bundles of the same slope). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000042">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Both assertions follow directly from Lemma&#160;<a href="index.html#cor:split sequence in order">21</a>. </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="lem:degree 1 stable2">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">23</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#lem:degree 1 stable2">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000043"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> For \(d\) a positive integer with \(\dim _{P_0} P_1 {\gt} d\) and \(c \in \mathbb {Z}\), there exists a semistable vector bundle on \(X\) of rank \(d\) and degree \(c\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000043">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>We may assume without loss of generality that \(d{\gt}1\) and \(c \in \{ 1,\dots ,d-1\} \). Choose \(s \in P_1\) nonzero and let \(x \in |X|\) be the unique closed point at which \(s\) vanishes. Set \(F := \mathcal{O}_X^{\oplus d}\) and let \(e_1,\dots ,e_d\) be the images in \(F_x\) of the standard basis vectors of \(H^0(X, F) \cong P_0^{d}\). The condition \(\dim _{P_0} P_1 {\gt} d\) is equivalent to \(\dim _{P_0} L_s \geq d\); consequently, we can choose elements \(f_1,\dots ,f_c \in L_s\) such that \(1,f_1,\dots ,f_c\) are linearly independent over \(P_0\). Let \(V \subset F_x\) be the \(L_s\)-span of \(e_1 - f_1 e_d, \dots , e_c - f_d e_d\) and construct the subbundle \(G\) of \(F\) so that we have an exact sequence </p>
+<div class="displaymath" id="a0000000044">
+  \[  0 \to G \to F \to j_x^* V \to 0;  \]
+</div>
+<p> then \(G^\vee \) is semistable of degree \(c\). </p>
+
+  </div>
+</div>
+<div class="lemma_thmwrapper theorem-style-plain" id="cor:unique stable">
+  <div class="lemma_thmheading">
+    <span class="lemma_thmcaption">
+    Lemma
+    </span>
+    <span class="lemma_thmlabel">24</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#cor:unique stable">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000045"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="lemma_thmcontent">
+  <p> For any \(\lambda \in \mathbb {Q}\), there is at most one isomorphism class of stable vector bundles on \(X\) of slope \(\lambda \). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000045">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>Let \(F,G\) be two such bundles. By Proposition&#160;<a href="index.html#prop:tensor product of semistable">20</a>, \(F^\vee \otimes G\) is trivial. We can thus find a nonzero morphism \(f\colon F \to G\), which must be an isomorphism by Lemma&#160;<a href="index.html#lem:map of stable">6</a>. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:abstract classification">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">25</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="index.html#thm:abstract classification">#</a>
+    
+    <a class="icon proof" href="index.html#a0000000046"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p> Set </p>
+<div class="displaymath" id="a0000000047">
+  \[  S := \begin{cases}  \mathbb {Z}&  \mbox{in the classical case,} \\ \tfrac {1}{2} \mathbb {Z}&  \mbox{in the twistor case,} \\ \mathbb {Q}&  \mbox{otherwise}. \end{cases}  \]
+</div>
+<p> Then the following statements hold. </p>
+<ol class="enumerate">
+  <li><p>There exists exactly one isomorphism class of stable vector bundles \(\mathcal{O}_X(\lambda )\) of slope \(\lambda \) if \(\lambda \in S\) and none if \(\lambda \notin S\). </p>
+</li>
+  <li><p>For \(\lambda \in S\) with denominator \(d\) in lower terms, \(\operatorname{rank}(\mathcal{O}_X(\lambda )) = d\). </p>
+</li>
+  <li><p>The endomorphisms of \(\mathcal{O}_X(\lambda )\) form a division algebra of degree \(d\) over \(P_0\). </p>
+</li>
+  <li><p>For \(\lambda , \lambda ' \in S\), \(\mathcal{O}_X(\lambda ) \otimes \mathcal{O}_X(\lambda ') \cong \mathcal{O}_X(\lambda +\lambda ')^{\oplus m}\) for some positive integer \(m\). </p>
+</li>
+  <li><p>Every vector bundle on \(X\) splits (nonuniquely) as a direct sum of summands each of the form \(\mathcal{O}_X(\lambda )\) for some \(\lambda \in S\). </p>
+</li>
+</ol>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000046">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▶</span>
+  </div>
+  <div class="proof_content">
+  <p>If \(\dim _{P_0} P_1 = \infty \), then we may deduce (a) and (b) from Lemma&#160;<a href="index.html#lem:degree 1 stable2">23</a> and Lemma&#160;<a href="index.html#cor:unique stable">24</a>. Otherwise, as per Remark&#160;?? we may argue as follows. </p>
+<ul class="itemize">
+  <li><p>In the classical case, \(P = P_0[x,y]\) and \(H^1(X, \mathcal{O}_X(-1)) = 0\). Hence any exact sequence of the form </p>
+<div class="displaymath" id="a0000000048">
+  \[  0 \to \mathcal{O}_X \to F \to \mathcal{O}_X(1) \to 0  \]
+</div>
+<p> splits, as then does any filtration as in Lemma&#160;<a href="index.html#lem:filtration by line bundles2">15</a>, proving (a). From this, (b) is obvious. </p>
+</li>
+  <li><p>In the twistor case, by identifying \(P \otimes _{P_0} P_0(\sqrt{-1})\) with \(P_0(\sqrt{-1})[x^2,xy,y^2]\) and applying the classical case, we see that \(S \subseteq \tfrac {1}{2}\mathbb {Z}\). We deduce (a) and (b) by applying Lemma&#160;<a href="index.html#lem:degree 1 stable2">23</a> to construct a stable bundle of rank \(2\) and degree \(1\), then applying Lemma&#160;<a href="index.html#cor:unique stable">24</a> for uniqueness. </p>
+</li>
+</ul>
+<p>Given (a)–(b), (c) follows from Lemma&#160;<a href="index.html#lem:map of stable">6</a> and Lemma&#160;<a href="index.html#lem:end of semistable">19</a>; (d) is immediate from Proposition&#160;<a href="index.html#prop:tensor product of semistable">20</a> and Proposition&#160;<a href="index.html#prop:decompose as stables">22</a>; and (e) is immediate from Proposition&#160;<a href="index.html#prop:decompose as stables">22</a>. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <svg  id="showmore-minus" class="icon icon-eye-minus showmore"><use xlink:href="symbol-defs.svg#icon-eye-minus"></use></svg>
+
+  <svg  id="showmore-plus" class="icon icon-eye-plus showmore"><use xlink:href="symbol-defs.svg#icon-eye-plus"></use></svg>
+
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+<script type="text/javascript" src="js/js.cookie.min.js"></script>
+<script type="text/javascript" src="js/showmore.js"></script>
+</body>
+</html>

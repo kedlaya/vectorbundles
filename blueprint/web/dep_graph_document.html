@@ -1,0 +1,934 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dependency graph</title>
+  <meta name="generator" content="plasTeX" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles/theme-white.css" />
+  <link rel="stylesheet" href="styles/dep_graph.css" />
+  
+  <script type="text/x-mathjax-config">
+  
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+  
+  </script>
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">  </script>
+
+
+<link rel="stylesheet" href="styles/extra_styles.css" />
+
+</head>
+
+<body>
+<header>
+  <a class="toc" href="index.html">Home</a>
+  <h1 id="doc_title">Dependencies</h1>
+</header>
+<div class="wrapper">
+<div class="content">
+  <div id="Legend">
+    <span id="legend_title" class="title">Legend
+    <div class="btn">
+       <div class="bar"></div>
+       <div class="bar"></div>
+       <div class="bar"></div>
+    </div></span> 
+    <dl class="legend">
+      
+      <dt>Boxes</dt><dd>definitions</dd>
+      
+      <dt>Ellipses</dt><dd>theorems and lemmas</dd>
+      
+      <dt>Blue border</dt><dd>the <em>statement</em> of this result is ready to be formalized; all prerequisites are done</dd>
+      
+      <dt>Orange border</dt><dd>the <em>statement</em> of this result is not ready to be formalized; the blueprint needs more work</dd>
+      
+      <dt>Blue background</dt><dd>the <em>proof</em> of this result is ready to be formalized; all prerequisites are done</dd>
+      
+      <dt>Green border</dt><dd>the <em>statement</em> of this result is formalized</dd>
+      
+      <dt>Green background</dt><dd>the <em>proof</em> of this result is formalized</dd>
+      
+      <dt>Dark green background</dt><dd>the <em>proof</em> of this result and all its ancestors are formalized</dd>
+      
+      <dt>Dark green border</dt><dd>this is in Mathlib</dd>
+      
+    </dl>
+  </div>
+    <div id="graph"></div>
+<div id="statements">
+
+    
+    <div class="dep-modal-container" id="a0000000003_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="a0000000003" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">2</span></div>
+    <div class="thm_thmcontent"><p> Since the degree map \(\operatorname{Div}(X) \to \mathbb {Z}\) vanishes on principal divisors, it induces a map \(\operatorname{Pic}(X) \to \mathbb {Z}\) which we use to define a <em>degree</em> homomorphism \(\deg \colon K_0(X) \to \mathbb {Z}\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#a0000000003">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="a0000000004_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="a0000000004" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">3</span></div>
+    <div class="thm_thmcontent"><p> Let \(F \subseteq G\) be an inclusion of vector bundles on \(X\). Then there is a unique intermediate bundle \(F'\) such that \(\operatorname{rank}(F) = \operatorname{rank}(F')\) and \(G/F'\) is a vector bundle, called the <em>saturation</em> of \(F\) in \(G\). We then have \(\deg (F) \leq \deg (F')\) with equality if and only if \(F' = F\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#a0000000004">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="a0000000007_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="a0000000007" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">5</span></div>
+    <div class="thm_thmcontent"><p> Let \(F\) be a nonzero vector bundle on \(X\). We define the <em>slope</em> of \(F\) as </p>
+<div class="displaymath" id="a0000000008">
+  \[  \mu (F) := \frac{\deg (F)}{\operatorname{rank}(F)}.  \]
+</div>
+<p> The bundle \(F\) is <em>stable</em> if there is no nonzero proper subbundle \(G\) of \(F\) with \(\mu (G) \geq \mu (F)\). The bundle \(F\) is <em>semistable</em> if there is no nonzero subbundle \(G\) of \(F\) with \(\mu (G) {\gt} \mu (F)\). The bundle \(F\) is <em>polystable</em> if it is a direct sum of stable vector bundles, all of the same slope. </p>
+</div>
+
+    <a class="latex_link" href="index.html#a0000000007">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="a0000000013_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="a0000000013" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">8</span></div>
+    <div class="thm_thmcontent"><p> For \(F\) a vector bundle on \(X\), the filtration on \(F\) described in ??prop:HN filtration is called the <em>Harder–Narasimhan filtration</em>, or <em>HN filtration</em>, of \(F\). We define the multiset of <em>HN slopes</em> of \(F\) to consist of \(\mu _i = \deg (F_i/F_{i-1})/\operatorname{rank}(F_i/F_{i-1})\) with multiplicity \(\operatorname{rank}(F_i/F_{i-1})\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#a0000000013">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="a0000000017_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="a0000000017" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">10</span></div>
+    <div class="thm_thmcontent"><p>Let \(P := \bigoplus _{d \geq 0} P_d\) be a graded ring satisfying the following conditions. </p>
+<ul class="itemize">
+  <li><p>The subring \(P_0\) of \(P\) is a field and \(P_1 \neq 0\). </p>
+</li>
+  <li><p>The multiplicative monoid </p>
+<div class="displaymath" id="a0000000018">
+  \[  \left( \bigcup _{n=0}^\infty P_n \setminus \{ 0\}  \right)/P_0^\times  \]
+</div>
+<p> is generated by \((P_1 \setminus \{ 0\} )/P_{0}^{\times }\). </p>
+</li>
+  <li><p>For each nonzero \(s \in P_1\), there exists a graded ring isomorphism </p>
+<div class="equation" id="eq:graded ring isom mod s">
+<p>
+  <div class="equation_content">
+    \begin{equation}  \label{eq:graded ring isom mod s} P/sP \cong P_0 \oplus T L_s[T] \end{equation}
+  </div>
+  <span class="equation_label">1</span>
+</p>
+</div>
+<p> for some field \(L_s\) containing \(P_0\). </p>
+</li>
+</ul>
+</div>
+
+    <a class="latex_link" href="index.html#a0000000017">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="cor:slopes to sections_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="cor:slopes to sections" style="display: none">
+    <div class="thm_thmheading">
+      <span class="corollary_thmcaption">
+      Corollary
+      </span>
+      <span class="corollary_thmlabel">18</span></div>
+    <div class="thm_thmcontent"><p> Let \(F\) be a nonzero vector bundle on \(X\) whose HN slopes are all nonnegative. Then \(F\) is generated by global sections and \(H^1(X, F) = 0\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#cor:slopes to sections">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="cor:split sequence in order_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="cor:split sequence in order" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">21</span></div>
+    <div class="thm_thmcontent"><p> Any exact sequence of vector bundles on \(X\) of the form </p>
+<div class="displaymath" id="a0000000041">
+  \[  0 \to F_1 \to F \to F_2 \to 0,  \]
+</div>
+<p> in which every HN slope of \(F_1\) is greater than or equal to every HN slope of \(F_2\), is split. </p>
+</div>
+
+    <a class="latex_link" href="index.html#cor:split sequence in order">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="cor:unique stable_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="cor:unique stable" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">24</span></div>
+    <div class="thm_thmcontent"><p> For any \(\lambda \in \mathbb {Q}\), there is at most one isomorphism class of stable vector bundles on \(X\) of slope \(\lambda \). </p>
+</div>
+
+    <a class="latex_link" href="index.html#cor:unique stable">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:abstract-complete-curve_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:abstract-complete-curve" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">1</span></div>
+    <div class="thm_thmcontent"><p> By an <em>abstract complete curve</em> we mean a connected, separated, regular \(1\)-dimensional Noetherian scheme \(X\), together with a <em>degree</em> function from closed points of \(X\) to positive integers with the property that the induced linear map \(\deg \colon \operatorname{Div}(X) \to \mathbb {Z}\) is zero on all principal divisors. </p>
+</div>
+
+    <a class="latex_link" href="index.html#def:abstract-complete-curve">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="L:rank 2 extension_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="L:rank 2 extension" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">14</span></div>
+    <div class="thm_thmcontent"><p> Let \(F\) be a vector bundle on \(X\) admitting a filtration with successive quotients \(\mathcal{O}_X(-1), \mathcal{O}_X^{\oplus n}, \mathcal{O}_X(1)\) for some \(n \geq 0\). Then \(H^0(X, F) \neq 0\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#L:rank 2 extension">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:degree 1 stable2_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:degree 1 stable2" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">23</span></div>
+    <div class="thm_thmcontent"><p> For \(d\) a positive integer with \(\dim _{P_0} P_1 {\gt} d\) and \(c \in \mathbb {Z}\), there exists a semistable vector bundle on \(X\) of rank \(d\) and degree \(c\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#lem:degree 1 stable2">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:end of semistable_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:end of semistable" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">19</span></div>
+    <div class="thm_thmcontent"><p> For any semistable vector bundle \(F\) on \(X\), \(F^\vee \otimes F\) is trivial. </p>
+</div>
+
+    <a class="latex_link" href="index.html#lem:end of semistable">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:filtration by line bundles_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:filtration by line bundles" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">4</span></div>
+    <div class="thm_thmcontent"><p>  Every vector bundle \(F\) on \(X\) admits a filtration of the form </p>
+<div class="displaymath" id="a0000000006">
+  \[  0 = F_0 \subset \cdots \subset F_n = F  \]
+</div>
+<p> in which \(F_i/F_{i-1}\) is a vector bundle of rank \(1\) for \(i=1,\dots ,n\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#lem:filtration by line bundles">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:filtration by line bundles_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:filtration by line bundles" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">13</span></div>
+    <div class="thm_thmcontent"><p> Every vector bundle \(F\) on \(X\) admits a filtration of the form </p>
+<div class="displaymath" id="a0000000023">
+  \[  0 = F_0 \subset \cdots \subset F_n = F  \]
+</div>
+<p> in which each successive quotient \(F_i/F_{i-1}\) is isomorphic to \(\mathcal{O}_X(m_i)\) for some \(m_i \in \mathbb {Z}\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#lem:filtration by line bundles">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:filtration by line bundles2_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:filtration by line bundles2" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">15</span></div>
+    <div class="thm_thmcontent"><p> With notation as in Lemma&#160;<a href="index.html#lem:filtration by line bundles">13</a>, we can further ensure that </p>
+<div class="displaymath" id="a0000000029">
+  \[  m_j \leq m_i+1 \qquad (1 \leq i {\lt} j \leq n).  \]
+</div>
+</div>
+
+    <a class="latex_link" href="index.html#lem:filtration by line bundles2">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:H1 of line bundles_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:H1 of line bundles" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">12</span></div>
+    <div class="thm_thmcontent"><p> We have \(H^i(X, \mathcal{O}_X(n)) = 0\) for all \(n \geq 0\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#lem:H1 of line bundles">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:map of stable_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:map of stable" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">6</span></div>
+    <div class="thm_thmcontent"><p>  Let \(F,G\) be two stable vector bundles on \(X\) of the same slope \(\mu \). Then any nonzero morphism \(f\colon F \to G\) is an isomorphism. </p>
+</div>
+
+    <a class="latex_link" href="index.html#lem:map of stable">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:one-step-modification_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:one-step-modification" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">17</span></div>
+    <div class="thm_thmcontent"><p> Let \(F\) be a vector bundle on \(X\) with all HN slopes in \([0,1)\). Then for any closed point \(x \in |X|\), for \(j_x \colon x \to X\) the canonical inclusion, there exist a coherent sheaf \(G\) on \(x\) and an exact sequence </p>
+<div class="displaymath" id="a0000000035">
+  \[  0 \to \mathcal{O}_X^{\oplus \operatorname{rank}(F)} \to F \to j_x^* G \to 0  \]
+</div>
+<p> of coherent sheaves on \(X\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#lem:one-step-modification">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="lem:semistable-from-product_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="lem:semistable-from-product" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">9</span></div>
+    <div class="thm_thmcontent"><p>  Let \(F,G\) be two nonzero vector bundles on \(X\). If \(F \otimes G\) is semistable, then so are \(F\) and \(G\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#lem:semistable-from-product">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="prop:abstract curve2_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="prop:abstract curve2" style="display: none">
+    <div class="thm_thmheading">
+      <span class="proposition_thmcaption">
+      Proposition
+      </span>
+      <span class="proposition_thmlabel">11</span></div>
+    <div class="thm_thmcontent"><p> The degree map \(\deg \colon \operatorname{Div}(X) \to \mathbb {Z}\) induces an isomorphism \(\operatorname{Pic}(X) \cong \mathbb {Z}\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#prop:abstract curve2">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="prop:decompose as stables_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="prop:decompose as stables" style="display: none">
+    <div class="thm_thmheading">
+      <span class="proposition_thmcaption">
+      Proposition
+      </span>
+      <span class="proposition_thmlabel">22</span></div>
+    <div class="thm_thmcontent"><p> Every vector bundle on \(X\) splits (nonuniquely) as a direct sum of stable bundles. In particular, the HN filtration always splits and every semistable bundle is <em>polystable</em> (i.e., a direct sum of stable bundles of the same slope). </p>
+</div>
+
+    <a class="latex_link" href="index.html#prop:decompose as stables">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="prop:HN filtration_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="prop:HN filtration" style="display: none">
+    <div class="thm_thmheading">
+      <span class="proposition_thmcaption">
+      Proposition
+      </span>
+      <span class="proposition_thmlabel">7</span></div>
+    <div class="thm_thmcontent"><p>  Every vector bundle \(F\) on \(X\) admits a unique filtration </p>
+<div class="displaymath" id="a0000000011">
+  \[  0 = F_0 \subset F_1 \subset \cdots \subset F_l = F  \]
+</div>
+<p> in which each successive quotient \(F_i/F_{i-1}\) is a semistable vector bundle of some slope \(\mu _i\) and \(\mu _1 {\gt} \cdots {\gt} \mu _l\). </p>
+</div>
+
+    <a class="latex_link" href="index.html#prop:HN filtration">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="prop:semistable slope 0_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="prop:semistable slope 0" style="display: none">
+    <div class="thm_thmheading">
+      <span class="proposition_thmcaption">
+      Proposition
+      </span>
+      <span class="proposition_thmlabel">16</span></div>
+    <div class="thm_thmcontent"><p> Every vector bundle on \(X\) which is semistable of slope \(0\) is trivial. </p>
+</div>
+
+    <a class="latex_link" href="index.html#prop:semistable slope 0">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="prop:tensor product of semistable_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="prop:tensor product of semistable" style="display: none">
+    <div class="thm_thmheading">
+      <span class="proposition_thmcaption">
+      Proposition
+      </span>
+      <span class="proposition_thmlabel">20</span></div>
+    <div class="thm_thmcontent"><p> The tensor product of any two semistable vector bundles on \(X\) is semistable. </p>
+</div>
+
+    <a class="latex_link" href="index.html#prop:tensor product of semistable">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:abstract classification_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:abstract classification" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">25</span></div>
+    <div class="thm_thmcontent"><p> Set </p>
+<div class="displaymath" id="a0000000047">
+  \[  S := \begin{cases}  \mathbb {Z}&  \mbox{in the classical case,} \\ \tfrac {1}{2} \mathbb {Z}&  \mbox{in the twistor case,} \\ \mathbb {Q}&  \mbox{otherwise}. \end{cases}  \]
+</div>
+<p> Then the following statements hold. </p>
+<ol class="enumerate">
+  <li><p>There exists exactly one isomorphism class of stable vector bundles \(\mathcal{O}_X(\lambda )\) of slope \(\lambda \) if \(\lambda \in S\) and none if \(\lambda \notin S\). </p>
+</li>
+  <li><p>For \(\lambda \in S\) with denominator \(d\) in lower terms, \(\operatorname{rank}(\mathcal{O}_X(\lambda )) = d\). </p>
+</li>
+  <li><p>The endomorphisms of \(\mathcal{O}_X(\lambda )\) form a division algebra of degree \(d\) over \(P_0\). </p>
+</li>
+  <li><p>For \(\lambda , \lambda ' \in S\), \(\mathcal{O}_X(\lambda ) \otimes \mathcal{O}_X(\lambda ') \cong \mathcal{O}_X(\lambda +\lambda ')^{\oplus m}\) for some positive integer \(m\). </p>
+</li>
+  <li><p>Every vector bundle on \(X\) splits (nonuniquely) as a direct sum of summands each of the form \(\mathcal{O}_X(\lambda )\) for some \(\lambda \in S\). </p>
+</li>
+</ol>
+</div>
+
+    <a class="latex_link" href="index.html#thm:abstract classification">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+</div>
+</div> <!-- content -->
+</div> <!-- wrapper -->
+<script src="js/jquery.min.js" type="text/javascript"></script>
+
+<script src="js/d3.min.js"></script>
+<script src="js/hpcc.min.js"></script>
+<script src="js/d3-graphviz.js"></script>
+
+<script type="text/javascript">
+const graphContainer = d3.select("#graph");
+const width = graphContainer.node().clientWidth;
+const height = graphContainer.node().clientHeight;
+
+
+graphContainer.graphviz({useWorker: true})
+    .width(width)
+    .height(height)
+    .fit(true)
+    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	a0000000007	[label=a0000000007,		shape=box];	"cor:slopes to sections"	[color=blue,		fillcolor="#A3D6FF",		label="slopes to sections",		shape=ellipse,		style=filled];	"def:abstract-complete-curve"	[color=blue,		fillcolor="#A3D6FF",		label="abstract-complete-curve",		shape=box,		style=filled];	"def:abstract-complete-curve" -> a0000000007	[style=dashed];	a0000000004	[label=a0000000004,		shape=box];	"def:abstract-complete-curve" -> a0000000004	[style=dashed];	"prop:HN filtration"	[label="HN filtration",		shape=ellipse];	"def:abstract-complete-curve" -> "prop:HN filtration"	[style=dashed];	a0000000013	[label=a0000000013,		shape=box];	"def:abstract-complete-curve" -> a0000000013	[style=dashed];	a0000000003	[label=a0000000003,		shape=box];	"def:abstract-complete-curve" -> a0000000003	[style=dashed];	"lem:filtration by line bundles"	[color=blue,		fillcolor="#A3D6FF",		label="filtration by line bundles",		shape=ellipse,		style=filled];	"def:abstract-complete-curve" -> "lem:filtration by line bundles"	[style=dashed];	"lem:map of stable"	[label="map of stable",		shape=ellipse];	"def:abstract-complete-curve" -> "lem:map of stable"	[style=dashed];	"lem:semistable-from-product"	[label="semistable-from-product",		shape=ellipse];	"def:abstract-complete-curve" -> "lem:semistable-from-product"	[style=dashed];	"lem:end of semistable"	[color=blue,		fillcolor="#A3D6FF",		label="end of semistable",		shape=ellipse,		style=filled];	"prop:abstract curve2"	[color=blue,		fillcolor="#A3D6FF",		label="abstract curve2",		shape=ellipse,		style=filled];	"lem:one-step-modification"	[color=blue,		fillcolor="#A3D6FF",		label="one-step-modification",		shape=ellipse,		style=filled];	a0000000017	[color=blue,		fillcolor="#A3D6FF",		label=a0000000017,		shape=box,		style=filled];	"prop:tensor product of semistable"	[color=blue,		fillcolor="#A3D6FF",		label="tensor product of semistable",		shape=ellipse,		style=filled];	"cor:split sequence in order"	[color=blue,		fillcolor="#A3D6FF",		label="split sequence in order",		shape=ellipse,		style=filled];	"cor:unique stable"	[color=blue,		fillcolor="#A3D6FF",		label="unique stable",		shape=ellipse,		style=filled];	"prop:semistable slope 0"	[color=blue,		fillcolor="#A3D6FF",		label="semistable slope 0",		shape=ellipse,		style=filled];	"prop:decompose as stables"	[color=blue,		fillcolor="#A3D6FF",		label="decompose as stables",		shape=ellipse,		style=filled];	"L:rank 2 extension"	[color=blue,		fillcolor="#A3D6FF",		label="rank 2 extension",		shape=ellipse,		style=filled];	"lem:degree 1 stable2"	[color=blue,		fillcolor="#A3D6FF",		label="degree 1 stable2",		shape=ellipse,		style=filled];	"lem:H1 of line bundles"	[color=blue,		fillcolor="#A3D6FF",		label="H1 of line bundles",		shape=ellipse,		style=filled];	"lem:filtration by line bundles2"	[color=blue,		fillcolor="#A3D6FF",		label="filtration by line bundles2",		shape=ellipse,		style=filled];	"thm:abstract classification"	[color=blue,		fillcolor="#A3D6FF",		label="abstract classification",		shape=ellipse,		style=filled];}`)
+    .on("end", interactive);
+
+latexLabelEscaper = function(label) {
+  return label.replace(/\./g, '\\.').replace(/:/g, '\\:')
+}
+
+clickNode = function() {
+  $("#statements div").hide()
+  var node_id = $('text', this).text();
+  $('.thm').hide();
+  $('#'+latexLabelEscaper(node_id)).show().children().show();
+}
+function interactive() {
+    $("span#legend_title").on("click", function () {
+           $(this).siblings('dl').toggle();
+        })
+
+    d3.selectAll('.node')
+        .attr('pointer-events', 'fill')
+        .on('click', function () {
+           var title = d3.select(this).selectAll('title').text().trim();
+           $('#statements > div').hide()
+           $('.thm').hide();
+           $('#'+latexLabelEscaper(title)+'_modal').show().children().show().children().show();
+           $('#statements').show()
+        });
+
+    d3.selectAll('.dep-closebtn').on('click', function() {
+        var modal =
+            d3.select(this).node().parentNode.parentNode.parentNode ;
+        d3.select(modal).style('display', 'none');
+    });
+}
+
+</script>
+
+</body>
+</html>

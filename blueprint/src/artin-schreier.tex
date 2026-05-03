@@ -1,0 +1,112 @@
+\section{The Artin--Schreier theorem}
+
+\begin{definition}
+\lean{IsRealClosed}
+\mathlibok
+A field $F$ is \emph{real} if $-1$ is not a sum of squares in $F$.
+A field $F$ is \emph{real closed} is all of the following conditions hold:
+\begin{itemize}
+\item $F$ is real;
+\item for every $x \in F$, one of $x$ or $-x$ is a square in $F$;
+\item every odd-degree polynomial over $F$ has a root in $F$.
+\end{itemize}
+\end{definition}
+
+\begin{lemma} \label{lem:real-closed-from-quadratic}
+\lean{Field.RealClosed_from_quadratic}
+Let $F$ be a field. Suppose that $x^2+1$ is irreducible over $F$
+and there exists a quadratic extension $K/F$ which is algebraically closed. Then $F$ is real closed.
+\end{lemma}
+\begin{proof}
+The sum of any two squares in $F$ is a square: for $a,b \in F$, we can choose $u \in K$ with $u^2 = a+bi$, and then $\mathrm{Norm}_{K/F}(u)^2 = \Norm_{K/F}(a+bi) = a^2+b^2$.
+Since $-1$ is not a square in $F$, it follows that $F$ is real.
+
+If $x \in F$ is not a square, then $K=F(x^{1/2})$ and so $x^{1/2}/i \in F$ squares to $-x$.
+
+Finally, since $F$ is real, it is of characteristic 0, so $K/F$ is a Galois extension.
+For any polynomial $f(x)$ of odd degree over $F$, the Galois group of $K/F$ acts on the roots of $f$ with orbits of order 1 or 2, so there must be a fixed point; hence $f$ has a root in $F$.
+\end{proof}
+
+\begin{lemma} \label{lem:p-power extensions}
+\lean{X_pow_sub_C_irreducible_iff_of_prime_pow}
+\mathlibok
+Let $F$ be a field.
+Let $p$ be an odd prime.
+Then for $a \in F$, $a$ is not a $p$-th power
+if and only if for every positive integer $n$, the polynomial $x^{p^n}-a$ is irreducible over $F$.
+\end{lemma}
+\begin{proof}
+In Mathlib.
+\end{proof}
+
+\begin{lemma} \label{lem:p-power extensions2}
+\lean{Field.two_power_roots_irreducible}
+Let $F$ be a field of characteristic $2$.
+If $a \in F$ is not a square, then
+for every positive integer $n$, the polynomial $x^{2^n}-a$ is irreducible over $F$.
+\end{lemma}
+\begin{proof}
+Let $K$ be an algebraic closure of $F$.
+Let $b \in K$ be an element with $b^{2^n} = a$.
+Then $x^{2^n}-a$ factors over $K$ as $(x-b)^{2^n}$,
+so any irreducible factor over $F$ itself factors over $K$ as $(x-b)^i$ for some $i \in \{1,\dots,2^n\}$. This implies $b^i \in F$, but since $a$ is not a square in $F$ this is only possible if $i \equiv 0 \pmod{2^n}$.
+\end{proof}
+
+\begin{lemma} \label{lem:finite-ac-extension-separable}
+\lean{Field.finite_algebraic_closure_separable}
+Let $F$ be a field which admits a finite algebraically closed extension $K$.
+Then $K/F$ is a separable extension.
+\end{lemma}
+\begin{proof}
+If $F$ is not perfect, it must have characteristic $p>0$ and there must exist $a \in F$ which is not a $p$-th power. However, using Lemma~\ref{lem:p-power extensions} (if $p>2$) or Lemma~\ref{lem:p-power extensions2} (if $p=2$) we can write down finite extensions of $F$ of unbounded degree, so $F$ cannot have a finite algebraically closed extension.
+\end{proof}
+
+\begin{lemma} \label{lem:cyclic-p-nonzero}
+Let $F$ be a field which admits an algebraically closed extension $K$ such that $K/F$ is Galois of prime degree $p$. Then $p \neq 0$ in $F$.
+\end{lemma}
+\begin{proof}
+If $p=0$ in $F$, then by Artin--Schreier theory,
+$K = F[x]/(x^p-x-a)$ for some $a \in F$. Since $K$ is algebraically closed,
+there exists $y \in K$ such that $y^p-y=ax^{p-1}$. Write $y = \sum_{i=0}^{p-1} y_i x^i$ with $y_i \in F$;
+then $y_{p-1}^{p} - y_{p-1} = a$ and so $x-y_{p-1} \in \mathbb{F}_p$, a contradiction.
+\end{proof}
+
+\begin{lemma} \label{lem:ac-quadratic}
+Let $F$ be a field which admits an algebraically closed extension $K$ such that $K/F$ is Galois of prime degree $p$. Then $p = 2$.
+\end{lemma}
+\begin{proof}
+Suppose by way of contradiction that $p \neq 2$.
+By Lemma~\ref{lem:cyclic-p-nonzero}, $F$ cannot have characteristic $p$;
+consequently, $K$ contains a primitive $p$-th root of unity $\zeta_p$.
+Since $\Q(\zeta_p)/\Q$ is Galois of degree $p-1$, $F(\zeta_p)/F$ is Galois of degree dividing $p-1$;
+but this degree must also divide $[K:F] = p$, so it is 1. That is, $\zeta_p \in F$.
+
+By Kummer theory, $K  \cong F[x]/(x^p-a)$ for some $a \in F$. However, this means that $x^{p^n}-a$ is irreducible over $F$ for each positive integer $n$, a contradiction.
+\end{proof}
+
+\begin{lemma} \label{lem:ac-quadratic-adjoins-i}
+\lean{Field.quadratic_algebraic_closure_no_i}
+Let $F$ be a field which admits an algebraically closed extension $K$ such that $K/F$ is quadratic. Then $F$ does not contain a square root of $-1$.
+\end{lemma}
+\begin{proof}
+Suppose that $F$ contains $i$, a square root of $-1$.
+By Lemma~\ref{lem:finite-ac-extension-separable}, $F$ is not of characteristic $2$;
+we can thus write $K = F[x]/(x^2-a)$ for some $a \in F$ not a perfect square. 
+Then the roots of $x^4-a$ in $K$ are $a^{1/4}, ia^{1/4}, -a^{1/4}, -ia^{1/4}$; for any pair of these, the product is a nonzero element of $F$ times $a^{1/2}$ and hence does not belong to $F$. Hence $x^4-a$ has no linear or quadratic factor over $K$ and so is irreducible over $F$, a contradiction.
+\end{proof}
+
+\begin{theorem} \label{thm:artin-schreier}
+\lean{Field.artin_schreier_thm}
+Let $F$ be a field which admits a finite algebraically closed extension.
+Then $F$ is algebraically closed or real closed.
+\end{theorem}
+\begin{proof}
+Let $K$ be an algebraic closure of $F$.
+Let $i \in K$ be a square root of $-1$.
+The extension $K/F(i)$ is normal, and by Lemma~\ref{lem:finite-ac-extension-separable} it is separable, so it is Galois; let $G$ be the Galois group. 
+If $K \neq F(i)$ is not algebraically closed, then $G$ contains a nontrivial cyclic subgroup of prime order $p$, whose fixed field is a subfield $E$ of $K$ containing $F(i)$.
+Applying \cref{lem:ac-quadratic} to $K/E$ yields $p=2$;
+applying \cref{lem:ac-quadratic-adjoins-i} to $K/E$ yields $i \notin E$, a contradiction.
+We contclude that $K= F(i)$; by \cref{lem:real-closed-from-quadratic}, $F$ is real closed.
+\end{proof}
+
