@@ -7,6 +7,7 @@ Let $F$ be a field.
 Let $p$ be an odd prime.
 Then for $a \in F$, $a$ is not a $p$-th power
 if and only if for every positive integer $n$, the polynomial $x^{p^n}-a$ is irreducible over $F$.
+(Note that this fails for $p=2$.)
 \end{lemma}
 \begin{proof}
 In Mathlib.
@@ -14,15 +15,15 @@ In Mathlib.
 
 \begin{lemma} \label{lem:p-power extensions2}
 \lean{Field.two_power_roots_irreducible}
-Let $F$ be a field of characteristic $2$.
-If $a \in F$ is not a square, then
-for every nonnegative integer $n$, the polynomial $x^{2^n}-a$ is irreducible over $F$.
+Let $F$ be a field of prime characteristic $p$.
+If $a \in F$ is not a $p$-th power, then
+for every nonnegative integer $n$, the polynomial $x^{p^n}-a$ is irreducible over $F$.
 \end{lemma}
 \begin{proof}
 Let $K$ be an algebraic closure of $F$.
-Let $b \in K$ be an element with $b^{2^n} = a$.
-Then $x^{2^n}-a$ factors over $K$ as $(x-b)^{2^n}$,
-so any irreducible factor over $F$ itself factors over $K$ as $(x-b)^i$ for some $i \in \{1,\dots,2^n\}$. This implies $b^i \in F$, but since $a$ is not a square in $F$ this is only possible if $i \equiv 0 \pmod{2^n}$.
+Let $b \in K$ be an element with $b^{p^n} = a$.
+Then $x^{p^n}-a$ factors over $K$ as $(x-b)^{p^n}$,
+so any irreducible factor over $F$ itself factors over $K$ as $(x-b)^i$ for some $i \in \{1,\dots,p^n\}$. This implies $b^i \in F$, but since $a$ is not a $p$-th power in $F$ this is only possible if $i \equiv 0 \pmod{p^n}$.
 \end{proof}
 
 \begin{lemma} \label{lem:finite-ac-extension-separable}

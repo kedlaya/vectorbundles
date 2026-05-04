@@ -108,9 +108,11 @@ lemma Field.RealClosed_from_quadratic (F : Type) (K : Type)
 theorem Field.artin_schreier_thm (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
   [IsAlgClosed K] : IsAlgClosed F ∨ IsRealClosed F := by
-
-  have have_i: ∃ i : K, i^2 = -1 := by
-    apply IsAlgClosed.exists_pow_nat_eq
-    simp -- to prove 0 < 2
-  obtain ⟨i, hi⟩ := have_i
-  sorry
+  if hi: ∃ i : F, i^2 = -1 then
+    left
+    have hF: F = K := by
+      apply Field.finite_algebraic_closure_with_i F K hi
+    have hACF: IsAlgClosed F := by sorry
+    apply hACF
+  else
+    sorry
