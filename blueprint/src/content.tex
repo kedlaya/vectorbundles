@@ -115,7 +115,16 @@ m_j \leq m_i+1 \qquad (1 \leq i < j \leq n).
 \]
 \end{lemma}
 \begin{proof}
-Among filtrations as in Lemma~\ref{lem:filtration by line bundles om}, choose one to minimize $\sum_{i=1}^n (n-i) m_i$.
+For each $i  \in \{1,\dots,n-1\}$, 
+Lemma~\ref{lem:subbundle-slope-bound}
+gives a uniform upper bound on $m_1 + \cdots + m_i$
+over all filtrations as in Lemma~\ref{lem:filtration by line bundles},
+while $m_1 +\cdots + m_n = \deg(F)$.
+Consequently, we can choose such a filtration so as to minimize 
+\[
+\sum_{i=1}^n i m_i = 
+= (n+1) \left( \sum_{i=1}^n m_i \right) -\sum_{i=1}^{n-1} (m_1 + \cdots + m_n).
+\]
 We prove that this filtration has the desired property by induction on $j-i$.
 
 We start with the base case $j=i+1$.
@@ -123,7 +132,7 @@ Suppose by way of contradiction that this fails for some $i$. We then have an ex
 \[
 0 \to \cO_X(m_i) \to F_{i+1}/F_{i-1} \to \cO_X(m_{i+1}) \to 0.
 \]
-By choosing an embedding $\cO_X(m_i+2) \to \cO_X(m_{i+1})$, we obtain a subbundle $G$ of $F_{i+1}/F_{i-1}$ and an exact sequence
+By pulling back along an embedding $\cO_X(m_i+2) \to \cO_X(m_{i+1})$, we obtain a subbundle $G$ of $F_{i+1}/F_{i-1}$ and an exact sequence
 \[
 0 \to \cO_X(m_i) \to G \to \cO_X(m_i+2) \to 0.
 \]
@@ -139,19 +148,32 @@ That is, $F_j/F_i$ admits a filtration with successive quotients $\cO_X(m-1), \c
 By Lemma~\ref{L:rank 2 extension} again, $F_j/F_i$ admits $\cO_X(m)$ as a (not necessarily saturated) subbundle, but again this would contradict minimality.
 \end{proof}
 
+\begin{lemma} \label{lem:sequence by bounds}
+Let $n$ be a positive integer.
+Let $m_1,\dots,m_n$ be a sequence of integers satisfying 
+the following conditions:
+\begin{align}
+m_1 + \cdots + m_i \leq 0 & \quad (i=1,\dots,n-1)  \label{eq:bound1}\\
+m_1 +\cdots+m_i = 0 & \quad (i=n) \label{eq:bound2} \\
+m_j \leq m_i+1 & \quad (1 \leq i < j \leq n). \label{eq:bound3}
+\end{align}
+Then $m_1 = \cdots = m_n = 0$.
+\end{lemma}
+\begin{proof}
+We proceed by induction on $n$, with trivial base case $n=1$.
+For $n > 1$, note that \eqref{eq:bound1} and \eqref{eq:bound2} together imply $m_n \geq 0$.
+On the other hand, \eqref{eq:bound1} implies $\max_i\{m_i\} \leq 0$, and then \eqref{eq:bound3}
+implies $m_n \leq 1$. Finally, if $m_n = 1$, then \eqref{eq:bound3} implies that $m_i \geq 0$ for $i=1,\dots,{n-1}$, but then $m_1 + \cdots + m_n \geq 1$ in violation of \eqref{eq:bound2}.
+We deduce that $m_n = 0$; now the induction hypothesis applies to $m_1,\dots,m_{n-1}$ to finish.
+\end{proof}
+
 \begin{proposition} \label{prop:semistable slope 0}
 Every vector bundle on $X$ which is semistable of slope $0$ is trivial.
 \end{proposition}
 \begin{proof}
 Let $F$ be a semistable vector bundle of degree $0$ and rank $n$,
 and choose a filtration as in Lemma~\ref{lem:filtration by line bundles2}.
-Since $\sum_{i=1}^n m_i = \deg(F) = 0$, we have
-\[
-0 \leq \max_i\{m_i\} \leq m_1 + 1
-\]
-and so $m_1 \geq -1$; moreover, if $m_1 = -1$ we deduce that $\sum_{i=1}^n m_i < m_1 + \sum_{i=2}^n m_i \leq -1 + 0 < 0$, a contradiction.
-Hence $m_1 = 0$, and similar logic yields $m_n = 0$;
-by semistability we deduce that $m_1 = \cdots = m_n = 0$.
+By Lemma~\ref{lem:sequence by bounds}, we have $m_1 = \cdots = m_n = 0$.
 Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes by Lemma~\ref{lem:H1 of line bundles}, it follows that $F$ is trivial.
 \end{proof}
 

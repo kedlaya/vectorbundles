@@ -1,5 +1,30 @@
 \section{The Artin--Schreier theorem}
 
+\begin{lemma} \label{lem:finite-ac-extension-separable}
+\lean{finite_algebraic_closure_separable}
+Let $F$ be a field which admits a finite algebraically closed extension $K$.
+Then $K/F$ is a separable extension.
+\end{lemma}
+\begin{proof}
+It suffices to check that $F$ is perfect; this is automatic if $F$ has characteristic $0$, so we
+may assume that $F$ is of characteristic $p>0$.
+
+We must check that an arbitrary $a \in F$ has a $p$-th root.
+Choose a positive integer $n$ with $p^n > [K:F]$,
+then choose $b \in K$ with $b^{p^n} = a$.
+If the polynomial $x^{p^n} - a$ were irreducible over $F$,
+then the subfield $F(b)$ of $K$ would have degree $p^n$ over $F$, but this degree divides $[K:F]$ which is impossible. 
+Hence $x^{p^n}-a$ has an irreducible factor $f(x)$ of degree $d \in \{1,\dots,p^n-1\}$.
+Over $K$ we have $x^{p^n}-a = (x-b)^{p^n}$ and so $f(x) = (x-b)^d$.
+Set $e := \gcd(d, p^n) \in \{p,p^2,\dots,p^{n-1}\}$
+and choose $g_1,g_2 \in \mathbb{Z}$ with $dg_1 + p^n g_2 = e$; then 
+$f(0) = (-1)^d b^d$ and so
+\[
+(((-1)^d f(0))^{g_1} a^{g_2})^{p^{n-1}/e} = (b^e) = b^{p^{n-1}}  
+\]
+is an element of $F$ with $p$-th power $a$.
+\end{proof}
+
 \begin{lemma} \label{lem:p-power extensions}
 \lean{X_pow_sub_C_irreducible_iff_of_prime_pow}
 \mathlibok
@@ -7,33 +32,12 @@ Let $F$ be a field.
 Let $p$ be an odd prime.
 Then for $a \in F$, $a$ is not a $p$-th power
 if and only if for every positive integer $n$, the polynomial $x^{p^n}-a$ is irreducible over $F$.
-(Note that this fails for $p=2$.)
+(Note that this fails for $p=2$, for example $x^4+4 = (x^2-2x+2)(x^2+2x+2)$.)
 \end{lemma}
 \begin{proof}
 In Mathlib.
 \end{proof}
 
-\begin{lemma} \label{lem:p-power extensions2}
-\lean{Field.two_power_roots_irreducible}
-Let $F$ be a field of prime characteristic $p$.
-If $a \in F$ is not a $p$-th power, then
-for every nonnegative integer $n$, the polynomial $x^{p^n}-a$ is irreducible over $F$.
-\end{lemma}
-\begin{proof}
-Let $K$ be an algebraic closure of $F$.
-Let $b \in K$ be an element with $b^{p^n} = a$.
-Then $x^{p^n}-a$ factors over $K$ as $(x-b)^{p^n}$,
-so any irreducible factor over $F$ itself factors over $K$ as $(x-b)^i$ for some $i \in \{1,\dots,p^n\}$. This implies $b^i \in F$, but since $a$ is not a $p$-th power in $F$ this is only possible if $i \equiv 0 \pmod{p^n}$.
-\end{proof}
-
-\begin{lemma} \label{lem:finite-ac-extension-separable}
-\lean{Field.finite_algebraic_closure_separable}
-Let $F$ be a field which admits a finite algebraically closed extension $K$.
-Then $K/F$ is a separable extension.
-\end{lemma}
-\begin{proof}
-If $F$ is not perfect, it must have characteristic $p>0$ and there must exist $a \in F$ which is not a $p$-th power. However, using Lemma~\ref{lem:p-power extensions} (if $p>2$) or Lemma~\ref{lem:p-power extensions2} (if $p=2$) we can write down finite extensions of $F$ of unbounded degree, so $F$ cannot have a finite algebraically closed extension.
-\end{proof}
 
 \begin{proposition} \label{lem:artin-schreier-extensions}
 Let $F$ be a field of prime characteristic $p$.
@@ -55,7 +59,7 @@ then $y_{p-1}^{p} - y_{p-1} = a$ and so $x-y_{p-1} \in \mathbb{F}_p$, a contradi
 \end{proof}
 
 \begin{lemma} \label{lem:ac-quadratic}
-\lean{Field.finite_algebraic_closure_cyclic_quadratic}
+\lean{finite_algebraic_closure_cyclic_quadratic}
 Let $F$ be a field which admits an algebraically closed extension $K$ such that $K/F$ is Galois of prime degree $p$. Then $p = 2$.
 \end{lemma}
 \begin{proof}
@@ -65,12 +69,14 @@ consequently, $K$ contains a primitive $p$-th root of unity $\zeta_p$.
 Since $\Q(\zeta_p)/\Q$ is Galois of degree $p-1$, $F(\zeta_p)/F$ is Galois of degree dividing $p-1$;
 but this degree must also divide $[K:F] = p$, so it is 1. That is, $\zeta_p \in F$.
 
-By Kummer theory, $K  \cong F[x]/(x^p-a)$ for some $a \in F$. However, Lemma~\ref{lem:p-power extensions}
-now implies that $x^{p^n}-a$ is irreducible over $F$ for each positive integer $n$, a contradiction.
+By Kummer theory, $K  \cong F[x]/(x^p-a)$ for some $a \in F$. 
+Lemma~\ref{lem:p-power extensions} implies that $x^{p^2}-a$ is irreducible over $F$,
+so adjoining a root of this polynomial in $K$ gives a subfield of $K$ of degree $p^2$ over $F$.
+Howver, the degree of any subfield must divide $[K:F] = p$, a contradiction.
 \end{proof}
 
 \begin{lemma} \label{lem:ac-quadratic-adjoins-i}
-\lean{Field.quadratic_algebraic_closure_no_i}
+\lean{quadratic_algebraic_closure_no_i}
 Let $F$ be a field which admits an algebraically closed extension $K$ such that $K/F$ is quadratic. Then $F$ does not contain a square root of $-1$.
 \end{lemma}
 \begin{proof}
@@ -81,7 +87,7 @@ Then the roots of $x^4-a$ in $K$ are $a^{1/4}, ia^{1/4}, -a^{1/4}, -ia^{1/4}$; f
 \end{proof}
 
 \begin{lemma} \label{lem:ac-finite-alg-closure-with-i}
-\lean{Field.finite_algebraic_closure_with_i}
+\lean{finite_algebraic_closure_with_i}
 Let $F$ be a field containing a square root of $-1$ and admitting a finite algebraically closed extension. Then $F$ is algebraically closed.
 \end{lemma}
 \begin{proof}
@@ -105,7 +111,7 @@ A field $F$ is \emph{real closed} is all of the following conditions hold:
 \end{definition}
 
 \begin{lemma} \label{lem:real-closed-from-quadratic}
-\lean{Field.RealClosed_from_quadratic}
+\lean{RealClosed_from_quadratic}
 \uses{def:real-closed}
 Let $F$ be a field. Suppose that $-1$ is not a square in $F$
 and there exists a quadratic extension $K/F$ which is algebraically closed. Then $F$ is real closed.
@@ -123,15 +129,15 @@ For any polynomial $f(x)$ of odd degree over $F$, the Galois group of $K/F$ acts
 
 \begin{theorem} \label{thm:artin-schreier}
 \uses{def:real-closed}
-\lean{Field.artin_schreier_thm}
+\lean{artin_schreier_thm}
 Let $F$ be a field which admits a finite algebraically closed extension.
 Then $F$ is algebraically closed or real closed.
 \end{theorem}
 \begin{proof}
 Let $K$ be an algebraic closure of $F$.
 Let $i \in K$ be a square root of $-1$.
-By Lemma~\ref{lem:ac-finite-alg-closure-with-i}, $F(i) = K$, so either $i \in F$
-and $F$ is algebraically closed, or $i \notin F$ and 
-$F$ is real closed by Lemma~\ref{lem:real-closed-from-quadratic}, $F$ is real closed.
+By Lemma~\ref{lem:ac-finite-alg-closure-with-i}, $F(i)$ is algebraically closed;
+so either $i \in F$ and $F$ is algebraically closed, or $i \notin F$ and 
+$F$ is real closed by Lemma~\ref{lem:real-closed-from-quadratic}.
 \end{proof}
 

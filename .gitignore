@@ -1,0 +1,4 @@
+/.lake
+blueprint/lean_decls
+blueprint/print/*
+blueprint/web/*

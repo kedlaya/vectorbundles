@@ -1,11 +1,20 @@
 \section{Abstract complete curves and vector bundles}
 
+\begin{definition} \label{def:vector-bundle}
+A \emph{vector bundle} on a scheme $X$ is a quasicoherent sheaf $F$ such that for every morphism 
+$i \colon \Spec R \to X$, $\Gamma(X, i^* F)$ is a finite projective $R$-module. 
+\end{definition}
+
 \begin{definition} \label{def:abstract-complete-curve}
 By an \emph{abstract curve}, we mean a connected, separated, regular $1$-dimensional Noetherian scheme $X$. In other words, $X$ is a connected separated scheme which is covered by open subspaces which are the spectra of Dedekind domains.
 
 By an \emph{abstract complete curve}, we mean an abstract complete curve
 together with a \emph{degree} function from closed points of $X$ to positive integers with the property that the induced linear map $\deg\colon \Div(X) \to \Z$ is zero on all principal divisors.
 \end{definition}
+
+
+In the following lemmas, let $X$ denote an abstract complete curve.
+
 
 \begin{definition}
 \uses{def:abstract-complete-curve}
@@ -14,14 +23,14 @@ which we use to define a \emph{degree} homomorphism $\deg\colon K_0(X) \to \Z$.
 \end{definition}
 
 \begin{definition}
-\uses{def:abstract-complete-curve}
+\uses{def:abstract-complete-curve,def:vector-bundle}
 Let $F \subseteq G$ be an inclusion of vector bundles on $X$.
 Then there is a unique intermediate bundle $F'$ such that $\rank(F) = \rank(F')$ and $G/F'$ is a vector bundle, called the \emph{saturation} of $F$ in $G$.
 We then have $\deg(F) \leq \deg(F')$ with equality if and only if $F' = F$.
 \end{definition}
 
 \begin{lemma} \label{lem:filtration by line bundles}
-\uses{def:abstract-complete-curve}
+\uses{def:abstract-complete-curve,def:vector-bundle}
 Every vector bundle $F$ on $X$ admits a filtration of the form
 \[
 0 = F_0 \subset \cdots \subset F_n = F
@@ -35,8 +44,8 @@ We then apply the induction hypothesis to $F/F_1$ to conclude.
 \end{proof}
 
 
-\begin{definition}
-\uses{def:abstract-complete-curve}
+\begin{definition} \label{def:slope-vector-bundle}
+\uses{def:abstract-complete-curve,def:vector-bundle}
 Let $F$ be a nonzero vector bundle on $X$.
 We define the \emph{slope} of $F$ as 
 \[
@@ -48,7 +57,7 @@ The bundle $F$ is \emph{polystable} if it is a direct sum of stable vector bundl
 \end{definition}
 
 \begin{lemma} \label{lem:map of stable}
-\uses{def:abstract-complete-curve}
+\uses{def:slope-vector-bundle}
 Let $F,G$ be two stable vector bundles on $X$ of the same slope $\mu$.
 Then any nonzero morphism $f\colon F \to G$ is an isomorphism.
 \end{lemma}
@@ -63,7 +72,7 @@ so all of these inequalities must be equalities. Since $G$ is stable this means 
 \end{proof}
 
 \begin{proposition} \label{prop:HN filtration}
-\uses{def:abstract-complete-curve}
+\uses{def:slope-vector-bundle}
 Every vector bundle $F$ on $X$ admits a unique filtration
 \[
 0 = F_0 \subset F_1 \subset \cdots \subset F_l = F
@@ -74,15 +83,15 @@ in which each successive quotient $F_i/F_{i-1}$ is a semistable vector bundle of
 %See for example \cite[Th\'eor\`eme~5.5.2]{FaFoCfv}.
 \end{proof}
 
-\begin{definition}
-\uses{def:abstract-complete-curve}
+\begin{definition} \label{def:HN-filtration}
+\uses{def:slope-vector-bundle}
 For $F$ a vector bundle on $X$, the filtration on $F$ described in Proposition~\ref{prop:HN filtration}
 is called the  \emph{Harder--Narasimhan filtration}, or \emph{HN filtration}, of $F$.
 We define the multiset of \emph{HN slopes} of $F$ to consist of $\mu_i = \deg(F_i/F_{i-1})/\rank(F_i/F_{i-1})$ with multiplicity $\rank(F_i/F_{i-1})$.
 \end{definition}
 
 \begin{lemma} \label{lem:semistable-from-product}
-\uses{def:abstract-complete-curve}
+\uses{def:HN-filtration}
 Let $F,G$ be two nonzero vector bundles on $X$. If $F \otimes G$ is semistable, then so are $F$ and $G$.
 \end{lemma}
 \begin{proof}
@@ -94,4 +103,30 @@ $F \otimes G$ is semistable, we must have
 \mu(F_1)+\mu(G_1) \leq \mu(F \otimes G) = \mu(F) + \mu(G) \leq \mu(F_1) + \mu(G_1).
 \]
 We conclude that $\mu(F_1) = \mu(F), \mu(G_1) = \mu(G)$ and so $F$ and $G$ are semistable.
+\end{proof}
+
+\begin{lemma} \label{lem:subbundle-slope-bound}
+\uses{def:HN-filtration}
+Let $F$ be a vector bundle on $X$ with HN slopes $\mu_1 \geq \cdots \geq \mu_n$.
+Then for $i=0,\dots,n$, the degrees of rank-$i$ subbundles of $F$ are bounded above
+by $\mu_1 + \cdots + \mu_i$.
+\end{lemma}
+\begin{proof}
+We prove the claim by induction on $n = \rank(F)$.
+Let $F_1$ be the first step in the HN filtration of $F$, and set $j = \rank(F_1)$.
+Let $G$ be a subbundle of $F$ of rank $i$; we then have an exact sequence
+\[
+0 \to G \cap F_1 \to G \to G/(G \cap F_1) \to 0.
+\]
+Set $k := \rank(G \cap F_1) \leq k$. By the semistability of $F_1$, we have
+$\deg(G \cap F_1) \leq \mu_1 + \cdots + \mu_k$;
+by the induction hypothesis, we have
+\[
+\deg(G/(G \cap F_1)) \leq \mu_{j+1} + \cdots + \mu_{j+i-k} \leq \mu_{k+1} + \cdots + \mu_i.
+\]
+Combining, we obtain
+\[
+\deg(G) = \deg(G \cap F_1) + \deg(G/(G \cap F_1)) \leq (\mu_1 + \cdots + \mu_j) + (\mu_{j+1} + \cdots + \mu_k)
+\]
+as desired.
 \end{proof}
