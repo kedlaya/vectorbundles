@@ -19,10 +19,42 @@ public import Mathlib.FieldTheory.Minpoly.Basic
 public import Mathlib.FieldTheory.Perfect
 public import Mathlib.FieldTheory.PurelyInseparable.Exponent
 public import Mathlib.FieldTheory.PurelyInseparable.PerfectClosure
+public import Mathlib.FieldTheory.PurelyInseparable.Tower
 public import Mathlib.FieldTheory.SplittingField.Construction
 public import Mathlib.GroupTheory.Perm.Cycle.Type
 
 @[expose] public section
+
+lemma finite_inseparable_extension_intermediate_small (F : Type) (K : Type)
+  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
+  [IsPurelyInseparable F K] (h: Module.finrank F K > 1) :
+  ∃ E: IntermediateField F K, Module.finrank F E = ringChar F := by
+  have hx : ∃ x : K, x ∉ (algebraMap F K).range := by
+    sorry
+  obtain ⟨x, hx⟩ := hx
+  let e := IsPurelyInseparable.elemExponent F x
+  have _ : e > 0 := by
+    sorry
+  let p := ringChar F
+  let y := x^(p^(e-1))
+  sorry
+
+lemma finite_inseparable_extension_intermediate (F : Type) (K : Type)
+  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
+  [IsPurelyInseparable F K] (h: Module.finrank F K > 1) :
+  ∃ E : IntermediateField F K, Module.finrank E K = ringChar F := by
+  let p := ringChar F
+  let d := Module.finrank F K
+  have hn : ∃ n: ℕ, p^(n+1) = d := by
+    sorry
+  obtain ⟨n, _⟩ := hn
+  induction n with
+  | zero =>
+      sorry
+  | succ n _ =>
+      have hE: ∃ E: IntermediateField F K, Module.finrank F E = ringChar F :=
+        finite_inseparable_extension_intermediate_small F K h
+      sorry
 
 lemma quadratic_algebraic_closure_no_i (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
@@ -64,11 +96,12 @@ lemma quadratic_algebraic_closure_no_i (F : Type) (K : Type)
       grind
 
     · -- let f0 := Polynomial.constantCoeff f
-      let g := Polynomial.X^4 - Polynomial.C (a : F)
+      let g := Polynomial.X^4 - Polynomial.C a
       have _ : Polynomial.aeval b g = 0 := by
         sorry
       have _ : f ∣ g := by
         sorry
+      let S := {x : K | x = b ∨ x = (algebraMap F K) i*b ∨ x = -b ∨ x = -(algebraMap F K) i*b}
       sorry
   unfold IsSquare
   obtain ⟨c, hc⟩ := hc
@@ -77,6 +110,30 @@ lemma quadratic_algebraic_closure_no_i (F : Type) (K : Type)
     exact FaithfulSMul.algebraMap_injective F K
   apply hinj
   grind
+
+lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
+  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
+  (hp: Nat.Prime p) (h: Module.finrank F K = p)
+  (hsep: IsGalois F K): ¬ ringChar F = p := by
+  sorry
+
+lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) (p : ℕ)
+  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
+  (hp: Nat.Prime p) (hrank: Module.finrank F K = p)
+  (hgal: IsGalois F K): p = 2 := by
+  sorry
+
+lemma finite_separable_algebraic_closure_with_i (F : Type) (K : Type)
+  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
+  [Algebra.IsSeparable F K] [IsAlgClosure F K]
+  (h : ∃ (i : F), i^2 = -1) : IsAlgClosed F := by
+  sorry
+
+lemma finite_inseparable_algebraic_closure_with_i (F : Type) (K : Type)
+  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
+  [IsPurelyInseparable F K] [IsAlgClosure F K]
+  (h : ∃ (i : F), i^2 = -1) : IsAlgClosed F := by
+  sorry
 
 lemma finite_algebraic_closure_separable (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
@@ -89,13 +146,16 @@ lemma finite_algebraic_closure_separable (F : Type) (K : Type)
         apply CharP.char_is_prime_or_zero F p
       have _: Nat.Prime p := by
         grind [CharP.ringChar_zero_iff_CharZero F]
-      have _: ExpChar F p := by
+      have hchar: ExpChar F p := by
         (expose_names; exact ExpChar.prime h_2)
       let frob := frobenius F p
       have hpow: ∀ a : F, ∃ b : F, b^p = a := by
         intro a
         by_cases hp: p = 2
-        · sorry
+        · have hi : ∃ (i : F), i^2 = -1 := by
+            use 1
+            sorry
+          sorry
           --   sorry
             -- apply quadratic_algebraic_closure_no_i F K a
         · let d := Module.finrank F K
@@ -127,21 +187,9 @@ lemma finite_algebraic_closure_separable (F : Type) (K : Type)
           intro a
           apply hpow
       have _: PerfectRing F p := by
-        (expose_names; exact PerfectRing.ofSurjective F p h_4)
+        exact PerfectRing.ofSurjective F p hpow
       exact PerfectRing.toPerfectField F p
   { to_isSeparable := IsSepClosure.isSeparable, to_normal := IsGalois.to_normal }
-
-lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
-  (hp: Nat.Prime p) (h: Module.finrank F K = p)
-  (hsep: IsGalois F K): ¬ ringChar F = p := by
-  sorry
-
-lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) (p : ℕ)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
-  (hp: Nat.Prime p) (hrank: Module.finrank F K = p)
-  (hgal: IsGalois F K): p = 2 := by
-  sorry
 
 lemma finite_algebraic_closure_with_i (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]

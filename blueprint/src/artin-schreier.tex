@@ -14,6 +14,40 @@ if and only if for every positive integer $n$, the polynomial $x^{p^n}-a$ is irr
 In Mathlib.
 \end{proof}
 
+\begin{proposition} \label{prop:artin schreier extensions}
+Let $F$ be a field of prime characteristic $p$.
+Let $K/F$ be a Galois extension of degree $p$.
+Then $K \cong F[x]/(x^p-x-a)$ for some $a \in F$.
+\end{proposition}
+\begin{proof}
+To be filled in.
+\end{proof}
+
+\begin{lemma} \label{lem:finite inseparable tower step 1}
+\lean{finite_inseparable_extension_intermediate_small}
+\leanok
+Let $K/F$ be a nontrivial finite purely inseparable extension of fields of characteristic $p$.
+Then there exists an intermediate field $E$ with $[E:F] = p$.
+\end{lemma}
+\begin{proof}
+For every $x \in K$, there exists a smallest nonnegative integer $e$ such that $x^{p^e} \in K$,
+which is zero if and only if $x \in F$. Since $K \neq F$, we can find $x$ for which $e > 0$.
+Set $a = x^{p^{e-1}}$ and $E := F(a)$; then $[E:F] = p$.
+\end{proof}
+
+\begin{lemma} \label{lem:finite inseparable tower step 2}
+\lean{finite_inseparable_extension_intermediate}
+\leanok
+Let $K/F$ be a nontrivial finite purely inseparable extension of fields of characteristic $p$.
+Then there exists an intermediate field $E$ with $[K:E] = p$.
+\end{lemma}
+\begin{proof}
+\uses{lem:finite inseparable tower step 1}
+We induct on the degree of $K/F$. If this degree is $p$ we take $E = F$.
+Otherwise, by Lemma~\ref{lem:finite inseparable tower step 1} we can find an intermediate field
+$F_1$ with $[F:F_1] = p$ and hence $[K:F_1] > 1$. By the induction hypothesis, there exists an intermediate field $E$ between $F_1$ and $K$ with $[K:E] = p$.
+\end{proof}
+
 \begin{lemma} \label{lem:ac-quadratic-adjoins-i}
 \lean{quadratic_algebraic_closure_no_i}
 \leanok
@@ -31,38 +65,6 @@ which must be one of $ib, -b, -bi$.
 Hence $f(0) \in F$ equals $b^2$ times an element of $F$, so $b^2 \in F$.
 In both cases, $b^2$ is a square root of $a$ in $F$.
 \end{proof}
-
-\begin{lemma} \label{lem:finite-ac-extension-separable}
-\lean{finite_algebraic_closure_separable}
-\leanok
-Let $F$ be a field which admits a finite algebraically closed extension $K$.
-Then $K/F$ is a separable extension.
-\end{lemma}
-\begin{proof}
-\uses{lem:ac-quadratic-adjoins-i,lem:p-power extensions}
-It suffices to check that $F$ is perfect; this is automatic if $F$ has characteristic $0$, so we
-may assume that $F$ is of characteristic $p>0$, and then the perfect condition can be interpreted as the condition that every element of $F$ is a $p$-th power.
-
-Suppose that $p=2$. Since $1 = -1$ in $F$, $F$ contains a square root of $-1$.
-We can thus apply Lemma~\ref{lem:ac-quadratic-adjoins-i} to see that every element of $F$ is a perfect square, so $F$ is perfect.
-
-Suppose that $p > 2$. If $F$ is not perfect, we can find $a \in F$ which is not a $p$-th power.
-Choose a positive integer $n$ with $p^n > [K:F]$,
-then choose $b \in K$ with $b^{p^n} = a$.
-The polynomial $x^{p^n} - a$ is irreducible over $F$ by Lemma~\ref{lem:p-power extensions} and has $b$ as a root, so it is the minimal polynomial of $b$ over $F$.
-However, the degree of the minimal polynomial is at most $[K:F] < p^n$, a contradiction.
-\end{proof}
-
-
-\begin{proposition} \label{prop:artin schreier extensions}
-Let $F$ be a field of prime characteristic $p$.
-Let $K/F$ be a Galois extension of degree $p$.
-Then $K \cong F[x]/(x^p-x-a)$ for some $a \in F$.
-\end{proposition}
-\begin{proof}
-To be filled in.
-\end{proof}
-
 
 \begin{lemma} \label{lem:cyclic-p-nonzero}
 \lean{finite_algebraic_closure_cyclic_prime}
@@ -96,6 +98,41 @@ so adjoining a root of this polynomial in $K$ gives a subfield of $K$ of degree 
 However, the degree of any subfield must divide $[K:F] = p$, a contradiction.
 \end{proof}
 
+\begin{lemma} \label{lem:ac-finite-sep-alg-closure-with-i}
+\lean{finite_separable_algebraic_closure_with_i}
+\leanok
+Let $F$ be a field containing a square root of $-1$ and admitting a finite separable extension $K$ which is algebraically closed. Then $F$ is algebraically closed.
+\end{lemma}
+\begin{proof}
+\uses{lem:ac-quadratic,lem:ac-quadratic-adjoins-i,lem:cyclic-p-nonzero}
+The extension $K/F$ is normal, and by hypothesis it is separable, so it is Galois; let $G$ be the Galois group. 
+If $K \neq F$, then for any prime factor $p$ of $[L:K]$, by Cauchy's theorem 
+$G$ contains a nontrivial cyclic subgroup of prime order $p$, whose fixed field is a subfield $E$ of $K$ containing $F$.
+Applying Lemma~\ref{lem:ac-quadratic} to $K/E$ yields $p=2$.
+
+By Lemma~\ref{lem:cyclic-p-nonzero}, $F$ is not of characteristic $2$.
+We can thus write $K = F[x]/(x^2-a)$ for some $a \in F$ not a perfect square,
+but by Lemma~\ref{lem:ac-quadratic-adjoins-i} no such $a$ exists.
+\end{proof}
+
+\begin{lemma} \label{lem:ac-finite-insep-alg-closure-with-i}
+\lean{finite_inseparable_algebraic_closure_with_i}
+Let $F$ be a field containing a square root of $-1$ and admitting a finite purely inseparable extension $K$ which is algebraically closed. Then $F$ is algebraically closed.
+\end{lemma}
+\begin{proof}
+\uses{lem:p-power extensions,lem:finite inseparable tower step 2,lem:ac-quadratic-adjoins-i}
+Let $p$ be the characteristic of $F$. If $p = 0$, then there are no nontrivial finite purely inseparable extensions of $F$, so we must have $F = K$.
+
+Suppose that $p > 2$. If $F$ is not perfect, we can find $a \in F$ which is not a $p$-th power.
+Choose a positive integer $n$ with $p^n > [K:F]$,
+then choose $b \in K$ with $b^{p^n} = a$.
+The polynomial $x^{p^n} - a$ is irreducible over $F$ by Lemma~\ref{lem:p-power extensions} and has $b$ as a root, so it is the minimal polynomial of $b$ over $F$.
+However, the degree of the minimal polynomial is at most $[K:F] < p^n$, a contradiction.
+
+Suppose that $p=2$. If $K \neq F$, then by Lemma~\ref{lem:finite inseparable tower step 2}
+there exists an intermediate field $E$ with $[K:E] = 2$. By Lemma~\ref{lem:ac-quadratic-adjoins-i},
+every element of $E$ is a perfect square, so $E$ is perfect; however, this contradicts the existence of the nontrivial purely inseparable extension $K/E$.
+\end{proof}
 
 \begin{lemma} \label{lem:ac-finite-alg-closure-with-i}
 \lean{finite_algebraic_closure_with_i}
@@ -103,16 +140,33 @@ However, the degree of any subfield must divide $[K:F] = p$, a contradiction.
 Let $F$ be a field containing a square root of $-1$ and admitting a finite algebraically closed extension. Then $F$ is algebraically closed.
 \end{lemma}
 \begin{proof}
-\uses{lem:finite-ac-extension-separable,lem:ac-quadratic,lem:finite-ac-extension-separable,lem:ac-quadratic-adjoins-i}
-The extension $K/F$ is normal, and by Lemma~\ref{lem:finite-ac-extension-separable} it is separable, so it is Galois; let $G$ be the Galois group. 
-If $K \neq F$, then for any prime factor $p$ of $[L:K]$, by Cauchy's theorem 
-$G$ contains a nontrivial cyclic subgroup of prime order $p$, whose fixed field is a subfield $E$ of $K$ containing $F$.
-Applying Lemma~\ref{lem:ac-quadratic} to $K/E$ yields $p=2$.
-
-By Lemma~\ref{lem:finite-ac-extension-separable}, $F$ is not of characteristic $2$.
-We can thus write $K = F[x]/(x^2-a)$ for some $a \in F$ not a perfect square,
-but by Lemma~\ref{lem:ac-quadratic-adjoins-i} no such $a$ exists.
+\uses{lem:finite-ac-extension-separable,lem:ac-quadratic,lem:ac-quadratic-adjoins-i,lem:ac-finite-sep-alg-closure-with-i}
+Let $E$ be the perfect closure of $F$ within $K$. Then $K/E$ is separable, so by 
+Lemma~\ref{lem:ac-finite-sep-alg-closure-with-i} $E$ is algebraically closed (i.e., $E=K$).
+Meanwhile, $E/F$ is purely inseparable, so by Lemma~\ref{lem:ac-finite-insep-alg-closure-with-i}, $F$ is algebraically closed.
 \end{proof}
+
+\begin{lemma} \label{lem:finite-ac-extension-separable}
+\lean{finite_algebraic_closure_separable}
+\leanok
+Let $F$ be a field which admits a finite algebraically closed extension $K$.
+Then $K/F$ is a separable extension.
+\end{lemma}
+\begin{proof}
+\uses{lem:ac-quadratic-adjoins-i,lem:p-power extensions}
+It suffices to check that $F$ is perfect; this is automatic if $F$ has characteristic $0$, so we
+may assume that $F$ is of characteristic $p>0$, and then the perfect condition can be interpreted as the condition that every element of $F$ is a $p$-th power.
+
+Suppose that $p=2$. Since $1 = -1$ in $F$, $F$ contains a square root of $-1$.
+We can thus apply Lemma~\ref{lem:ac-quadratic-adjoins-i} to see that every element of $F$ is a perfect square, so $F$ is perfect.
+
+Suppose that $p > 2$. If $F$ is not perfect, we can find $a \in F$ which is not a $p$-th power.
+Choose a positive integer $n$ with $p^n > [K:F]$,
+then choose $b \in K$ with $b^{p^n} = a$.
+The polynomial $x^{p^n} - a$ is irreducible over $F$ by Lemma~\ref{lem:p-power extensions} and has $b$ as a root, so it is the minimal polynomial of $b$ over $F$.
+However, the degree of the minimal polynomial is at most $[K:F] < p^n$, a contradiction.
+\end{proof}
+
 
 \begin{definition} \label{def:real closed field}
 \lean{IsRealClosed}
