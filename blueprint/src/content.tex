@@ -11,8 +11,8 @@
 
 \section{Classification of vector bundles}
 
-\begin{definition}
-Let $P := \bigoplus_{d \geq 0} P_d$ be a graded ring satisfying the following conditions.
+\begin{definition} \label{def:graded ring}
+In what follows, let $P := \bigoplus_{d \geq 0} P_d$ be a fixed graded ring satisfying the following conditions.
 
 \begin{itemize}
 \item[(i)]
@@ -33,17 +33,52 @@ for some field $L_s$ containing $P_0$.
 
 \end{definition}
 
-\begin{proposition} \label{prop:abstract curve2}
+\begin{lemma} \label{prop:PID from graded ring}
+\uses{def:graded ring}
+For $P$ as in Definition~\ref{def:graded ring}, for each nonzero $s \in P_1$, $P[s^{-1}]_0$
+is a principal ideal domain. 
+\end{lemma}
+\begin{proof}
+\end{proof}
+
+\begin{proposition} \label{prop:graded ring to curve}
+\uses{def:graded ring,def:abstract complete curve}
+For $P$ as in Definition~\ref{def:graded ring}, $X := \Proj(P)$ is an abstract complete curve.
+\end{proposition}
+\begin{proof}
+\uses{prop:PID from graded ring}
+\end{proof}
+
+\begin{definition} \label{def:line bundles}
+\uses{def:vector bundles}
+For $d \in \Z$, define the line bundle $\cO_X(d)$ on $X$ as $\Proj \bigoplus_{n=0}^\infty P_{n+d}$.
+\end{definition}
+
+\begin{lemma} \label{lem:H0 of line bundles}
+\uses{prop:graded ring to curve,def:line bundles}
+We have 
+\[
+\cO_X(n) = \begin{cases} 0 & n < 0 \\
+P_n & n \geq 0
+\end{cases}.
+\]
+\end{lemma}
+\begin{proof}
+\end{proof}
+
+\begin{proposition} \label{prop:Pic of curve}
+\uses{prop:graded ring to curve,def:line bundles}
 The degree map $\deg\colon \Div(X) \to \Z$ induces an isomorphism $\Pic(X) \cong \Z$.
 \end{proposition}
 \begin{proof}
+\uses{prop:PID from graded ring}
 The map $\Pic(X) \to \Z$ carries $\cO_X(n)$ to $n$, so we need only check injectivity.
-This follows from the fact that for any nonzero $s \in P_1$,
-$P[s^{-1}]_0$ is a principal ideal domain.
+This follows from Proposition~\ref{prop:PID from graded ring}.
 \end{proof}
 
 \begin{lemma} \label{lem:H1 of line bundles}
-We have $H^i(X, \cO_X(n)) = 0$ for all $n \geq 0$.
+\uses{prop:graded ring to curve,def:line bundles}
+We have $H^1(X, \cO_X(n)) = 0$ for all $n \geq 0$.
 \end{lemma}
 \begin{proof}
 For any $s,t \in P_1$ which are linearly independent over $P_0$, by \eqref{eq:graded ring isom mod s} we have $P_2 = P_1 s + P_1 t$.
@@ -56,7 +91,8 @@ H^1(X, \cO_X(n)) = \frac{P[(st)^{-1}]_n}{P[s^{-1}]_n + P[t^{-1}]_n} =
 \end{proof}
 
 
-\begin{lemma} \label{lem:filtration by line bundles om}
+\begin{lemma} \label{lem:filtration by O_m}
+\uses{prop:graded ring to curve,def:line bundles}
 Every vector bundle $F$ on $X$ admits a filtration of the form
 \[
 0 = F_0 \subset \cdots \subset F_n = F
@@ -65,17 +101,20 @@ in which each successive quotient $F_i/F_{i-1}$ is isomorphic to $\cO_X(m_i)$
 for some $m_i \in \Z$.
 \end{lemma}
 \begin{proof}
-Consider the filtration in Lemma~\ref{lem:filtration by line bundles}. By
-Proposition~\ref{prop:abstract curve2}, each successive quotient is isomorphic to $\cO_X(m_i)$
+\uses{lem:filtration by line bundles,prop:Pic of curve}
+Consider a filtration as in Lemma~\ref{lem:filtration by line bundles}. By
+Proposition~\ref{prop:Pic of curve}, each successive quotient is isomorphic to $\cO_X(m_i)$
 for some $m_i \in \Z$.
 \end{proof}
 
 \begin{lemma} \label{L:rank 2 extension}
+\uses{prop:graded ring to curve,def:line bundles}
 Let $F$ be a vector bundle on $X$ admitting a filtration with successive quotients
 $\cO_X(-1), \cO_X^{\oplus n}, \cO_X(1)$ for some $n \geq 0$.
 Then $H^0(X, F) \neq 0$.
 \end{lemma}
 \begin{proof}
+\uses{lem:H1 of line bundles,prop:Pic of curve,lem:H1 of line bundles}
 Choose $s \in P_1$ nonzero and let $x \in |X|$ be the unique closed point at which $s$ vanishes. Define the bundle $H$ to fit into the commutative diagram
 \[
 \begin{tikzcd}
@@ -87,7 +126,7 @@ in which the left vertical arrow is injective with cokernel supported at $x$.
 Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes by Lemma~\ref{lem:H1 of line bundles}, $H$ admits a filtration with successive quotients $\cO_X^{\oplus (n+1)}, \cO_X(1)$.
 
 We may assume that $H^0(X, H(-1)) = 0$, as otherwise $H$ contains the subbundle $\cO_X(1)$ whose intersection with $F$ has degree $\geq 0$ and hence
-by Proposition~\ref{prop:abstract curve2} is either $\cO_X$ or $\cO_X(1)$.
+by Proposition~\ref{prop:Pic of curve} is either $\cO_X$ or $\cO_X(1)$.
 Then $H^0(X, H)$ injects into $H^0(X, H/H(-1))$, which we reinterpret as the fiber $H_x$ of $H$ at $x$.
 Using the exact sequence
 \[
@@ -107,23 +146,24 @@ then $ae_1 + be_{n+2}$ is the image in $H_x$
 of a nonzero element of $H^0(X, F)$.
 \end{proof}
 
-
-\begin{lemma} \label{lem:filtration by line bundles2}
-With notation as in Lemma~\ref{lem:filtration by line bundles}, we can further ensure that 
+\begin{lemma} \label{lem:minimal filtration}
+\uses{prop:graded ring to curve,lem:filtration by O_m}
+With notation as in Lemma~\ref{lem:filtration by O_m}, we can further ensure that 
 \[
 m_j \leq m_i+1 \qquad (1 \leq i < j \leq n).
 \]
 \end{lemma}
 \begin{proof}
+\uses{lem:subbundle slope bound,L:rank 2 extension,lem:H1 of line bundles}
 For each $i  \in \{1,\dots,n-1\}$, 
-Lemma~\ref{lem:subbundle-slope-bound}
+Lemma~\ref{lem:subbundle slope bound}
 gives a uniform upper bound on $m_1 + \cdots + m_i$
 over all filtrations as in Lemma~\ref{lem:filtration by line bundles},
 while $m_1 +\cdots + m_n = \deg(F)$.
 Consequently, we can choose such a filtration so as to minimize 
 \[
-\sum_{i=1}^n i m_i = 
-= (n+1) \left( \sum_{i=1}^n m_i \right) -\sum_{i=1}^{n-1} (m_1 + \cdots + m_n).
+\sum_{i=1}^n i m_i 
+= (n+1) \left( \sum_{i=1}^n m_i \right) -\sum_{i=1}^{n-1} (m_1 + \cdots + m_i).
 \]
 We prove that this filtration has the desired property by induction on $j-i$.
 
@@ -142,13 +182,16 @@ We next proceed to the induction step $j-i> 1$.
 Suppose by way of contradiction that this fails for some $i$.
 By the induction hypothesis, we have $m_{j-1} \leq m_i+1$ and $m_j \leq m_{j-1}+1$,
 so both of these must be equalities; in particular, $m_j = m_i + 2$.
-For $k=i+1,\dots,j-1$, the induction hypothesis yields $m_i + 1 \leq m_k \leq m_j-1$,
-so the sequence $(m_i, \dots, m_j)$ looks like $(m-1, m, \dots, m, m+1)$ for some $m$.
-That is, $F_j/F_i$ admits a filtration with successive quotients $\cO_X(m-1), \cO_X(m)^{\oplus (j-i-1)}, \cO_X(m+1)$.
+Set $m := m_i+1 = m_j-1$;
+for $k=i+1,\dots,j-1$, the induction hypothesis yields $m = m_i + 1 \leq m_k \leq m_j=1-m$,
+so $(m_i, \dots, m_j) = (m-1, m, \dots, m, m+1)$.
+That is, $(F_j/F_i)(-m)$ admits a filtration with successive quotients $\cO_X(-1), G, \cO_X(1)$
+where $G$ itself admits a filtration with all successive quotients trivial;
+by Lemma~\ref{lem:H1 of line bundles}, $G$ is itself trivial.
 By Lemma~\ref{L:rank 2 extension} again, $F_j/F_i$ admits $\cO_X(m)$ as a (not necessarily saturated) subbundle, but again this would contradict minimality.
 \end{proof}
 
-\begin{lemma} \label{lem:sequence by bounds}
+\begin{lemma} \label{lem:sequence argument}
 Let $n$ be a positive integer.
 Let $m_1,\dots,m_n$ be a sequence of integers satisfying 
 the following conditions:
@@ -168,18 +211,21 @@ We deduce that $m_n = 0$; now the induction hypothesis applies to $m_1,\dots,m_{
 \end{proof}
 
 \begin{proposition} \label{prop:semistable slope 0}
+\uses{prop:graded ring to curve,def:stable bundle}
 Every vector bundle on $X$ which is semistable of slope $0$ is trivial.
 \end{proposition}
 \begin{proof}
+\uses{lem:minimal filtration,lem:sequence argument,lem:H1 of line bundles}
 Let $F$ be a semistable vector bundle of degree $0$ and rank $n$,
-and choose a filtration as in Lemma~\ref{lem:filtration by line bundles2}.
-By Lemma~\ref{lem:sequence by bounds}, we have $m_1 = \cdots = m_n = 0$.
+and choose a filtration as in Lemma~\ref{lem:minimal filtration}.
+By Lemma~\ref{lem:sequence argument}, we have $m_1 = \cdots = m_n = 0$.
 Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes by Lemma~\ref{lem:H1 of line bundles}, it follows that $F$ is trivial.
 \end{proof}
 
 
 
-\begin{lemma} \label{lem:one-step-modification}
+\begin{lemma} \label{lem:one-step modification}
+\uses{prop:graded ring to curve,def:HN filtration}
 Let $F$ be a vector bundle on $X$ with all HN slopes in $[0,1)$. Then 
 for any closed point $x \in |X|$,
 for $j_x \colon x \to X$ the canonical inclusion,
@@ -190,6 +236,7 @@ there exist a coherent sheaf $G$ on $x$ and an exact sequence
 of coherent sheaves on $X$.
 \end{lemma}
 \begin{proof}
+\uses{prop:semistable slope 0}
 We show that for $i=1,\dots,\deg(F)$, we can find an exact sequence
 \begin{equation} \label{eq:modification}
 0 \to H_i \to F \to j_x^* G_i \to 0
@@ -204,17 +251,21 @@ We achieve the general case by applying this argument repeatedly.
 \end{proof}
 
 \begin{corollary} \label{cor:slopes to sections}
+\uses{def:HN filtration}
 Let $F$ be a nonzero vector bundle on $X$ whose HN slopes are all nonnegative.
 Then $F$ is generated by global sections and $H^1(X, F) = 0$.
 \end{corollary}
 \begin{proof}
-By replacing $F$ with the first step of its HN filtration, we may reduce to the case where $F$ is semistable. By twisting, we may further ensure that $\mu(F) \in [0,1)$. We then deduce both claims from Lemma~\ref{lem:H1 of line bundles} and  Lemma~\ref{lem:one-step-modification}.
+\uses{lem:H1 of line bundles,lem:one-step modification}
+By replacing $F$ with the first step of its HN filtration, we may reduce to the case where $F$ is semistable. By twisting, we may further ensure that $\mu(F) \in [0,1)$. We then deduce both claims from Lemma~\ref{lem:H1 of line bundles} and  Lemma~\ref{lem:one-step modification}.
 \end{proof}
 
 \begin{lemma} \label{lem:end of semistable}
+\uses{prop:graded ring to curve,def:stable bundle}
 For any semistable vector bundle $F$ on $X$, $F^\vee \otimes F$ is trivial.
 \end{lemma}
 \begin{proof}
+\uses{cor:slopes to sections,lem:map of stable,prop:semistable slope 0}
 We immediately reduce to the case where $F$ is stable with slope in $[0,1)$. In this case, suppose by way of contradiction that $F^\vee \otimes F$ is not semistable, and let $G$ be the first step of its HN filtration. Since $G \otimes G$ has slope $2\mu(G) > \mu(G)$, 
 the composition map $(F^\vee \otimes F) \otimes (F^\vee \otimes F) \to F^\vee \otimes F$
 restricts to zero on $G \otimes G$.
@@ -226,19 +277,22 @@ and hence trivial by Proposition~\ref{prop:semistable slope 0}.
 \end{proof}
 
 \begin{proposition} \label{prop:tensor product of semistable}
+\uses{prop:graded ring to curve,def:stable bundle}
 The tensor product of any two semistable vector bundles on $X$ is semistable.
 \end{proposition}
 \begin{proof}
+\uses{lem:end of semistable,lem:semistable from product}
 Let $F,G$ be two semistable vector bundles on $X$.
 By Lemma~\ref{lem:end of semistable}, 
 \[
 (F^\vee \otimes G^\vee) \otimes (F \otimes G)
 \cong (F^\vee \otimes F) \otimes (G^\vee \otimes G)
 \]
-is semistable. By Lemma~\ref{lem:semistable-from-product}, $F \otimes G$ must be semistable.
+is semistable. By Lemma~\ref{lem:semistable from product}, $F \otimes G$ must be semistable.
 \end{proof}
 
 \begin{lemma} \label{cor:split sequence in order}
+\uses{prop:graded ring to curve,def:HN filtration}
 Any exact sequence of vector bundles on $X$ of the form
 \[
 0 \to F_1 \to F \to F_2 \to 0,
@@ -251,13 +305,16 @@ Now $\Ext^1_X(F_2, F_1) = H^1(X, F_2^\vee \otimes F_1)$ which vanishes by Coroll
 \end{proof}
 
 \begin{proposition} \label{prop:decompose as stables}
+\uses{prop:graded ring to curve,def:HN filtration}
 Every vector bundle on $X$ splits (nonuniquely) as a direct sum of stable bundles. In particular, the HN filtration always splits and every semistable bundle is \emph{polystable} (i.e., a direct sum of stable bundles of the same slope).
 \end{proposition}
 \begin{proof}
+\uses{cor:split sequence in order}
 Both assertions follow directly from Lemma~\ref{cor:split sequence in order}.
 \end{proof}
 
-\begin{lemma} \label{lem:degree 1 stable2}
+\begin{lemma} \label{lem:construct semistables}
+\uses{prop:graded ring to curve,def:stable bundle}
 For $d$ a positive integer with $\dim_{P_0} P_1 > d$
 and $c \in \Z$, there exists a semistable vector bundle on $X$ of rank $d$ and degree $c$.
 \end{lemma}
@@ -265,7 +322,7 @@ and $c \in \Z$, there exists a semistable vector bundle on $X$ of rank $d$ and d
 We may assume without loss of generality that $d>1$ and $c \in \{1,\dots,d-1\}$.
 Choose $s \in P_1$ nonzero and let $x \in |X|$ be the unique closed point at which $s$ vanishes.
 Set $F := \cO_X^{\oplus d}$ and let $e_1,\dots,e_d$ be the images in $F_x$
-of the standard basis vectors of $H^0(X, F) \cong P_0^{d}$.
+of the standard basis vectors of $H^0(X, F) \cong P_0^{d}$ (Lemma~\ref{lem:H0 of line bundles}).
 The condition $\dim_{P_0} P_1 > d$ is equivalent to $\dim_{P_0} L_s \geq d$;
 consequently, we can choose elements $f_1,\dots,f_c \in L_s$
 such that $1,f_1,\dots,f_c$ are linearly independent over $P_0$.
@@ -279,15 +336,18 @@ then $G^\vee$ is semistable of degree $c$.
 \end{proof}
 
 \begin{lemma} \label{cor:unique stable}
+\uses{prop:graded ring to curve,def:stable bundle}
 For any $\lambda \in \Q$, there is at most one isomorphism class of stable vector bundles on $X$ of slope $\lambda$.
 \end{lemma}
 \begin{proof}
+\uses{prop:tensor product of semistable,lem:map of stable}
 Let $F,G$ be two such bundles. By Proposition~\ref{prop:tensor product of semistable}, $F^\vee \otimes G$ is trivial. We can thus find a nonzero morphism $f\colon 
 F \to G$, which must be an isomorphism by Lemma~\ref{lem:map of stable}.
 \end{proof}
  
 
 \begin{theorem} \label{thm:abstract classification}
+\uses{prop:graded ring to curve,def:stable bundle}
 Set
 \[
 S := \begin{cases} \Z & \mbox{in the classical case,} \\
@@ -312,8 +372,9 @@ Every vector bundle on $X$ splits (nonuniquely) as a direct sum of summands each
 \end{enumerate}
 \end{theorem}
 \begin{proof}
+\uses{lem:construct semistables,cor:unique stable,thm:artin schreier thm,lem:filtration by line bundles,lem:end of semistable,prop:tensor product of semistable,prop:decompose as stables}
 If $\dim_{P_0} P_1 = \infty$, then 
-we may deduce (a) and (b) from Lemma~\ref{lem:degree 1 stable2} and Lemma~\ref{cor:unique stable}. Otherwise, by Theorem~\ref{thm:artin-schreier} we may argue as follows.
+we may deduce (a) and (b) from Lemma~\ref{lem:construct semistables} and Lemma~\ref{cor:unique stable}. Otherwise, by Theorem~\ref{thm:artin schreier thm} we may argue as follows.
 \begin{itemize}
 \item 
 In the classical case, $P = P_0[x,y]$
@@ -322,7 +383,7 @@ Hence any exact sequence of the form
 \[
 0 \to \cO_X \to F \to \cO_X(1) \to 0 
 \]
-splits, as then does any filtration as in Lemma~\ref{lem:filtration by line bundles2}, proving (a).
+splits, as then does any filtration as in Lemma~\ref{lem:minimal filtration}, proving (a).
 From this, (b) is obvious.
 \item
 In the twistor case, by identifying $P \otimes_{P_0} P_0(\sqrt{-1})$ with $P_0(\sqrt{-1})[x^2,xy,y^2]$ and applying the classical case, we see that $S \subseteq \tfrac{1}{2}\Z$.

@@ -1,36 +1,40 @@
 \section{Abstract complete curves and vector bundles}
 
-\begin{definition} \label{def:vector-bundle}
+\begin{definition} \label{def:vector bundles}
 A \emph{vector bundle} on a scheme $X$ is a quasicoherent sheaf $F$ such that for every morphism 
 $i \colon \Spec R \to X$, $\Gamma(X, i^* F)$ is a finite projective $R$-module. 
 \end{definition}
 
-\begin{definition} \label{def:abstract-complete-curve}
+\begin{definition} \label{def:abstract curve}
 By an \emph{abstract curve}, we mean a connected, separated, regular $1$-dimensional Noetherian scheme $X$. In other words, $X$ is a connected separated scheme which is covered by open subspaces which are the spectra of Dedekind domains.
+\end{definition}
 
+\begin{definition} \label{def:saturation}
+\uses{def:abstract curve,def:vector bundles}
+Let $F \subseteq G$ be an inclusion of vector bundles on an abstract curve $X$.
+Then there is a unique intermediate bundle $F'$ such that $\rank(F) = \rank(F')$ and $G/F'$ is a vector bundle, called the \emph{saturation} of $F$ in $G$.
+\end{definition}
+
+
+\begin{definition} \label{def:abstract complete curve}
+\uses{def:abstract curve}
 By an \emph{abstract complete curve}, we mean an abstract complete curve
 together with a \emph{degree} function from closed points of $X$ to positive integers with the property that the induced linear map $\deg\colon \Div(X) \to \Z$ is zero on all principal divisors.
 \end{definition}
 
-
 In the following lemmas, let $X$ denote an abstract complete curve.
 
-
-\begin{definition}
-\uses{def:abstract-complete-curve}
+\begin{definition} \label{def:degree map}
+\uses{def:abstract complete curve,def:vector bundles}
 Since the degree map $\Div(X) \to \Z$ vanishes on principal divisors, it induces a map $\Pic(X) \to \Z$
 which we use to define a \emph{degree} homomorphism $\deg\colon K_0(X) \to \Z$.
-\end{definition}
 
-\begin{definition}
-\uses{def:abstract-complete-curve,def:vector-bundle}
-Let $F \subseteq G$ be an inclusion of vector bundles on $X$.
-Then there is a unique intermediate bundle $F'$ such that $\rank(F) = \rank(F')$ and $G/F'$ is a vector bundle, called the \emph{saturation} of $F$ in $G$.
-We then have $\deg(F) \leq \deg(F')$ with equality if and only if $F' = F$.
+If $F \subseteq F'$ is an inclusion of vector bundles of the same rank, then
+$\deg(F) \leq \deg(F')$ with equality if and only if $F' = F$.
 \end{definition}
 
 \begin{lemma} \label{lem:filtration by line bundles}
-\uses{def:abstract-complete-curve,def:vector-bundle}
+\uses{def:abstract complete curve,def:vector bundles}
 Every vector bundle $F$ on $X$ admits a filtration of the form
 \[
 0 = F_0 \subset \cdots \subset F_n = F
@@ -38,14 +42,16 @@ Every vector bundle $F$ on $X$ admits a filtration of the form
 in which $F_i/F_{i-1}$ is a vector bundle of rank $1$ for $i=1,\dots,n$.
 \end{lemma}
 \begin{proof}
+\uses{def:saturation}
 We proceed by induction on $\rank(F)$, the case of rank 0 serving as a trivial base case.
-For the induction step, use the ampleness of $\cO_X(1)$ to construct a surjection $\cO_X^{\oplus d} \to F(m)$ for some positive integers $d$ and $m$. In particular, there exists a nonzero (hence injective) map $\cO_X(m) \to F$ for some integer $m$; let $F_1$ be the saturation of the image of this map. 
+For the induction step, pick a nonempty open affine subspace $U$ of $X$, let $Z$ be the reduced divisor $X \setminus U$, and choose a finite set of generators of $\Gamma(U, F)$ as a module over $\Gamma(U, \cO)$; these generators can be viewed as elements of $F(mZ)$ for some nonnegative integer $m$. We thus have a surjection $\cO_X^{\oplus d} \to F(mZ)$ for some positive integer $d$. In particular, there exists a nonzero (hence injective) map $\cO_X(mZ) \to F$;
+choose one such map and let $F_1$ be the saturation of the image of this map. 
 We then apply the induction hypothesis to $F/F_1$ to conclude.
 \end{proof}
 
 
-\begin{definition} \label{def:slope-vector-bundle}
-\uses{def:abstract-complete-curve,def:vector-bundle}
+\begin{definition} \label{def:slope of vector bundle}
+\uses{def:abstract complete curve,def:vector bundles}
 Let $F$ be a nonzero vector bundle on $X$.
 We define the \emph{slope} of $F$ as 
 \[
@@ -56,12 +62,21 @@ The bundle $F$ is \emph{semistable} if there is no nonzero subbundle $G$ of $F$ 
 The bundle $F$ is \emph{polystable} if it is a direct sum of stable vector bundles, all of the same slope.
 \end{definition}
 
+\begin{definition} \label{def:stable bundle}
+\uses{def:slope of vector bundle}
+Let $F$ be a nonzero vector bundle on $X$.
+The bundle $F$ is \emph{stable} if there is no nonzero proper subbundle $G$ of $F$ with $\mu(G) \geq \mu(F)$.
+The bundle $F$ is \emph{semistable} if there is no nonzero subbundle $G$ of $F$ with $\mu(G) > \mu(F)$.
+The bundle $F$ is \emph{polystable} if it is a direct sum of stable vector bundles, all of the same slope.
+\end{definition}
+
 \begin{lemma} \label{lem:map of stable}
-\uses{def:slope-vector-bundle}
+\uses{def:stable bundle}
 Let $F,G$ be two stable vector bundles on $X$ of the same slope $\mu$.
 Then any nonzero morphism $f\colon F \to G$ is an isomorphism.
 \end{lemma}
 \begin{proof}
+\uses{def:saturation}
 Let $H \neq 0$ be the image of $f$.
 Let $H'$ be the saturation of $H$ in $G$. 
 Then
@@ -71,8 +86,8 @@ Then
 so all of these inequalities must be equalities. Since $G$ is stable this means that $H = H' = G$, and since $F$ is stable the kernel of $f$ must be zero.
 \end{proof}
 
-\begin{proposition} \label{prop:HN filtration}
-\uses{def:slope-vector-bundle}
+\begin{proposition} \label{prop:construct HN filtration}
+\uses{def:stable bundle}
 Every vector bundle $F$ on $X$ admits a unique filtration
 \[
 0 = F_0 \subset F_1 \subset \cdots \subset F_l = F
@@ -83,18 +98,19 @@ in which each successive quotient $F_i/F_{i-1}$ is a semistable vector bundle of
 %See for example \cite[Th\'eor\`eme~5.5.2]{FaFoCfv}.
 \end{proof}
 
-\begin{definition} \label{def:HN-filtration}
-\uses{def:slope-vector-bundle}
-For $F$ a vector bundle on $X$, the filtration on $F$ described in Proposition~\ref{prop:HN filtration}
+\begin{definition} \label{def:HN filtration}
+\uses{prop:construct HN filtration}
+For $F$ a vector bundle on $X$, the filtration on $F$ described in Proposition~\ref{prop:construct HN filtration}
 is called the  \emph{Harder--Narasimhan filtration}, or \emph{HN filtration}, of $F$.
 We define the multiset of \emph{HN slopes} of $F$ to consist of $\mu_i = \deg(F_i/F_{i-1})/\rank(F_i/F_{i-1})$ with multiplicity $\rank(F_i/F_{i-1})$.
 \end{definition}
 
-\begin{lemma} \label{lem:semistable-from-product}
-\uses{def:HN-filtration}
+\begin{lemma} \label{lem:semistable from product}
+\uses{def:stable bundle}
 Let $F,G$ be two nonzero vector bundles on $X$. If $F \otimes G$ is semistable, then so are $F$ and $G$.
 \end{lemma}
 \begin{proof}
+\uses{def:HN filtration}
 Let $F_1, G_1$ be the first steps in the respective HN filtrations of $F$ and $G$;
 then $\mu(F_1) \geq \mu(F)$, $\mu(G_1) \geq \mu(G)$. 
 Then $F_1 \otimes G_1$ is a nonzero subbundle of $F \otimes G$ of slope $\mu(F_1)+\mu(G_1)$; since
@@ -105,11 +121,11 @@ $F \otimes G$ is semistable, we must have
 We conclude that $\mu(F_1) = \mu(F), \mu(G_1) = \mu(G)$ and so $F$ and $G$ are semistable.
 \end{proof}
 
-\begin{lemma} \label{lem:subbundle-slope-bound}
-\uses{def:HN-filtration}
+\begin{lemma} \label{lem:subbundle slope bound}
+\uses{def:HN filtration}
 Let $F$ be a vector bundle on $X$ with HN slopes $\mu_1 \geq \cdots \geq \mu_n$.
-Then for $i=0,\dots,n$, the degrees of rank-$i$ subbundles of $F$ are bounded above
-by $\mu_1 + \cdots + \mu_i$.
+Then for $i=0,\dots,n$, the degree of any rank-$i$ subbundle of $F$ is at most 
+$\mu_1 + \cdots + \mu_i$.
 \end{lemma}
 \begin{proof}
 We prove the claim by induction on $n = \rank(F)$.
