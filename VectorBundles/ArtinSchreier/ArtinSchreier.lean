@@ -17,6 +17,7 @@ public import Mathlib.FieldTheory.IsRealClosed.Basic
 public import Mathlib.FieldTheory.KummerExtension
 public import Mathlib.FieldTheory.Minpoly.Basic
 public import Mathlib.FieldTheory.Perfect
+public import Mathlib.FieldTheory.PrimitiveElement
 public import Mathlib.FieldTheory.PurelyInseparable.Exponent
 public import Mathlib.FieldTheory.PurelyInseparable.PerfectClosure
 public import Mathlib.FieldTheory.PurelyInseparable.Tower
@@ -30,7 +31,13 @@ lemma finite_inseparable_extension_intermediate_small (F : Type) (K : Type)
   [IsPurelyInseparable F K] (h: Module.finrank F K > 1) :
   ∃ E: IntermediateField F K, Module.finrank F E = ringChar F := by
   have hx : ∃ x : K, x ∉ (algebraMap F K).range := by
-    sorry
+    by_contra
+    push Not at this
+    have _ : F = K := by
+      sorry
+    have _ : Module.finrank F K = 1 := by
+      sorry
+    simp_all
   obtain ⟨x, hx⟩ := hx
   let e := IsPurelyInseparable.elemExponent F x
   have _ : e > 0 := by
@@ -44,16 +51,19 @@ lemma finite_inseparable_extension_intermediate (F : Type) (K : Type)
   [IsPurelyInseparable F K] (h: Module.finrank F K > 1) :
   ∃ E : IntermediateField F K, Module.finrank E K = ringChar F := by
   let p := ringChar F
-  let d := Module.finrank F K
-  have hn : ∃ n: ℕ, p^(n+1) = d := by
+  have hn : ∃ n: ℕ, p^(n+1) = Module.finrank F K := by
     sorry
   obtain ⟨n, _⟩ := hn
   induction n with
   | zero =>
       sorry
-  | succ n _ =>
+  | succ n hn =>
       have hE: ∃ E: IntermediateField F K, Module.finrank F E = ringChar F :=
         finite_inseparable_extension_intermediate_small F K h
+      obtain ⟨E, _⟩ := hE
+      apply hn
+      have _ : Module.finrank E K = p^(n+1) := by
+        sorry
       sorry
 
 lemma quadratic_algebraic_closure_no_i (F : Type) (K : Type)
@@ -193,7 +203,7 @@ lemma finite_algebraic_closure_separable (F : Type) (K : Type)
 
 lemma finite_algebraic_closure_with_i (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
-  (h : ∃ (i : F), i^2 = -1) : IsAlgClosed F := by
+  (h : ∃ (i : K), i^2 = -1 ∧ i ∈ (algebraMap F K).range) : IsAlgClosed F := by
 
   by_contra
   have hgal: IsGalois F K :=
@@ -230,9 +240,12 @@ lemma finite_algebraic_closure_with_i (F : Type) (K : Type)
   sorry
   -- apply quadratic_algebraic_closure_no_i F₁ K
 
-lemma RealClosed_from_quadratic (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosed K]
-  (h : Module.finrank F K = 2) (h1 : ¬ ∃ i : F, i^2 = -1) : IsRealClosed F := by
+lemma RealClosed_from_quadratic (F : Type) (K : Type) (L: Type)
+  [Field F] [Field K] [Field L] [Algebra F K] [Algebra K L] [Algebra F L] [FiniteDimensional F K] [IsAlgClosed K]
+  (h1 : ¬ ∃ i : K, i^2 = -1 ∧ i ∈ (algebraMap F K).range)
+  (h2 : ∃ i : L, IntermediateField.adjoin F {x : L | x = i} = K)
+  -- (h : Module.finrank F K = 2)
+  : IsRealClosed F := by
 
   have have_i: ∃ i : K, i^2 = -1 := by
     apply IsAlgClosed.exists_pow_nat_eq
@@ -267,8 +280,13 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type)
       grind
     obtain ⟨a,b⟩ := h2
     apply h1
-    use a
-    grind
+    use (algebraMap F K) a
+    constructor
+    · symm
+      have _ : (algebraMap F K) (-1 : F) = (algebraMap F K) (a * a) :=
+        congr_arg (algebraMap F K) b
+      grind
+    · exact RingHom.mem_range_self (algebraMap F K) a
   have hR: CharZero F := by
     exact CharP.charP_to_charZero F
   refine
@@ -286,26 +304,54 @@ theorem artin_schreier_thm (F : Type) (K : Type)
   [IsAlgClosure F K] : IsAlgClosed F ∨ IsRealClosed F := by
   have _: IsAlgClosed K := by
     exact IsAlgClosure.isAlgClosed F
-  if hi: ∃ i : F, i^2 = -1 then
+  have have_i: ∃ i : K, i^2 = -1 := by
+    apply IsAlgClosed.exists_pow_nat_eq
+    simp -- to prove 0 < 2
+  obtain ⟨i, hi⟩ := have_i
+  if hF : i ∈ (algebraMap F K).range then
     left
-    apply finite_algebraic_closure_with_i F K hi
+    apply finite_algebraic_closure_with_i F K
+    use i
   else
     right
-    have have_i: ∃ i : K, i^2 = -1 := by
-      apply IsAlgClosed.exists_pow_nat_eq
-      simp -- to prove 0 < 2
-    obtain ⟨i, hi⟩ := have_i
-    let S : Set K := {x : K | x = i}
+    let S : Set K := {x | x = i}
     let F₁ := IntermediateField.adjoin F S
-    have hFi: ∃ i₁ : F₁, ⇑(algebraMap F₁ K) i₁ = i := by
-      sorry
-    obtain ⟨i₁, hi₁⟩ := hFi
-    have hACF: IsAlgClosed F₁ := by
-      have _: IsAlgClosure F₁ K := by
-        sorry
+    have _ : i ∈ F₁ := by
+      have hiS: i ∈ S := by
+        exact Set.mem_setOf.mpr rfl
+      exact IntermediateField.mem_adjoin_of_mem F hiS
+    let iota₁ := algebraMap F₁ K
+    have _: IsAlgClosure F₁ K := by
+      apply IsAlgClosure.ofAlgebraic F₁ K
+    have _: IsAlgClosed F₁ := by
       apply finite_algebraic_closure_with_i F₁ K
-      use i₁
-      sorry
-    apply RealClosed_from_quadratic F F₁
-    sorry -- [F₁:F] = 2
-    grind
+      use i
+      constructor
+      · apply hi
+      · have _ : F₁ = Set.range iota₁ := by
+          apply IntermediateField.adjoin_eq_range_algebraMap_adjoin
+        simp_all
+    apply RealClosed_from_quadratic F F₁ K
+    · let iota := algebraMap F F₁
+      by_contra
+      obtain ⟨i₁, h22, _⟩ := this
+      let i₂ := iota₁ i₁
+      have _ : iota₁ (i₁ ^ 2) = iota₁ (-1 : F₁) :=
+        congr_arg iota₁ h22
+      have _ : i₂ = i ∨ i₂ = -i := by
+        grind
+      have _ : algebraMap F K = iota₁.comp iota := by
+        exact IsScalarTower.algebraMap_eq F (↥F₁) K
+      have h33 : i₂ ∈ (iota₁.comp iota).range := by
+        have h : Subring.map iota₁ iota.range = (iota₁.comp iota).range :=
+          RingHom.map_range iota₁ iota
+        have h1 : i₁ ∈ iota.range := by
+          (expose_names; exact RingHom.mem_range.mpr right)
+        subst i₂
+        have _ : iota₁ i₁ ∈ Subring.map iota₁ iota.range := by
+          grind [Subring.mem_map]
+        grind
+      have _ : -i₂ ∈ (algebraMap F K).range := by
+        exact Subring.neg_mem (algebraMap F K).range h33
+      grind
+    · use i
