@@ -1,5 +1,16 @@
 \section{The Artin--Schreier theorem}
 
+\begin{lemma} \label{lem:degree 1 extension}
+\lean{finite_extension_degree_one}
+\leanok
+Let $K/F$ be a finite extension of fields. 
+Then $[K:F] > 1$ if and only if the map $F \to K$ fails to be surjective.
+\end{lemma}
+\begin{proof}
+\leanok
+Apply the rank-nullity theorem for a surjection of $F$-vector spaces.
+\end{proof}
+
 \begin{lemma} \label{lem:p-power extensions}
 \lean{X_pow_sub_C_irreducible_iff_of_prime_pow}
 \mathlibok
@@ -30,6 +41,8 @@ Let $K/F$ be a nontrivial finite purely inseparable extension of fields of chara
 Then there exists an intermediate field $E$ with $[E:F] = p$.
 \end{lemma}
 \begin{proof}
+\uses{lem:degree 1 extension}
+\leanok	
 For every $x \in K$, there exists a smallest nonnegative integer $e$ such that $x^{p^e} \in K$,
 which is zero if and only if $x \in F$. Since $K \neq F$, we can find $x$ for which $e > 0$.
 Set $a = x^{p^{e-1}}$ and $E := F(a)$; then $[E:F] = p$.
@@ -43,6 +56,7 @@ Then there exists an intermediate field $E$ with $[K:E] = p$.
 \end{lemma}
 \begin{proof}
 \uses{lem:finite inseparable tower step 1}
+\leanok
 We induct on the degree of $K/F$. If this degree is $p$ we take $E = F$.
 Otherwise, by Lemma~\ref{lem:finite inseparable tower step 1} we can find an intermediate field
 $F_1$ with $[F:F_1] = p$ and hence $[K:F_1] > 1$. By the induction hypothesis, there exists an intermediate field $E$ between $F_1$ and $K$ with $[K:E] = p$.
@@ -207,6 +221,7 @@ Then $F$ is algebraically closed or real closed.
 \end{theorem}
 \begin{proof}
 \uses{lem:ac-finite-alg-closure-with-i,lem:real closed condition}
+\leanok
 Let $K$ be an algebraic closure of $F$.
 Let $i \in K$ be a square root of $-1$.
 By Lemma~\ref{lem:ac-finite-alg-closure-with-i}, $F(i)$ is algebraically closed;

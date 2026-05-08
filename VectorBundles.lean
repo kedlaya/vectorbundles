@@ -2,3 +2,4 @@
 -- Import modules here that should be built as part of the library.
 import «VectorBundles».Basic
 import VectorBundles.ArtinSchreier.ArtinSchreier
+import VectorBundles.ArtinSchreier.ArtinSchreier2
