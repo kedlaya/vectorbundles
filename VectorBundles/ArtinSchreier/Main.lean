@@ -1,12 +1,14 @@
 module
 
 public import Mathlib.Algebra.Algebra.Basic
+public import Mathlib.Algebra.BigOperators.Finprod
 public import Mathlib.Algebra.CharP.Defs
 public import Mathlib.Algebra.Group.Subgroup.ZPowers.Basic
 public import Mathlib.Algebra.Polynomial.Splits
 public import Mathlib.Algebra.Ring.Semireal.Defs
 public import Mathlib.Algebra.Ring.SumsOfSquares
 public import Mathlib.Algebra.CharP.Frobenius
+public import Mathlib.Data.Finset.Defs
 public import Mathlib.Data.Nat.Prime.Defs
 public import Mathlib.FieldTheory.AlgebraicClosure
 public import Mathlib.FieldTheory.Galois.Basic

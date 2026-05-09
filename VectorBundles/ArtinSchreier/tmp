@@ -1,0 +1,56 @@
+lemma finite_extension_degree_one (F : Type) (K : Type)
+  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] :
+  Module.finrank F K > 1 → ¬ Function.Surjective (algebraMap F K) := by
+    intro h
+    let L := IntermediateField F K
+    have h1 : Module.finrank F (⊤ : L) = 1 ↔ (⊤ : L) = (⊥: L) := by
+      exact IntermediateField.finrank_eq_one_iff
+    have h2 : (⊥: L) ≃ₐ[F] F := by
+      exact IntermediateField.botEquiv F K
+    have h3 : (⊤: L) ≃ₐ[F] K := by
+      exact IntermediateField.topEquiv
+    simp_all
+    by_contra
+    unfold Function.Surjective at this
+    sorry
+
+
+    let L := IntermediateField F K
+    have h1 : Module.finrank F (⊤ : L) = 1 ↔ (⊤ : L) = (⊥: L) := by
+      exact IntermediateField.finrank_eq_one_iff
+    have h2 : (⊥: L) ≃ₐ[F] F := by
+      exact IntermediateField.botEquiv F K
+    have h3 : (⊤: L) ≃ₐ[F] K := by
+      exact IntermediateField.topEquiv
+    have _ : Module.finrank F K = Module.finrank F (⊤: L) := by
+      exact Eq.symm IntermediateField.finrank_top'
+    simp_all
+    have _ : Module.finrank F (⊤: L) ≠ 1 := by
+      exact Ne.symm (Nat.ne_of_lt h)
+    simp_all
+    have _ :  Function.Surjective (algebraMap F K) → Module.finrank F K ≤ Module.finrank F F := by
+      apply?
+
+  have _ (k : ℕ): k = m → ∃ E : IntermediateField F K, Module.finrank E K = ringChar F := by
+    induction k with
+    | zero =>
+        intro hm
+        let E := (⊥ : IntermediateField F K)
+        use E
+        have _ : n = 1 := by
+          linarith
+        sorry
+    | succ m1 hm =>
+        intro m0
+        have hE: ∃ E: IntermediateField F K, Module.finrank F E = ringChar F :=
+          finite_inseparable_extension_intermediate_small F K hr
+        obtain ⟨E, _⟩ := hE
+        have _ : m1 = m → ∃ E₁: IntermediateField E K, Module.finrank E₁ K = ringChar F := by
+          sorry
+        -- intro E₁
+        let bot := (⊥ : IntermediateField F K)
+        have _ : bot.relfinrank E * Module.finrank E K  = Module.finrank bot K := by
+          apply IntermediateField.relfinrank_mul_finrank_top
+          exact OrderBot.bot_le E
+        sorry
+

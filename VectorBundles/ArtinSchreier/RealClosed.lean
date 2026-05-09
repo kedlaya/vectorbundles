@@ -32,8 +32,6 @@ public import Mathlib.RingTheory.UniqueFactorizationDomain.Defs
 
 public import VectorBundles.ArtinSchreier.ArtinSchreier
 
-@[expose] public section
-
 lemma odd_irreducible_factor {F : Type} [Field F] (f : Polynomial F)
   (h : Odd f.natDegree) : ∃ (g : Polynomial F), Irreducible g ∧ g ∣ f ∧ Odd g.natDegree := by
     have _ : f ≠ 0 := by
@@ -108,6 +106,12 @@ lemma tmp2 (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] (a b: F) :
   (algebraMap F K) a + (algebraMap F K) b = (algebraMap F K) (a + b) := by
   grind
 
+lemma tmp3 (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] (a: F) :
+  - (algebraMap F K) a = (algebraMap F K) (-a) := by
+  grind
+
+@[expose] public section
+
 lemma RealClosed_from_quadratic (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosed K]
   (h1 : ∀ i : F, i^2 ≠ -1)
@@ -150,8 +154,12 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type)
         grind [FaithfulSMul.algebraMap_injective F K]
       have _ : i = iota c := by
         grind
+      have _ : iota (c^2) = iota (-1) := by
+        grind
+      have _ : c^2 = -1 := by
+        apply FaithfulSMul.algebraMap_injective F K
+        (expose_names; exact (Con.ker_rel (algebraMap F K)).mp h_5)
       simp_all
-      sorry
 
   have h_alg : ∀ (a b : F), (iota a) * (iota b) = iota (a*b) := by grind
 
@@ -165,7 +173,13 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type)
       let have_ab := real_imag
       specialize have_ab u
       obtain ⟨a, b, hab⟩ := have_ab
+      have _ : - iota (b * b) = iota (- (b*b)) :=
+        tmp3 F K (b * b)
       have _ : iota (a*a) - iota (b * b) = iota (a^2 - b^2) := by
+        have _ : iota (a*a) - iota (b * b) = iota (a*a) + iota (- (b*b) ) := by
+          grind
+        have _ : iota (a*a) - iota (b * b) = iota (a*a - (b*b) ) := by
+          sorry
         sorry
       have _ : 2 * iota a * iota b = iota (2 * a * b) := by
         have _ : iota a * iota b = iota (a * b) := by
