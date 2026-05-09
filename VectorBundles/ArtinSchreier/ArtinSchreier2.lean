@@ -104,13 +104,18 @@ lemma quadratic_algebraic_closure_no_i (F : Type) (K : Type)
           exact Polynomial.isRoot_of_mem_roots hx
         have _ : x^4 = b^4 := by
           subst g
-          expose_names
-          unfold Polynomial.aeval at h_6
-          unfold Polynomial.aevalEquiv at h_6
+          rename_i heval
+          unfold Polynomial.aeval at heval
+          unfold Polynomial.aevalEquiv at heval
           sorry
         let y := x/b
         let g1 := Polynomial.X ^ 4 - Polynomial.C (1 : K)
         have _ : y ∈ g1.roots := by
+          refine (Polynomial.mem_roots_sub_C ?_).mpr ?_
+          refine Polynomial.natDegree_pos_iff_degree_pos.mp ?_
+          have _ : ((Polynomial.X :Polynomial K)  ^ 4).natDegree = 4 := by
+            apply Polynomial.natDegree_X_pow
+          grind
           sorry
         have hy : y = 1 ∨ y = -1 ∨ y = (algebraMap F K) i ∨ y = - (algebraMap F K) i := by
           sorry
@@ -132,25 +137,7 @@ lemma quadratic_algebraic_closure_no_i (F : Type) (K : Type)
         grind
       have hspl : f_K.Splits := by
         exact Normal.splits' b
-      have _ : ∃ (r1 r2 : K), f_K = (Polynomial.X - Polynomial.C r1) *
-        (Polynomial.X - Polynomial.C r2) := by
-        have _ : ∀ x : K, Polynomial.eval x f_K = (Multiset.map (fun (x_1 : K) => x - x_1) f_K.roots).prod := by
-          -- refine Polynomial.Splits.eval_eq_prod_roots_of_monic
-          sorry
-        sorry
-      let S := {x : K | x = b ∨ x = (algebraMap F K) i*b ∨ x = -b ∨ x = -(algebraMap F K) i*b}
-      have _ : ∀ (x : K), Polynomial.aeval x f = 0 → x ∈ S := by
-        intro x hx
-        have hx1 : Polynomial.aeval x g = 0 := by
-          exact Polynomial.aeval_eq_zero_of_dvd_aeval_eq_zero hdiv hx
-        have _ : x^4 = iota a := by
-          unfold Polynomial.aeval at hx1
-          simp_all
-          subst g
-          unfold Polynomial.aevalEquiv at hx1
-          simp_all
-          grind
-        sorry
+
       sorry
   unfold IsSquare
   obtain ⟨c, hc⟩ := hc
@@ -244,13 +231,15 @@ lemma finite_algebraic_closure_with_i (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
   (h : ∃ (i : K), i^2 = -1 ∧ i ∈ (algebraMap F K).range) : IsAlgClosed F := by
 
+  obtain ⟨i, h1, h2⟩ := h
   by_contra
   have hgal: IsGalois F K :=
     finite_algebraic_closure_separable F K
   let G := K ≃ₐ[F] K
   let d := Nat.card G
+  have _ : d = Module.finrank F K := by
+    apply IsGaloisGroup.card_eq_finrank
   have hd : 1 < d := by
-    -- apply IsGaloisGroup.card_eq_finrank
     sorry
   let p := Nat.minFac d
   have hp : Nat.Prime p := by
@@ -271,125 +260,13 @@ lemma finite_algebraic_closure_with_i (F : Type) (K : Type)
     finite_algebraic_closure_separable F₁ K
   have hp2: p = 2 :=
     finite_algebraic_closure_cyclic_quadratic F₁ K p hp hrank hgal1
+  have hfin: Module.finrank F₁ K = 2 := by
+    sorry
+  have hq : (∃ i : F₁, i ^ 2 = -1) → Module.finrank F₁ K = 2 → ∀ (a : ↥F₁), IsSquare a := by
+    apply quadratic_algebraic_closure_no_i F₁ K
+  have _ : ∀ a : F₁, IsSquare a := by
+    sorry
   have ha: ∃ a : F₁, ¬ IsSquare a := by
     sorry
   obtain ⟨a, ha⟩ := ha
-  have hfin: Module.finrank F₁ K = 2 := by
-    sorry
   sorry
-  -- apply quadratic_algebraic_closure_no_i F₁ K
-
-lemma RealClosed_from_quadratic (F : Type) (K : Type) (L: Type)
-  [Field F] [Field K] [Field L] [Algebra F K] [Algebra K L] [Algebra F L] [FiniteDimensional F K] [IsAlgClosed K]
-  (h1 : ¬ ∃ i : K, i^2 = -1 ∧ i ∈ (algebraMap F K).range)
-  (h2 : ∃ i : L, i^2 = -1 ∧ IntermediateField.adjoin F {x : L | x = i} = K)
-  : IsRealClosed F := by
-
-  have have_i: ∃ i : K, i^2 = -1 := by
-    apply IsAlgClosed.exists_pow_nat_eq
-    simp -- to prove 0 < 2
-  obtain ⟨i, hi⟩ := have_i
-
-  have semi: IsSemireal F := by
-    have hs: ∀ x : F, ∀ y : F, ∃ z : F, x^2 + y^2 = z^2 := by
-      intro x y
-      have have_u: ∃ u : K, u^2 = ⇑(algebraMap F K) x + i * ⇑(algebraMap F K) y := by
-        sorry
-      obtain ⟨u, hu⟩ := have_u
-      have have_ab: ∃ a : F, ∃ b : F, u = ⇑(algebraMap F K) a + i * ⇑(algebraMap F K) b := by
-        sorry
-      obtain ⟨a, b, hab⟩ := have_ab
-      use a^2 + b^2
-      sorry
-    have hssq: ∀ x : F, IsSumSq x → IsSquare x := by
-      intro x hx
-      induction hx with
-      | zero => simp
-      | sq_add y _ hz =>
-          rcases hz with ⟨z, hz⟩
-          unfold IsSquare
-          subst hz
-          obtain ⟨r, hr⟩ := hs y z
-          use r
-          grind
-    rw [isSemireal_iff_not_isSumSq_neg_one]
-    by_contra
-    have h2 : IsSquare (-1 : F) := by
-      grind
-    obtain ⟨a,b⟩ := h2
-    apply h1
-    use (algebraMap F K) a
-    constructor
-    · symm
-      have _ : (algebraMap F K) (-1 : F) = (algebraMap F K) (a * a) :=
-        congr_arg (algebraMap F K) b
-      grind
-    · exact RingHom.mem_range_self (algebraMap F K) a
-  have hR: CharZero F := by
-    exact CharP.charP_to_charZero F
-  refine
-    { toIsSemireal := semi, isSquare_or_isSquare_neg := ?_, exists_isRoot_of_odd_natDegree := ?_ }
-  -- ∀ (x : F), IsSquare x ∨ IsSquare (-x)
-  sorry
-  -- ∀ {f : Polynomial F}, Odd f.natDegree → ∃ x, f.IsRoot x
-  intro f
-  let p := f.roots
-  let G := K ≃ₐ[F] K
-  sorry
-
-theorem artin_schreier_thm (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
-  [IsAlgClosure F K] : IsAlgClosed F ∨ IsRealClosed F := by
-  have _: IsAlgClosed K := by
-    exact IsAlgClosure.isAlgClosed F
-  have have_i: ∃ i : K, i^2 = -1 := by
-    apply IsAlgClosed.exists_pow_nat_eq
-    simp -- to prove 0 < 2
-  obtain ⟨i, hi⟩ := have_i
-  if hF : i ∈ (algebraMap F K).range then
-    left
-    apply finite_algebraic_closure_with_i F K
-    use i
-  else
-    right
-    let S : Set K := {x | x = i}
-    let F₁ := IntermediateField.adjoin F S
-    have _ : i ∈ F₁ := by
-      have hiS: i ∈ S := by
-        exact Set.mem_setOf.mpr rfl
-      exact IntermediateField.mem_adjoin_of_mem F hiS
-    let iota₁ := algebraMap F₁ K
-    have _: IsAlgClosure F₁ K := by
-      apply IsAlgClosure.ofAlgebraic F₁ K
-    have _: IsAlgClosed F₁ := by
-      apply finite_algebraic_closure_with_i F₁ K
-      use i
-      constructor
-      · apply hi
-      · have _ : F₁ = Set.range iota₁ := by
-          apply IntermediateField.adjoin_eq_range_algebraMap_adjoin
-        simp_all
-    apply RealClosed_from_quadratic F F₁ K
-    · let iota := algebraMap F F₁
-      by_contra
-      obtain ⟨i₁, h22, _⟩ := this
-      let i₂ := iota₁ i₁
-      have _ : iota₁ (i₁ ^ 2) = iota₁ (-1 : F₁) :=
-        congr_arg iota₁ h22
-      have _ : i₂ = i ∨ i₂ = -i := by
-        grind
-      have _ : algebraMap F K = iota₁.comp iota := by
-        exact IsScalarTower.algebraMap_eq F (↥F₁) K
-      have h33 : i₂ ∈ (iota₁.comp iota).range := by
-        have h : Subring.map iota₁ iota.range = (iota₁.comp iota).range :=
-          RingHom.map_range iota₁ iota
-        have h1 : i₁ ∈ iota.range := by
-          (expose_names; exact RingHom.mem_range.mpr right)
-        subst i₂
-        have _ : iota₁ i₁ ∈ Subring.map iota₁ iota.range := by
-          grind [Subring.mem_map]
-        grind
-      have _ : -i₂ ∈ (algebraMap F K).range := by
-        exact Subring.neg_mem (algebraMap F K).range h33
-      grind
-    · use i

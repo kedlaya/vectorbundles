@@ -206,10 +206,15 @@ Let $i \in K$ be a square root of $-1$.
 The sum of any two squares in $F$ is a square: for $a,b \in F$, we can choose $u \in K$ with $u^2 = a+bi$, and then $\Norm_{K/F}(u)^2 = \Norm_{K/F}(a+bi) = a^2+b^2$.
 Since $-1$ is not a square in $F$, it follows that $F$ is real.
 
-If $x \in F$ is not a square, then $K=F(x^{1/2})$; by Kummer theory, $-1$ and $x$ belong to the same square class, and so $x^{1/2}/i \in F$ squares to $-x$.
+For $x \in F$, we can find $y =a+bi \in K$ with $y^2 = x$. Equating coefficients of $1$ and $i$ yields
+\[
+a^2- b^2 = x, \qquad 2ab = 0.
+\]
+Hence either $a=0$ and $-x = b^2$, or $b=0$ and $x=a^2$.
 
-Finally, since $F$ is real, it is of characteristic 0, so $K/F$ is a Galois extension.
-For any polynomial $f(x)$ of odd degree over $F$, the Galois group of $K/F$ acts on the roots of $f$ with orbits of order 1 or 2, so there must be a fixed point; hence $f$ has a root in $F$.
+Finally, adjoining to $F$ an irreducible polynomial of degree $d$ generates a subfield of $K$
+of degree $d \leq [K:F] = 2$. If $f$ is a polynomial of odd degree, its irreducible factors all
+have degrees 1 or 2, so the degrees cannot all be even; hence $f$ has a root in $F$.
 \end{proof}
 
 \begin{theorem} \label{thm:artin schreier thm}
