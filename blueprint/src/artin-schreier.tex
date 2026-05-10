@@ -1,4 +1,4 @@
-\section{The Artin--Schreier theorem}
+\section{Lemmas from field theory}
 
 \begin{lemma} \label{lem:degree 1 extension}
 \lean{finite_extension_degree_one}
@@ -33,7 +33,38 @@ Let $K/F$ be a Galois extension of degree $p$.
 Then $K \cong F[x]/(x^p-x-a)$ for some $a \in F$.
 \end{proposition}
 \begin{proof}
-To be filled in.
+Let $g \in \Gal(K/F)$ be a generator.
+Since $K/F$ is separable, the trace map $K \to F$ is nonzero;
+we can thus choose $y \in K$ with 
+\[
+1 = \Trace_{K/F}(y) = y + g(y) + \cdots + g^{p-1}(y).
+\]
+Set
+\[
+z := -\frac{1}{\Trace_{K/F}(y)} \left( g(y) + 2g^2(y) + \cdots + (p-1) g^{p-1}(y) \right);
+\]
+then $g(z) - z = 1$, and so $z^p-z$ is fixed by $g$. Set $a := z^p - z$;
+the isomorphism in question now carries $z$ to the class of $x$.
+\end{proof}
+
+\begin{lemma} \label{lem:nonsquare in quadratic extension}
+\lean{nonsquare_in_quadratic_extension}
+\leanok
+Let $K/F$ be a quadratic extension of fields of characteristic $\neq 2$.
+Then there exists $a \in F$ which is not a square.
+\end{lemma}
+\begin{proof}
+\leanok
+Apply Kummer theory to write $K \cong F[x]/(x^2-a)$ for some $a \in F$.
+This gives the desired element.
+\end{proof}
+
+\begin{lemma} \label{lem:trivial absolute Galois group}
+\lean{trivial_absolute_galois_group}
+\leanok
+Let $F$ be a field admitting an algebraic closure $F$ such that $F/K$ is separable with trivial Galois group. Then $F$ is algebraically closed.
+\end{lemma}
+\begin{proof}
 \end{proof}
 
 \begin{lemma} \label{lem:finite inseparable tower step 1}
@@ -63,6 +94,8 @@ We induct on the degree of $K/F$. If this degree is $p$ we take $E = F$.
 Otherwise, by Lemma~\ref{lem:finite inseparable tower step 1} we can find an intermediate field
 $F_1$ with $[F:F_1] = p$ and hence $[K:F_1] > 1$. By the induction hypothesis, there exists an intermediate field $E$ between $F_1$ and $K$ with $[K:E] = p$.
 \end{proof}
+
+\section{The Artin--Schreier theorem}
 
 \begin{lemma} \label{lem:squares in quadratic closure}
 \lean{quadratic_algebraic_closure_no_i}
@@ -121,15 +154,18 @@ However, the degree of any subfield must divide $[K:F] = p$, a contradiction.
 Let $F$ be a field containing a square root of $-1$ and admitting a finite separable extension $K$ which is algebraically closed. Then $F$ is algebraically closed.
 \end{lemma}
 \begin{proof}
-\uses{lem:ac-quadratic,lem:squares in quadratic closure,lem:cyclic-p-nonzero}
+\uses{lem:ac-quadratic,lem:squares in quadratic closure,lem:cyclic-p-nonzero,lem:nonsquare in quadratic extension,lem:trivial absolute Galois group}
 The extension $K/F$ is normal, and by hypothesis it is separable, so it is Galois; let $G$ be the Galois group. 
-If $K \neq F$, then for any prime factor $p$ of $[L:K]$, by Cauchy's theorem 
+If $G$ is trivial, then $F$ is algebraically closed by Lemma~\ref{lem:trivial absolute Galois group}.
+Otherwise, for any prime factor $p$ of $[L:K]$, by Cauchy's theorem 
 $G$ contains a nontrivial cyclic subgroup of prime order $p$, whose fixed field is a subfield $E$ of $K$ containing $F$.
 Applying Lemma~\ref{lem:ac-quadratic} to $K/E$ yields $p=2$.
 
 By Lemma~\ref{lem:cyclic-p-nonzero}, $F$ is not of characteristic $2$.
-We can thus write $K = F[x]/(x^2-a)$ for some $a \in F$ not a perfect square,
-but by Lemma~\ref{lem:squares in quadratic closure} no such $a$ exists.
+By Lemma~\ref{lem:nonsquare in quadratic extension}, we can find $a \in F$ which is not a square;
+since $F$ contains a square root of $-1$, $-a$ is not a square either. 
+However, this contradicts
+Lemma~\ref{lem:squares in quadratic closure}.
 \end{proof}
 
 \begin{lemma} \label{lem:ac-finite-insep-alg-closure-with-i}
