@@ -49,7 +49,16 @@ theorem artin_schreier_thm (F : Type) (K : Type)
   if hF : i ∈ (algebraMap F K).range then
     left
     apply finite_algebraic_closure_with_i F K
-    use i
+    have hj : ∃ j : F, (algebraMap F K) j = i := by
+      exact Set.mem_range.mp hF
+    obtain ⟨j, hj⟩ := hj
+    have _ : j^2 = -1 := by
+      have _ : Function.Injective (algebraMap F K) := by
+        exact FaithfulSMul.algebraMap_injective F K
+      have _ : (algebraMap F K) (j^2) = (algebraMap F K) (-1) := by
+        simp_all
+      grind
+    use j
   else
     right
     let S : Set K := {x | x = i}
@@ -63,12 +72,16 @@ theorem artin_schreier_thm (F : Type) (K : Type)
       apply IsAlgClosure.ofAlgebraic F₁ K
     have _: IsAlgClosed F₁ := by
       apply finite_algebraic_closure_with_i F₁ K
-      use i
-      constructor
-      · apply hi
-      · have _ : F₁ = Set.range iota₁ := by
-          apply IntermediateField.adjoin_eq_range_algebraMap_adjoin
-        simp_all
+      have hj : ∃ j : F₁, iota₁ j = i := by
+        (expose_names; exact CanLift.prf i h_1)
+      obtain ⟨j, hj⟩ := hj
+      have _ : j^2 = -1 := by
+        have _ : Function.Injective iota₁ := by
+          exact FaithfulSMul.algebraMap_injective (↥F₁) K
+        have _ : iota₁ (j^2) = iota₁ (-1) := by
+          simp_all
+        grind
+      use j
     have hF1 : ∀ x : K, x ∈ (algebraMap F₁ K).range := by
       have _ : ∀ x : K, (minpoly F₁ x).degree = 1 := by
         intro x

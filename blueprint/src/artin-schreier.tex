@@ -26,6 +26,8 @@ In Mathlib.
 \end{proof}
 
 \begin{proposition} \label{prop:artin schreier extensions}
+\lean{cyclic_char_p_as_artin_schreier}
+\leanok
 Let $F$ be a field of prime characteristic $p$.
 Let $K/F$ be a Galois extension of degree $p$.
 Then $K \cong F[x]/(x^p-x-a)$ for some $a \in F$.
@@ -62,7 +64,7 @@ Otherwise, by Lemma~\ref{lem:finite inseparable tower step 1} we can find an int
 $F_1$ with $[F:F_1] = p$ and hence $[K:F_1] > 1$. By the induction hypothesis, there exists an intermediate field $E$ between $F_1$ and $K$ with $[K:E] = p$.
 \end{proof}
 
-\begin{lemma} \label{lem:ac-quadratic-adjoins-i}
+\begin{lemma} \label{lem:squares in quadratic closure}
 \lean{quadratic_algebraic_closure_no_i}
 \leanok
 Let $F$ be a field.
@@ -119,7 +121,7 @@ However, the degree of any subfield must divide $[K:F] = p$, a contradiction.
 Let $F$ be a field containing a square root of $-1$ and admitting a finite separable extension $K$ which is algebraically closed. Then $F$ is algebraically closed.
 \end{lemma}
 \begin{proof}
-\uses{lem:ac-quadratic,lem:ac-quadratic-adjoins-i,lem:cyclic-p-nonzero}
+\uses{lem:ac-quadratic,lem:squares in quadratic closure,lem:cyclic-p-nonzero}
 The extension $K/F$ is normal, and by hypothesis it is separable, so it is Galois; let $G$ be the Galois group. 
 If $K \neq F$, then for any prime factor $p$ of $[L:K]$, by Cauchy's theorem 
 $G$ contains a nontrivial cyclic subgroup of prime order $p$, whose fixed field is a subfield $E$ of $K$ containing $F$.
@@ -127,15 +129,16 @@ Applying Lemma~\ref{lem:ac-quadratic} to $K/E$ yields $p=2$.
 
 By Lemma~\ref{lem:cyclic-p-nonzero}, $F$ is not of characteristic $2$.
 We can thus write $K = F[x]/(x^2-a)$ for some $a \in F$ not a perfect square,
-but by Lemma~\ref{lem:ac-quadratic-adjoins-i} no such $a$ exists.
+but by Lemma~\ref{lem:squares in quadratic closure} no such $a$ exists.
 \end{proof}
 
 \begin{lemma} \label{lem:ac-finite-insep-alg-closure-with-i}
 \lean{finite_inseparable_algebraic_closure_with_i}
+\leanok
 Let $F$ be a field containing a square root of $-1$ and admitting a finite purely inseparable extension $K$ which is algebraically closed. Then $F$ is algebraically closed.
 \end{lemma}
 \begin{proof}
-\uses{lem:p-power extensions,lem:finite inseparable tower step 2,lem:ac-quadratic-adjoins-i}
+\uses{lem:p-power extensions,lem:finite inseparable tower step 2,lem:squares in quadratic closure}
 Let $p$ be the characteristic of $F$. If $p = 0$, then there are no nontrivial finite purely inseparable extensions of $F$, so we must have $F = K$.
 
 Suppose that $p > 2$. If $F$ is not perfect, we can find $a \in F$ which is not a $p$-th power.
@@ -145,7 +148,7 @@ The polynomial $x^{p^n} - a$ is irreducible over $F$ by Lemma~\ref{lem:p-power e
 However, the degree of the minimal polynomial is at most $[K:F] < p^n$, a contradiction.
 
 Suppose that $p=2$. If $K \neq F$, then by Lemma~\ref{lem:finite inseparable tower step 2}
-there exists an intermediate field $E$ with $[K:E] = 2$. By Lemma~\ref{lem:ac-quadratic-adjoins-i},
+there exists an intermediate field $E$ with $[K:E] = 2$. By Lemma~\ref{lem:squares in quadratic closure},
 every element of $E$ is a perfect square, so $E$ is perfect; however, this contradicts the existence of the nontrivial purely inseparable extension $K/E$.
 \end{proof}
 
@@ -155,33 +158,13 @@ every element of $E$ is a perfect square, so $E$ is perfect; however, this contr
 Let $F$ be a field containing a square root of $-1$ and admitting a finite algebraically closed extension. Then $F$ is algebraically closed.
 \end{lemma}
 \begin{proof}
-\uses{lem:finite-ac-extension-separable,lem:ac-quadratic,lem:ac-quadratic-adjoins-i,lem:ac-finite-sep-alg-closure-with-i}
-Let $E$ be the perfect closure of $F$ within $K$. Then $K/E$ is separable, so by 
-Lemma~\ref{lem:ac-finite-sep-alg-closure-with-i} $E$ is algebraically closed (i.e., $E=K$).
-Meanwhile, $E/F$ is purely inseparable, so by Lemma~\ref{lem:ac-finite-insep-alg-closure-with-i}, $F$ is algebraically closed.
+\uses{lem:ac-finite-insep-alg-closure-with-i,lem:ac-finite-sep-alg-closure-with-i}
+\mathlibok
+Let $E$ be the separable closure of $F$ within $K$. Then $K/E$ is purely inseparable, so by Lemma~\ref{lem:ac-finite-insep-alg-closure-with-i}, $E$ is algebraically closed.
+Meanwhile, $E/F$ is 
+separable, so by 
+Lemma~\ref{lem:ac-finite-sep-alg-closure-with-i} $F$ is algebraically closed.
 \end{proof}
-
-\begin{lemma} \label{lem:finite-ac-extension-separable}
-\lean{finite_algebraic_closure_separable}
-\leanok
-Let $F$ be a field which admits a finite algebraically closed extension $K$.
-Then $K/F$ is a separable extension.
-\end{lemma}
-\begin{proof}
-\uses{lem:ac-quadratic-adjoins-i,lem:p-power extensions}
-It suffices to check that $F$ is perfect; this is automatic if $F$ has characteristic $0$, so we
-may assume that $F$ is of characteristic $p>0$, and then the perfect condition can be interpreted as the condition that every element of $F$ is a $p$-th power.
-
-Suppose that $p=2$. Since $1 = -1$ in $F$, $F$ contains a square root of $-1$.
-We can thus apply Lemma~\ref{lem:ac-quadratic-adjoins-i} to see that every element of $F$ is a perfect square, so $F$ is perfect.
-
-Suppose that $p > 2$. If $F$ is not perfect, we can find $a \in F$ which is not a $p$-th power.
-Choose a positive integer $n$ with $p^n > [K:F]$,
-then choose $b \in K$ with $b^{p^n} = a$.
-The polynomial $x^{p^n} - a$ is irreducible over $F$ by Lemma~\ref{lem:p-power extensions} and has $b$ as a root, so it is the minimal polynomial of $b$ over $F$.
-However, the degree of the minimal polynomial is at most $[K:F] < p^n$, a contradiction.
-\end{proof}
-
 
 \begin{definition} \label{def:real closed field}
 \lean{IsRealClosed}
@@ -203,16 +186,15 @@ Let $F$ be a field. Suppose that $-1$ is not a square in $F$
 and the field $K := F[x]/(x^2+1)$ is algebraically closed. Then $F$ is real closed.
 \end{lemma}
 \begin{proof}
-\uses{lem:ac-quadratic-adjoins-i}
-
+\uses{lem:squares in quadratic closure}
 Let $i \in K$ be a square root of $-1$.
 The sum of any two squares in $F$ is a square: for $a,b \in F$, we can choose $u \in K$ with $u^2 = a+bi$, and then $\Norm_{K/F}(u)^2 = \Norm_{K/F}(a+bi) = a^2+b^2$.
 Consequently, any sum of squares in $F$ is a square.
 Since $-1$ is not a square in $F$, it follows that $F$ is real.
 
-For $x \in F$, Lemma~\ref{lem:ac-quadratic-adjoins-i} implies that one of $x$ or $-x$ is a square in $F$.
+For $x \in F$, Lemma~\ref{lem:squares in quadratic closure} implies that one of $x$ or $-x$ is a square in $F$.
 
-Finally, adjoining to $F$ an irreducible polynomial of degree $d$ generates a subfield of $K$
+Finally, adjoining to $F$ a root of an irreducible polynomial of degree $d$ generates a subfield of $K$
 of degree $d \leq [K:F] = 2$. If $f$ is a polynomial of odd degree, its irreducible factors all
 have degrees 1 or 2, so the degrees cannot all be even; hence $f$ has a root in $F$.
 \end{proof}
