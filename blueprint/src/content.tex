@@ -126,13 +126,13 @@ There do not exist indices $1 \leq i < j \leq n$ such that for some $m \in \Z$,
 \uses{lem:subbundle slope bound,L:rank 2 extension,lem:H1 of line bundles}
 For each $i  \in \{1,\dots,n-1\}$, 
 Lemma~\ref{lem:subbundle slope bound}
-gives a uniform upper bound on $m_1 + \cdots + m_i$
-over all filtrations as in Lemma~\ref{lem:filtration by line bundles},
-while $m_1 +\cdots + m_n = \deg(F)$.
+imposes a uniform upper bound on $m_1 + \cdots + m_i$
+on all filtrations as in Lemma~\ref{lem:filtration by line bundles};
+meanwhile, all such filtrations satisfy $m_1 +\cdots + m_n = \deg(F)$.
 Consequently, we can choose such a filtration so as to minimize 
 \[
 \sum_{i=1}^n i m_i 
-= (n+1) \left( \sum_{i=1}^n m_i \right) -\sum_{i=1}^{n-1} (m_1 + \cdots + m_i).
+= (n+1) \deg(F) -\sum_{i=1}^{n-1} (m_1 + \cdots + m_i).
 \]
 We prove that this filtration has the desired property.
 
@@ -211,11 +211,15 @@ We deduce that $m_n = 0$; now the induction hypothesis applies to $m_1,\dots,m_{
 Every vector bundle on $X$ which is semistable of slope $0$ is trivial.
 \end{proposition}
 \begin{proof}
-\uses{lem:minimal filtration,lem:sequence argument1,lem:sequence argument2,lem:H1 of line bundles}
-Let $F$ be a semistable vector bundle of degree $0$ and rank $n$,
-and choose a filtration as in Lemma~\ref{lem:minimal filtration}.
+\uses{lem:minimal filtration,lem:sequence argument1,lem:sequence argument2,lem:H1 of line bundles,lem:subbundle slope bound,lem:filtration by O_m}
+Let $F$ be a semistable vector bundle of degree $0$ and rank $n$.
+For any filtration as in Lemma~\ref{lem:filtration by O_m},
+by Lemma~\ref{lem:subbundle slope bound} we have
+we then have  $m_1 + \cdots + m_i = 0$ for $i=1,\dots,n-1$
+and $m_1 + \cdots + m_n = \deg(F) = 0$.
+Now choose such a filtration as in Lemma~\ref{lem:minimal filtration};
 By Lemma~\ref{lem:sequence argument1} and 
-Lemma~\ref{lem:sequence argument}, we have $m_1 = \cdots = m_n = 0$.
+Lemma~\ref{lem:sequence argument2}, we have $m_1 = \cdots = m_n = 0$.
 Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes by Lemma~\ref{lem:H1 of line bundles}, it follows that $F$ is trivial.
 \end{proof}
 
@@ -384,7 +388,7 @@ splits, as then does any filtration as in Lemma~\ref{lem:minimal filtration}, pr
 From this, (b) is obvious.
 \item
 In the twistor case, by identifying $P \otimes_{P_0} P_0(\sqrt{-1})$ with $P_0(\sqrt{-1})[x^2,xy,y^2]$ and applying the classical case, we see that $S \subseteq \tfrac{1}{2}\Z$.
-We deduce (a) and (b) by applying Lemma~\ref{lem:degree 1 stable2} to construct a stable bundle of rank $2$ and degree $1$, then applying Lemma~\ref{cor:unique stable} for uniqueness.
+We deduce (a) and (b) by applying Lemma~\ref{lem:contruct semistables} to construct a stable bundle of rank $2$ and degree $1$, then applying Lemma~\ref{cor:unique stable} for uniqueness.
 \end{itemize}
 
 Given (a)--(b), (c) follows from Lemma~\ref{lem:map of stable} and Lemma~\ref{lem:end of semistable}; 

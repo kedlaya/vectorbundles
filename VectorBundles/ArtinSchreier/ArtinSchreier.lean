@@ -3,8 +3,6 @@ module
 public import Mathlib.Algebra.Algebra.Basic
 public import Mathlib.Algebra.CharP.Defs
 public import Mathlib.Algebra.Group.Subgroup.ZPowers.Basic
-public import Mathlib.Algebra.Ring.Semireal.Defs
-public import Mathlib.Algebra.Ring.SumsOfSquares
 public import Mathlib.Algebra.CharP.Frobenius
 public import Mathlib.Data.Nat.Prime.Defs
 public import Mathlib.FieldTheory.AlgebraicClosure
@@ -14,16 +12,12 @@ public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 public import Mathlib.FieldTheory.IntermediateField.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
-public import Mathlib.FieldTheory.IsRealClosed.Basic
-public import Mathlib.FieldTheory.KummerExtension
-public import Mathlib.FieldTheory.KummerPolynomial
 public import Mathlib.FieldTheory.Minpoly.Basic
 public import Mathlib.FieldTheory.Perfect
 public import Mathlib.FieldTheory.PrimitiveElement
 public import Mathlib.FieldTheory.PurelyInseparable.Exponent
 public import Mathlib.FieldTheory.PurelyInseparable.PerfectClosure
 public import Mathlib.FieldTheory.PurelyInseparable.Tower
-public import Mathlib.FieldTheory.SplittingField.Construction
 public import Mathlib.FieldTheory.Relrank
 public import Mathlib.GroupTheory.Perm.Cycle.Type
 

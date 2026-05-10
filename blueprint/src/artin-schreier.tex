@@ -65,19 +65,20 @@ $F_1$ with $[F:F_1] = p$ and hence $[K:F_1] > 1$. By the induction hypothesis, t
 \begin{lemma} \label{lem:ac-quadratic-adjoins-i}
 \lean{quadratic_algebraic_closure_no_i}
 \leanok
-Let $F$ be a field. Suppose that $F$ contains a square root $i$ of $-1$
-and there exists a quadratic extension $K/F$ which is algebraically closed.
-Then every element of $F$ is a square.
+Let $F$ be a field.
+Suppose that  there exists a quadratic extension $K/F$ which is algebraically closed.
+Then for each $a \in F$, one of $a$ or $-a$ is a square in $F$.
 \end{lemma}
 \begin{proof}
-Let $a$ be an arbitrary element of $F$.
-Since $K$ is algebraically closed, it contains some $b$ for which $b^4 = a$.
+\leanok
+Since $K$ is algebraically closed, it contains some $i$ for which $i^2 = - 1$
+and some $b$ for which $b^4 = a$.
 The minimal polynomial $f(x)$ of $b$ over $F$ has degree dividing $[K:F] = 2$.
-If this degree is 1, then $f(x) = x-b$ and clearly $b^2 \in F$.
+If this degree is 1, then $f(x) = x-b$ and $b^2 \in F$ is a square root of $a$.
 If the degree is 2, then $f(0)$ is the product of $b$ and another root of $f(x)$,
-which must be one of $ib, -b, -bi$.
-Hence $f(0) \in F$ equals $b^2$ times an element of $F$, so $b^2 \in F$.
-In both cases, $b^2$ is a square root of $a$ in $F$.
+which must be either $-b$ or one of $ib, -bi$.
+In the former case, $f(0) = -b^2$ is a square root of $a$ in $F$.
+In the latter case, $f(0) = \pm i b^2$ is a square root of $-a$ in $F$.
 \end{proof}
 
 \begin{lemma} \label{lem:cyclic-p-nonzero}
@@ -202,15 +203,14 @@ Let $F$ be a field. Suppose that $-1$ is not a square in $F$
 and the field $K := F[x]/(x^2+1)$ is algebraically closed. Then $F$ is real closed.
 \end{lemma}
 \begin{proof}
+\uses{lem:ac-quadratic-adjoins-i}
+
 Let $i \in K$ be a square root of $-1$.
 The sum of any two squares in $F$ is a square: for $a,b \in F$, we can choose $u \in K$ with $u^2 = a+bi$, and then $\Norm_{K/F}(u)^2 = \Norm_{K/F}(a+bi) = a^2+b^2$.
+Consequently, any sum of squares in $F$ is a square.
 Since $-1$ is not a square in $F$, it follows that $F$ is real.
 
-For $x \in F$, we can find $y =a+bi \in K$ with $y^2 = x$. Equating coefficients of $1$ and $i$ yields
-\[
-a^2- b^2 = x, \qquad 2ab = 0.
-\]
-Hence either $a=0$ and $-x = b^2$, or $b=0$ and $x=a^2$.
+For $x \in F$, Lemma~\ref{lem:ac-quadratic-adjoins-i} implies that one of $x$ or $-x$ is a square in $F$.
 
 Finally, adjoining to $F$ an irreducible polynomial of degree $d$ generates a subfield of $K$
 of degree $d \leq [K:F] = 2$. If $f$ is a polynomial of odd degree, its irreducible factors all
