@@ -1,121 +1,27 @@
-\section{Lemmas from field theory}
-
-\begin{lemma} \label{lem:degree 1 extension}
-\lean{finite_extension_degree_one}
-\leanok
-Let $K/F$ be a finite extension of fields. 
-Then $[K:F] > 1$ if and only if the map $F \to K$ fails to be surjective.
-\end{lemma}
-\begin{proof}
-\leanok
-Apply the rank-nullity theorem for a surjection of $F$-vector spaces.
-\end{proof}
-
-\begin{lemma} \label{lem:p-power extensions}
-\lean{X_pow_sub_C_irreducible_iff_of_prime_pow}
-\mathlibok
-Let $F$ be a field.
-Let $p$ be an odd prime.
-Then for $a \in F$, $a$ is not a $p$-th power
-if and only if for every positive integer $n$, the polynomial $x^{p^n}-a$ is irreducible over $F$.
-(Note that this fails for $p=2$, for example $x^4+4 = (x^2-2x+2)(x^2+2x+2)$.)
-\end{lemma}
-\begin{proof}
-\mathlibok
-In Mathlib.
-\end{proof}
-
-\begin{proposition} \label{prop:artin schreier extensions}
-\lean{cyclic_char_p_as_artin_schreier}
-\leanok
-Let $F$ be a field of prime characteristic $p$.
-Let $K/F$ be a Galois extension of degree $p$.
-Then $K \cong F[x]/(x^p-x-a)$ for some $a \in F$.
-\end{proposition}
-\begin{proof}
-Let $g \in \Gal(K/F)$ be a generator.
-Since $K/F$ is separable, the trace map $K \to F$ is nonzero;
-we can thus choose $y \in K$ with 
-\[
-1 = \Trace_{K/F}(y) = y + g(y) + \cdots + g^{p-1}(y).
-\]
-Set
-\[
-z := -\frac{1}{\Trace_{K/F}(y)} \left( g(y) + 2g^2(y) + \cdots + (p-1) g^{p-1}(y) \right);
-\]
-then $g(z) - z = 1$, and so $z^p-z$ is fixed by $g$. Set $a := z^p - z$;
-the isomorphism in question now carries $z$ to the class of $x$.
-\end{proof}
-
-\begin{lemma} \label{lem:nonsquare in quadratic extension}
-\lean{nonsquare_in_quadratic_extension}
-\leanok
-Let $K/F$ be a quadratic extension of fields of characteristic $\neq 2$.
-Then there exists $a \in F$ which is not a square.
-\end{lemma}
-\begin{proof}
-\leanok
-Apply Kummer theory to write $K \cong F[x]/(x^2-a)$ for some $a \in F$.
-This gives the desired element.
-\end{proof}
-
-\begin{lemma} \label{lem:trivial absolute Galois group}
-\lean{trivial_absolute_galois_group}
-\leanok
-Let $F$ be a field admitting an algebraic closure $F$ such that $F/K$ is separable with trivial Galois group. Then $F$ is algebraically closed.
-\end{lemma}
-\begin{proof}
-\leanok
-\end{proof}
-
-\begin{lemma} \label{lem:finite inseparable tower step 1}
-\lean{finite_inseparable_extension_intermediate_small}
-\leanok
-Let $K/F$ be a nontrivial finite purely inseparable extension of fields of characteristic $p$.
-Then there exists an intermediate field $E$ with $[E:F] = p$.
-\end{lemma}
-\begin{proof}
-\uses{lem:degree 1 extension}
-\leanok	
-For every $x \in K$, there exists a smallest nonnegative integer $e$ such that $x^{p^e} \in K$,
-which is zero if and only if $x \in F$. Since $K \neq F$, we can find $x$ for which $e > 0$.
-Set $a = x^{p^{e-1}}$ and $E := F(a)$; then $[E:F] = p$.
-\end{proof}
-
-\begin{lemma} \label{lem:finite inseparable tower step 2}
-\lean{finite_inseparable_extension_intermediate}
-\leanok
-Let $K/F$ be a nontrivial finite purely inseparable extension of fields of characteristic $p$.
-Then there exists an intermediate field $E$ with $[K:E] = p$.
-\end{lemma}
-\begin{proof}
-\uses{lem:finite inseparable tower step 1}
-\leanok
-We induct on the degree of $K/F$. If this degree is $p$ we take $E = F$.
-Otherwise, by Lemma~\ref{lem:finite inseparable tower step 1} we can find an intermediate field
-$F_1$ with $[F:F_1] = p$ and hence $[K:F_1] > 1$. By the induction hypothesis, there exists an intermediate field $E$ between $F_1$ and $K$ with $[K:E] = p$.
-\end{proof}
-
 \section{The Artin--Schreier theorem}
 
 \begin{lemma} \label{lem:squares in quadratic closure}
-\lean{quadratic_algebraic_closure_no_i}
+\lean{quadratic_algebraic_closure}
 \leanok
 Let $F$ be a field.
 Suppose that  there exists a quadratic extension $K/F$ which is algebraically closed.
-Then for each $a \in F$, one of $a$ or $-a$ is a square in $F$.
+Then for each $a,b \in F$, one of $a^2+b$ or $-b$ is a square in $F$.
 \end{lemma}
 \begin{proof}
 \leanok
-Since $K$ is algebraically closed, it contains some $i$ for which $i^2 = - 1$
-and some $b$ for which $b^4 = a$.
-The minimal polynomial $f(x)$ of $b$ over $F$ has degree dividing $[K:F] = 2$.
-If this degree is 1, then $f(x) = x-b$ and $b^2 \in F$ is a square root of $a$.
-If the degree is 2, then $f(0)$ is the product of $b$ and another root of $f(x)$,
-which must be either $-b$ or one of $ib, -bi$.
-In the former case, $f(0) = -b^2$ is a square root of $a$ in $F$.
-In the latter case, $f(0) = \pm i b^2$ is a square root of $-a$ in $F$.
+Since $K$ is algebraically closed, it contains some $c$ 
+which is a root of the polynomial $g(x) = x^4 - 2ax^2 + (a^2+b)$.
+The minimal polynomial $f(x)$ of $c$ over $F$ has degree dividing $[K:F] = 2$.
+Consequently, there exists a monic polynomial $d(x)$ of degree 2 dividing $g$:
+if $\deg(f) = 2$ we take $d=g$, while if $\deg(f) = 1$ then $f(x) = x-c$
+and we take $-b = (c^2 - a)^2$
+
+If $f$ has linear coefficient 0, then $f(x) = x^2 + t$ for some $t \in F$ and 
+$-b = (t+a)^2$. 
+Otherwise, write $g(x) = d(x) e(x)$; by comparing coefficients of $x^3$,
+then of $x$, we have $e(x) = d(-x)$ and so $a^2 + b = d(0)^2$.
 \end{proof}
+
 
 \begin{lemma} \label{lem:cyclic-p-nonzero}
 \lean{finite_algebraic_closure_cyclic_prime}
@@ -137,11 +43,11 @@ Let $F$ be a field which admits an algebraically closed extension $K$ such that 
 \end{lemma}
 \begin{proof}
 \uses{lem:cyclic-p-nonzero,lem:p-power extensions}
+\leanok
 Suppose by way of contradiction that $p \neq 2$.
 By Lemma~\ref{lem:cyclic-p-nonzero}, $F$ cannot have characteristic $p$;
 consequently, $K$ contains a primitive $p$-th root of unity $\zeta_p$.
-Since $\Q(\zeta_p)/\Q$ is Galois of degree $p-1$, $F(\zeta_p)/F$ is Galois of degree dividing $p-1$;
-but this degree must also divide $[K:F] = p$, so it is 1. That is, $\zeta_p \in F$.
+The minimal polynomial of $\zeta_p$ over $F$ has degree dividing $[K:F] = p$, but also bounded above by $p-1$ since $\zeta_p$ is a root of $(x^p-1)/(x-1)$. Hence the degree is 1, that is, $\zeta_p \in F$.
 
 By Kummer theory, $K  \cong F[x]/(x^p-a)$ for some $a \in F$. 
 Lemma~\ref{lem:p-power extensions} implies that $x^{p^2}-a$ is irreducible over $F$,
@@ -155,6 +61,7 @@ However, the degree of any subfield must divide $[K:F] = p$, a contradiction.
 Let $F$ be a field containing a square root of $-1$ and admitting a finite separable extension $K$ which is algebraically closed. Then $F$ is algebraically closed.
 \end{lemma}
 \begin{proof}
+\leanok
 \uses{lem:ac-quadratic,lem:squares in quadratic closure,lem:cyclic-p-nonzero,lem:nonsquare in quadratic extension,lem:trivial absolute Galois group}
 The extension $K/F$ is normal, and by hypothesis it is separable, so it is Galois; let $G$ be the Galois group. 
 If $G$ is trivial, then $F$ is algebraically closed by Lemma~\ref{lem:trivial absolute Galois group}.
@@ -215,6 +122,16 @@ A field $F$ is \emph{real closed} is all of the following conditions hold:
 \end{itemize}
 \end{definition}
 
+\begin{lemma} \label{lem:odd irreducible factor}
+\lean{odd_irreducible_factor}
+\leanok
+Let $F$ be a field. Then every polynomial over $F$ of odd degree has an irreducible factor of odd degree.
+\end{lemma}
+\begin{proof}
+\leanok
+In Lean.
+\end{proof}
+
 \begin{lemma} \label{lem:real closed condition}
 \lean{RealClosed_from_quadratic}
 \leanok
@@ -224,16 +141,19 @@ and the field $K := F[x]/(x^2+1)$ is algebraically closed. Then $F$ is real clos
 \end{lemma}
 \begin{proof}
 \uses{lem:squares in quadratic closure}
-Let $i \in K$ be a square root of $-1$.
-The sum of any two squares in $F$ is a square: for $a,b \in F$, we can choose $u \in K$ with $u^2 = a+bi$, and then $\Norm_{K/F}(u)^2 = \Norm_{K/F}(a+bi) = a^2+b^2$.
-Consequently, any sum of squares in $F$ is a square.
-Since $-1$ is not a square in $F$, it follows that $F$ is real.
-
+\leanok
 For $x \in F$, Lemma~\ref{lem:squares in quadratic closure} implies that one of $x$ or $-x$ is a square in $F$.
 
-Finally, adjoining to $F$ a root of an irreducible polynomial of degree $d$ generates a subfield of $K$
+Adjoining to $F$ a root of an irreducible polynomial of degree $d$ generates a subfield of $K$
 of degree $d \leq [K:F] = 2$. If $f$ is a polynomial of odd degree, its irreducible factors all
-have degrees 1 or 2, so the degrees cannot all be even; hence $f$ has a root in $F$.
+have degrees 1 or 2, but by Lemma~\ref{lem:odd irreducible factor} there must be an irreducible factor of odd degree; this must have degree 1, and its unique root is a root of $f$ in $F$.
+
+We show that the sum of any two squares in $F$ is a square.
+For $a,b \in F$, by Lemma~\ref{lem:squares in quadratic closure}, one of $a^2+b^2$ 
+or $-b^2$ is a square; the latter cannot happen with $b \neq 0$.
+By induction, it follows that any sum of squares in $F$ is a square.
+Since $-1$ is not a square in $F$, it follows that $F$ is real.
+
 \end{proof}
 
 \begin{theorem} \label{thm:artin schreier thm}

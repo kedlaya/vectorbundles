@@ -1,9 +1,77 @@
-\section{Abstract complete curves and vector bundles}
+\section{Coherent sheaves and vector bundles}
+
+Tag numbers refer to the Stacks Project.
+
+\begin{definition}
+\label{def:quasicoherent}
+\mathlibok
+(tag 01BE)
+Let $X$ be a scheme. Let $F$ be a sheaf of $\cO_X$-modules.
+We say that $F$ is \emph{quasicoherent} if for every $x \in X$,
+there exist an open neighborhood $U$ of $x$ such that $\calF|_U$ is isomorphic to the kernel
+of some morphism of $\cO_U$-modules of the form
+\[
+\bigoplus_{j \in J} \cO_U \to \bigoplus_{i \in I} \cO_U.
+\]
+\end{definition}
+
+\begin{lemma}
+Let $X$ be a scheme. Let $F$ be a sheaf of $\cO_X$-modules.
+Then $F$ is quasicoherent if and only if 
+\[
+i^* F \to \tilde{M}, \qquad M := \Gamma(U, i^* F)
+\]
+of the tilde-Gamma adjunction is an isomorphism.
+(Here $M$ is a module over the ring $R = \Gamma(X, \cO)$, and $X \cong \Spec R$.)
+\end{lemma}
+\begin{proof}
+To be added to Mathlib.
+\end{proof}
+
+\begin{lemma}
+Let $X$ be a scheme. Let $F$ be a sheaf of $\cO_X$-modules.
+Then $F$ is quasicoherent if and only if for every ring $R$ and every morphism 
+$i \colon U \to X$ with $U$ affine, the counit map
+\[
+i^* F \to \tilde{M}, \qquad M := \Gamma(U, i^* F)
+\]
+of the tilde-Gamma adjunction is an isomorphism.
+\end{lemma}
+
+\begin{definition}
+Let $X$ be a scheme. Let $F$ be a sheaf of $\cO_X$-modules.
+We say that $F$ is \emph{quasicoherent} if for every ring $R$ and every morphism 
+$i \colon U \to X$ with $U$ affine, the counit map
+\[
+i^* F \to \tilde{M}, \qquad M := \Gamma(U, i^* F)
+\]
+of the tilde-Gamma adjunction is an isomorphism.
+(Here $M$ is a module over the ring $\Gamma(U, \cO)$, and $U \cong \Spec R$.)
+\end{definition}
+
+
+\begin{definition}
+Let $X$ be a scheme. Let $F$ be a sheaf of $\cO_X$-modules.
+We say that $F$ is \emph{finitely generated} if $F$ is quasicoherent and,
+for every ring $R$ and every morphism 
+$i \colon U \to X$ with $U$ affine, the module $\Gamma(U, i^*F)$ over the ring $\Gamma(U, \cO)$ is finitely generated.
+\end{definition}
+
+\begin{lemma}
+Let $X$ be a scheme. Let $F$ be a sheaf of $\cO_X$-modules.
+Suppose that there exists an open covering of $F$ by affine subspaces $U_j$ such 
+for each $j$, writing $i_j \colon U_j \to X$ for the inclusion, the module $\Gamma(U_j, i_j^*F)$ over the ring $\Gamma(U_j, \cO)$ is finitely generated. Then $F$ is finitely generated.
+\end{lemma}
+\begin{proof}
+\end{proof}
 
 \begin{definition} \label{def:vector bundles}
 A \emph{vector bundle} on a scheme $X$ is a quasicoherent sheaf $F$ such that for every morphism 
 $i \colon \Spec R \to X$, $\Gamma(X, i^* F)$ is a finite projective $R$-module. 
 \end{definition}
+
+
+\section{Abstract complete curves and vector bundles}
 
 \begin{definition} \label{def:abstract curve}
 By an \emph{abstract curve}, we mean a connected, separated, regular $1$-dimensional Noetherian scheme $X$. In other words, $X$ is a connected separated scheme which is covered by open subspaces which are the spectra of Dedekind domains.
@@ -22,6 +90,7 @@ By an \emph{abstract complete curve}, we mean an abstract complete curve
 together with a \emph{degree} function from closed points of $X$ to positive integers with the property that the induced linear map $\deg\colon \Div(X) \to \Z$ is zero on all principal divisors.
 \end{definition}
 
+
 In the following lemmas, let $X$ denote an abstract complete curve.
 
 \begin{definition} \label{def:degree map}
@@ -33,22 +102,57 @@ If $F \subseteq F'$ is an inclusion of vector bundles of the same rank, then
 $\deg(F) \leq \deg(F')$ with equality if and only if $F' = F$.
 \end{definition}
 
-\begin{lemma} \label{lem:filtration by line bundles}
+\begin{definition} \label{def:complete flag}
 \uses{def:abstract complete curve,def:vector bundles}
-Every vector bundle $F$ on $X$ admits a filtration of the form
+For $F$ a vector bundle on $X$, a \emph{complete flag} on $F$ is a filtration of the form
 \[
 0 = F_0 \subset \cdots \subset F_n = F
 \]
 in which $F_i/F_{i-1}$ is a vector bundle of rank $1$ for $i=1,\dots,n$.
+Given a complete flag, define the \emph{slope sequence} as the tuple $(\deg(F_i/F_{i-1}))_{i=1}^n \in \Z^n$.
+\end{definition}
+
+\begin{lemma} \label{lem:filtration by line bundles}
+\uses{def:complete flag}
+Every vector bundle on $X$ admits a complete flag.
 \end{lemma}
 \begin{proof}
 \uses{def:saturation}
-We proceed by induction on $\rank(F)$, the case of rank 0 serving as a trivial base case.
+We prove the theorem for a general vector bundle $F$ of rank $n$ by induction on $n$,
+the case of rank 0 serving as a trivial base case.
 For the induction step, pick a nonempty open affine subspace $U$ of $X$, let $Z$ be the reduced divisor $X \setminus U$, and choose a finite set of generators of $\Gamma(U, F)$ as a module over $\Gamma(U, \cO)$; these generators can be viewed as elements of $F(mZ)$ for some nonnegative integer $m$. We thus have a surjection $\cO_X^{\oplus d} \to F(mZ)$ for some positive integer $d$. In particular, there exists a nonzero (hence injective) map $\cO_X(mZ) \to F$;
 choose one such map and let $F_1$ be the saturation of the image of this map. 
 We then apply the induction hypothesis to $F/F_1$ to conclude.
 \end{proof}
 
+\begin{lemma} \label{lem:subbundle slope bound}
+Let $F$ be a vector bundle on $X$ admitting a complete flag with degree sequence $m_1,\dots,m_n$.
+Then for $i=0,\dots,n$, the degree of any rank-$i$ subbundle of $F$ is at most 
+\[
+\max\{m_{j_1} + \cdots + m_{j_i}\colon 1 \leq j_1,\dots,j_i \leq n\}.
+\]
+\end{lemma}
+\begin{proof}
+We prove the claim by strong induction on $n+i$.
+By hypothesis, there exists a subbundle $F_1 \subseteq F$ of degree $m_1$
+such that $F_1/F$ admits a complete flag with degree sequence $m_2,\dots,m_n$.
+Let $G$ be an arbitrary subbundle of $F$ of rank $i$; we then have an exact sequence
+\[
+0 \to G \cap F_1 \to G \to G/(G \cap F_1) \to 0.
+\]
+If $G \cap F_1$ is zero,
+then $G \cong/(G \cap F_1)$ is isomorphic to a subbundle of $F/F_1$ of rank $i$
+and hence has degree at most
+$\max\{m_{j_1} + \cdots + m_{j_i}: 2 \leq j_1,\dots,j_i \leq n\}$.
+nonzero, then it is a line bundle of degree at most $m_1$,
+while $G/(G \cap F_1)$ is a subbundle of $F/F_1$ of rank $i-1$ and hence has degree at most
+$\max\{m_{j_1} + \cdots + m_{j_{i-1}}: 2 \leq j_1,\dots,j_{i-1} \leq n\}$.
+In both cases,
+\[
+\deg(G) = \deg(G \cap F_1) + \deg(G/(G \cap F_1))
+\]
+satisfies the indicated bound.
+\end{proof}
 
 \begin{definition} \label{def:slope of vector bundle}
 \uses{def:abstract complete curve,def:vector bundles}
@@ -57,9 +161,6 @@ We define the \emph{slope} of $F$ as
 \[
 \mu(F) := \frac{\deg(F)}{\rank(F)}.
 \]
-The bundle $F$ is \emph{stable} if there is no nonzero proper subbundle $G$ of $F$ with $\mu(G) \geq \mu(F)$.
-The bundle $F$ is \emph{semistable} if there is no nonzero subbundle $G$ of $F$ with $\mu(G) > \mu(F)$.
-The bundle $F$ is \emph{polystable} if it is a direct sum of stable vector bundles, all of the same slope.
 \end{definition}
 
 \begin{definition} \label{def:stable bundle}
@@ -86,6 +187,179 @@ Then
 so all of these inequalities must be equalities. Since $G$ is stable this means that $H = H' = G$, and since $F$ is stable the kernel of $f$ must be zero.
 \end{proof}
 
+\begin{corollary} \label{cor:function field of curve}
+The ring $H^0(X, \cO_X)$ is a field.
+\end{corollary}
+\begin{proof}
+By Lemma~\ref{lem:map of stable}, every nonzero endomorphism of $\cO_X$ is invertible.
+\end{proof}
+
+\section{Generalized projective lines}
+
+\begin{definition}
+A \emph{generalized projective line} is an  abstract complete curve $X$ satisfying the following conditions.
+\begin{enumerate}
+\item[(a)] Every divisor of degree $0$ is principal. In other words the map $\Pic(X) \to \Z$
+is an isomorphism.
+\item[(b)] We have $H^1(X, \cO_X) = 0$. 
+\item[(c)] There exists a closed point $x \in X$ of degree $1$.
+\end{enumerate}
+\end{definition}
+
+\begin{lemma} \label{L:rank 2 extension}
+Let $X$ be a generalized projective line.
+Let $F$ be a vector bundle on $X$ admitting a complete flag with slope sequence
+$-1,0,\dots,0,1$ (with $n$ zeroes for some nonnegative integer $n$).
+Then $H^0(X, F) \neq 0$.
+\end{lemma}
+\begin{proof}
+\uses{cor:function field of curve}
+Let $E$ be the ring $H^0(X, \cO_X)$, which by Corollary~\ref{cor:function field of curve} is a curve.
+By (c), we can choose a closed point $x \in X$ of degree $1$;
+let $\kappa_x$ be the residue field of $x$.
+By (a), the ideal sheaf of $x$ is isomorphic to $\cO_X(-1)$.
+Define the bundle $H$ to fit into the commutative diagram
+\[
+\begin{tikzcd}
+0 \arrow{r} & \cO_X(-1) \arrow{r} \arrow{d} & F \arrow{r}\arrow{d} & F/\cO_X(-1) \arrow{r} \arrow[d,equal] & 0 \\
+0 \arrow{r} & \cO_X \arrow{r} & H \arrow{r} & F/\cO_X(-1) \arrow{r} & 0
+\end{tikzcd}
+\]
+in which the left vertical arrow is injective with cokernel supported at $x$.
+Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes by (b), $H$ admits a filtration with successive quotients $\cO_X^{\oplus (n+1)}, \cO_X(1)$.
+
+We may assume that $H^0(X, H(-1)) = 0$, as otherwise $H$ contains the subbundle $\cO_X(1)$ whose intersection with $F$ has degree $\geq 0$ and hence
+by (b) is either $\cO_X$ or $\cO_X(1)$.
+Then $H^0(X, H)$ injects into $H^0(X, H/H(-1))$, which we reinterpret as the fiber $H_x$ of $H$ at $x$.
+Using the exact sequence
+\[
+0 \to H^0(X, \cO_X^{\oplus n+1}) \to H^0(X, H) \to H^0(X, \cO_X(1)) \to H^1(X, \cO_X^{\oplus n}) = 0
+\]
+(where the last equality comes from (b)),
+we express the image of $H^0(X, H) \to H_x$ 
+as $E e_1 + \cdots + E e_{n+1} + \kappa_x e_{n+2}$
+for some basis $e_1,\dots,e_{n+2}$ of $H_x$ over $\kappa_x$.
+
+Meanwhile, the image of $H^0(X, F) \subset H^0(X, H)$ in $H_x$ is the intersection of the image of $H^0(X, H)$ with the image of $F_x \to H_x$; the latter is a codimension 1 subspace of $H_x$ and so can be written as the kernel of a nonzero $\kappa_x$-linear functional $\lambda\colon H_x \to \kappa_x$. 
+Define $a \in E$, $b \in \kappa_x$ by
+\[
+(a,b) := \begin{cases} (0, 1) & \lambda(e_{n+2}) = 0 \\ (1, -\lambda(e_1)/\lambda(e_{n+2})) & \lambda(e_{n+2}) \neq 0; \end{cases}
+\]
+then $ae_1 + be_{n+2}$ is the image in $H_x$
+of a nonzero element of $H^0(X, F)$.
+\end{proof}
+
+\begin{lemma} \label{lem:minimal filtration}
+Let $X$ be a generalized projective line.
+Let $F$ be a vector bundle of rank $n$ on $X$.
+Then $F$ admits a complete flag whose slope sequence $m_1,\dots,m_n$ has the following properties.
+\begin{enumerate}
+\item[(a)]
+For $i=1,\dots,n-1$, we have $m_{i+1} \leq m_{i}+1$.
+\item[(b)]
+There do not exist indices $1 \leq i < j \leq n$ such that for some $m \in \Z$,
+\[
+(m_i,\dots,m_j) = (m-1, m,\dots,m,m+1).
+\]
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+For each $i  \in \{1,\dots,n-1\}$, 
+Lemma~\ref{lem:subbundle slope bound}
+imposes a uniform upper bound on $m_1 + \cdots + m_i$,
+and in all cases $m_1 +\cdots + m_n = \deg(F)$.
+Consequently, we can choose a complete flag to minimize 
+\[
+\sum_{i=1}^n i m_i 
+= (n+1) \deg(F) -\sum_{i=1}^{n-1} (m_1 + \cdots + m_i).
+\]
+We prove that this complete flag has the desired property.
+
+Suppose by way of contradiction that (a) fails for some $i$. 
+Then $F_{i+1}/F_{i-1}(m_i-1)$ admits a complete flag with degree sequence
+$-1, m_{i+1}-m_i$; we then obtain a subbundle $(F_{i+1}/F_{i-1})(-m_i-1)$
+admitting a complete flag with degree sequence $-1, 1$.
+By Lemma~\ref{L:rank 2 extension}, $F_{i+1}/F_{i-1}(-m_i-1)$ admits $\cO_X$ as a (not necessarily saturated) subbundle; we thus obtain a new complete flag in which the terms
+$m_i, m_{i+1}$ in the degree sequence are replaced by new terms $m_i', m_{i+1}'$ with $m_i' > m_i$ and $m_i' + m_{i+1}' = m_i + m_{i+1}$, contradicting minimality.
+
+Suppose by way of contradiction that (b) fails for some $i,j$.
+Then $(F_j/F_i)(-m)$ admits a complete flag with degree sequence $-1,0,\dots,0,1$.
+By Lemma~\ref{L:rank 2 extension} again, 
+$F_j/F_i(-m)$ admits $\cO_X$ as a (not necessarily saturated) subbundle;
+we thus obtain a new complete flag in which the terms of $m_i, \dots, m_j$ in the degree sequence
+are replaced by new terms $m_i', \dots, m_j'$ with $m_i' > m_i$
+and $m_i' + \cdots + m_k' \geq m_i + \cdots + m_k$ for $k=i+1,\dots,j$,
+again contradicting minimality.
+\end{proof}
+
+\begin{lemma} \label{lem:sequence argument1}
+\leanok
+Let $n$ be a positive integer.
+Let $m_1,\dots,m_n$ be a sequence of integers satisfying 
+the following conditions.
+\begin{enumerate}
+\item[(a)]
+For $i=1,\dots,n-1$, we have $m_{i+1} \leq m_{i}+1$.
+\item[(b)]
+There do not exist indices $1 \leq i < j \leq n$ such that for some $m \in \Z$,
+\[
+(m_i,\dots,m_j) = (m-1, m,\dots,m,m+1).
+\]
+\end{enumerate}
+Then for $1 \leq i < j \leq n$,
+\[
+m_j \leq m_i+1 \qquad (1 \leq i < j \leq n).
+\]
+\end{lemma}
+\begin{proof}
+\leanok
+We prove the claim by induction on $j-i$.
+The base case $j-i=1$ is covered by (a).
+For the induction step, suppose by way of contradiction that $m_j> m_i+1$ for some $i,j$.
+Set $m := m_i + 1$.
+For $k = i+1, \dots, j-1$ we have $m_{k} \leq m_i+1$ and $m_j \leq m_{k}+1$ by the induction hypothesis;
+combining with $m_j \geq m_i + 2$ shows that both of these must be equalities
+and so $m_k = m, m_j = m+1$.
+Now $(m_i, \dots, m_j) = (m-1, m, \dots, m, m+1)$, which contradicts (b).
+\end{proof}
+
+
+\begin{lemma} \label{lem:sequence argument2}
+\leanok
+Let $n$ be a positive integer.
+Let $m_1,\dots,m_n$ be a sequence of integers satisfying 
+the following conditions:
+\begin{align}
+m_1 +\cdots+m_n = 0 & \label{eq:bound2} \\
+m_1 + \cdots + m_i \leq 0 & \quad (i=1,\dots,n-1)  \label{eq:bound1}\\
+m_j \leq m_i+1 & \quad (1 \leq i < j \leq n). \label{eq:bound3}
+\end{align}
+Then $m_1 = \cdots = m_n = 0$.
+\end{lemma}
+\begin{proof}
+\leanok
+We proceed by induction on $n$, with trivial base case $n=1$.
+For $n > 1$, note that \eqref{eq:bound1} and \eqref{eq:bound2} together imply $m_n \geq 0$.
+On the other hand, \eqref{eq:bound1} implies $\min_{i<n} \{m_i\} \leq 0$, and then \eqref{eq:bound3}
+implies $m_n \leq 1$. Finally, if $m_n = 1$, then \eqref{eq:bound3} implies that $m_i \geq 0$ for $i=1,\dots,{n-1}$, but then $m_1 + \cdots + m_n \geq 1$ in violation of \eqref{eq:bound2}.
+We deduce that $m_n = 0$; now the induction hypothesis applies to $m_1,\dots,m_{n-1}$ to finish.
+\end{proof}
+
+
+\begin{theorem}
+Let $X$ be a generalized projective line.
+Then every semistable bundle of degree $0$ on $X$ is trivial.
+\end{theorem}
+\begin{proof}
+Let $F$ be a semistable vector bundle of degree $0$ and rank $n$.
+Choose a complete flag as in Lemma~\ref{lem:minimal filtration}.
+By Lemma~\ref{lem:sequence argument1} and 
+Lemma~\ref{lem:sequence argument2}, we have $m_1 = \cdots = m_n = 0$.
+Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes by Lemma~\ref{lem:H1 of line bundles}, it follows that $F$ is trivial.
+\end{proof}
+
+\section{Harder--Narasimhan filtrations}
+
 \begin{proposition} \label{prop:construct HN filtration}
 \uses{def:stable bundle}
 Every vector bundle $F$ on $X$ admits a unique filtration
@@ -95,6 +369,14 @@ Every vector bundle $F$ on $X$ admits a unique filtration
 in which each successive quotient $F_i/F_{i-1}$ is a semistable vector bundle of some slope $\mu_i$ and $\mu_1 > \cdots > \mu_l$.
 \end{proposition}
 \begin{proof}
+We proceed by induction on $n = \rank(F)$.
+Let $S \subseteq \Q$ be the set of slopes of nonzero subbundles of $F$.
+The set $S$ is nonempty (it contains $\mu(F)$), bounded above
+(by Lemma~\ref{lem:filtration by line bundles} and Lemma~\ref{lem:subbundle slope bound}),
+and consists only of rational numbers with denominator bounded by $n$.
+It thus admits an upper bound $\mu_1$; let $F_1$ be a subbundle of $F$ of $\mu_1$ of maximal rank
+among such subbundles.
+We then continue by induction.
 %See for example \cite[Th\'eor\`eme~5.5.2]{FaFoCfv}.
 \end{proof}
 
@@ -119,30 +401,4 @@ $F \otimes G$ is semistable, we must have
 \mu(F_1)+\mu(G_1) \leq \mu(F \otimes G) = \mu(F) + \mu(G) \leq \mu(F_1) + \mu(G_1).
 \]
 We conclude that $\mu(F_1) = \mu(F), \mu(G_1) = \mu(G)$ and so $F$ and $G$ are semistable.
-\end{proof}
-
-\begin{lemma} \label{lem:subbundle slope bound}
-\uses{def:HN filtration}
-Let $F$ be a vector bundle on $X$ with HN slopes $\mu_1 \geq \cdots \geq \mu_n$.
-Then for $i=0,\dots,n$, the degree of any rank-$i$ subbundle of $F$ is at most 
-$\mu_1 + \cdots + \mu_i$.
-\end{lemma}
-\begin{proof}
-We prove the claim by induction on $n = \rank(F)$.
-Let $F_1$ be the first step in the HN filtration of $F$, and set $j = \rank(F_1)$.
-Let $G$ be a subbundle of $F$ of rank $i$; we then have an exact sequence
-\[
-0 \to G \cap F_1 \to G \to G/(G \cap F_1) \to 0.
-\]
-Set $k := \rank(G \cap F_1) \leq k$. By the semistability of $F_1$, we have
-$\deg(G \cap F_1) \leq \mu_1 + \cdots + \mu_k$;
-by the induction hypothesis, we have
-\[
-\deg(G/(G \cap F_1)) \leq \mu_{j+1} + \cdots + \mu_{j+i-k} \leq \mu_{k+1} + \cdots + \mu_i.
-\]
-Combining, we obtain
-\[
-\deg(G) = \deg(G \cap F_1) + \deg(G/(G \cap F_1)) \leq (\mu_1 + \cdots + \mu_j) + (\mu_{j+1} + \cdots + \mu_k)
-\]
-as desired.
 \end{proof}

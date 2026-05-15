@@ -21,24 +21,10 @@ public import Mathlib.FieldTheory.PurelyInseparable.Tower
 public import Mathlib.FieldTheory.Relrank
 public import Mathlib.GroupTheory.Perm.Cycle.Type
 
+public import VectorBundles.ArtinSchreier.FieldTheory
+
 @[expose] public section
 
-lemma finite_extension_degree_one (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] :
-  Module.finrank F K > 1 → ¬ Function.Surjective (algebraMap F K) := by
-    intro h
-    by_contra
-    have _ : Module.rank F F = Module.rank F K + Module.rank F (Algebra.linearMap F K).ker := by
-      apply LinearMap.rank_eq_of_surjective this
-    have _ : Module.rank F F = 1 := by
-      exact CommSemiring.rank_self F
-    have _ :  Module.rank F (Algebra.linearMap F K).ker ≥ 0 := by
-      exact Cardinal.zero_le (Module.rank F ↥(Algebra.linearMap F K).ker)
-    have _ : Module.rank F K ≤ 1 := by
-      simp_all
-    have _: Module.finrank F K ≤ 1 := by
-      (expose_names; exact Module.finrank_le_of_rank_le h_4)
-    grind
 
 lemma finite_inseparable_extension_intermediate_small (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
