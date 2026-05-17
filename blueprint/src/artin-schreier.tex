@@ -12,11 +12,9 @@ Then for each $a,b \in F$, one of $a^2+b$ or $-b$ is a square in $F$.
 Since $K$ is algebraically closed, it contains some $c$ 
 which is a root of the polynomial $g(x) = x^4 - 2ax^2 + (a^2+b)$.
 The minimal polynomial $f(x)$ of $c$ over $F$ has degree dividing $[K:F] = 2$.
-Consequently, there exists a monic polynomial $d(x)$ of degree 2 dividing $g$:
-if $\deg(f) = 2$ we take $d=g$, while if $\deg(f) = 1$ then $f(x) = x-c$
-and we take $-b = (c^2 - a)^2$
+Consequently, there must exists a monic polynomial $d(x)$ of degree 2 dividing $g$.
 
-If $f$ has linear coefficient 0, then $f(x) = x^2 + t$ for some $t \in F$ and 
+If $d$ has linear coefficient 0, then $d(x) = x^2 + t$ for some $t \in F$ and 
 $-b = (t+a)^2$. 
 Otherwise, write $g(x) = d(x) e(x)$; by comparing coefficients of $x^3$,
 then of $x$, we have $e(x) = d(-x)$ and so $a^2 + b = d(0)^2$.
@@ -30,10 +28,18 @@ Let $F$ be a field which admits an algebraically closed extension $K$ such that 
 \end{lemma}
 \begin{proof}
 \uses{prop:artin schreier extensions}
+\leanok
 If $p=0$ in $F$, then by Proposition~\ref{prop:artin schreier extensions},
 $K = F[x]/(x^p-x-a)$ for some $a \in F$. Since $K$ is algebraically closed,
-there exists $y \in K$ such that $y^p-y=ax^{p-1}$. Write $y = \sum_{i=0}^{p-1} y_i x^i$ with $y_i \in F$;
-then $y_{p-1}^{p} - y_{p-1} = a$ and so $x-y_{p-1} \in \mathbb{F}_p$, a contradiction.
+there exists $y \in K$ such that $y^p-y=ax^{p-1}$. Write $y = \sum_{i=0}^{p-1} y_i x^i$ with $y_i \in F$; then 
+\[
+y^p = \sum_{i=0}^{p-1} y_i^p (x^p)^i = \sum_{i=0}^{p-1} y_i^p (x+a)^p.
+\]
+In particular, comparing coefficients of $x^{p-1}$ in the equation
+\[
+ax^{p-1} + \sum_{i=0}^{p-1} y_i x^i = y + ax^{p-1} = y^p = \sum_{i=0}^{p-1} y_i^p (x+a)^p
+\]
+yields $y_{p-1}^{p} - y_{p-1} = a$ and so $x-y_{p-1} \in \mathbb{F}_p$, a contradiction.
 \end{proof}
 
 \begin{lemma} \label{lem:ac-quadratic}
@@ -83,6 +89,7 @@ Let $F$ be a field containing a square root of $-1$ and admitting a finite purel
 \end{lemma}
 \begin{proof}
 \uses{lem:p-power extensions,lem:finite inseparable tower step 2,lem:squares in quadratic closure}
+\leanok
 Let $p$ be the characteristic of $F$. If $p = 0$, then there are no nontrivial finite purely inseparable extensions of $F$, so we must have $F = K$.
 
 Suppose that $p > 2$. If $F$ is not perfect, we can find $a \in F$ which is not a $p$-th power.
@@ -140,7 +147,7 @@ Let $F$ be a field. Suppose that $-1$ is not a square in $F$
 and the field $K := F[x]/(x^2+1)$ is algebraically closed. Then $F$ is real closed.
 \end{lemma}
 \begin{proof}
-\uses{lem:squares in quadratic closure}
+\uses{lem:squares in quadratic closure,lem:odd irreducible factor}
 \leanok
 For $x \in F$, Lemma~\ref{lem:squares in quadratic closure} implies that one of $x$ or $-x$ is a square in $F$.
 

@@ -33,6 +33,7 @@ public import Mathlib.FieldTheory.Relrank
 public import VectorBundles.ArtinSchreier.ArtinSchreier
 public import VectorBundles.ArtinSchreier.ArtinSchreier2
 public import VectorBundles.ArtinSchreier.ArtinSchreier3
+public import VectorBundles.ArtinSchreier.ArtinSchreier4
 public import VectorBundles.ArtinSchreier.RealClosed
 
 @[expose] public section

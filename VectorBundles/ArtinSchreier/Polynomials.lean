@@ -6,6 +6,7 @@ public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 public import Mathlib.Algebra.CharP.Defs
 public import Mathlib.Algebra.Group.Defs
 public import Mathlib.Algebra.Group.Subgroup.ZPowers.Basic
+public import Mathlib.Algebra.Polynomial.Degree.Defs
 public import Mathlib.Algebra.Polynomial.Splits
 public import Mathlib.Algebra.Ring.Semireal.Defs
 public import Mathlib.Algebra.Ring.SumsOfSquares
@@ -35,6 +36,63 @@ public import Mathlib.FieldTheory.Relrank
 public import Mathlib.GroupTheory.Perm.Cycle.Type
 
 @[expose] public section
+
+lemma congruence_low_degree {F : Type} [Field F] {f g h : Polynomial F}
+  (h1 : h ∣ (f-g)) (h2 : f.natDegree < h.natDegree) (h3 : g.natDegree < h.natDegree) (h4: h.Monic) :
+    f = g := by
+    by_cases h = 0
+    · have _ : 0 ∣ (f-g) → f-g = 0 := by aesop
+      simp_all
+    rename_i h0
+    have h5 : (f-g).natDegree < h.natDegree := by
+      calc
+        (f-g).natDegree ≤ max f.natDegree g.natDegree := by apply Polynomial.natDegree_sub_le
+        _ < h.natDegree := by
+          refine max_lt_iff.mpr ?_
+          constructor
+          exact h2
+          exact h3
+    have h6 : (f-g).degree < h.degree := by
+      exact Polynomial.degree_lt_degree h5
+    have _ : (f-g) /ₘ h = 0 := (Polynomial.divByMonic_eq_zero_iff h4).mpr h6
+    have _ : (f-g) %ₘ h + h * ((f-g) /ₘ h) = f-g := Polynomial.modByMonic_add_div (f-g) h
+    have _ : (f-g) %ₘ h = 0 := by
+      exact (Polynomial.modByMonic_eq_zero_iff_dvd h4).mpr h1
+    grind
+
+lemma artin_schreier_poly {F : Type} [Field F] (p : ℕ) (c : F) (hp : Nat.Prime p):
+  let pol := Polynomial.X ^ p + (- Polynomial.X - Polynomial.C c);
+  pol.natDegree = p ∧ pol.Monic := by
+    have h1 : (- Polynomial.X - Polynomial.C c).natDegree ≤ 1 := by
+      refine (Polynomial.natDegree_sub_le_iff_right ?_).mpr ?_
+      · refine Polynomial.natDegree_neg_le_of_le ?_
+        exact Polynomial.natDegree_X_le
+      · have _ : (Polynomial.C c).natDegree = 0 := by
+          exact Polynomial.natDegree_C c
+        (expose_names; exact StrictMono.minimal_preimage_bot (fun ⦃a b⦄ a_1 => a_1) h 1)
+    have h3 : (- Polynomial.X - Polynomial.C c).natDegree < p := by
+      calc
+        (- Polynomial.X - Polynomial.C c).natDegree ≤ 1 := h1
+        _ < p := by exact Nat.Prime.one_lt hp
+    have h2   : ( Polynomial.X ^ p + (- Polynomial.X - Polynomial.C c)).natDegree ≤ p := by
+      refine Polynomial.natDegree_add_le_of_degree_le ?_ ?_
+      exact Polynomial.natDegree_X_pow_le p
+      exact Nat.le_of_succ_le h3
+    let pol := Polynomial.X ^ p + (- Polynomial.X - Polynomial.C c)
+    have h4 : pol.coeff p = 1 := by
+      have _ : (( Polynomial.X : Polynomial F)^ p ).coeff p = 1 := by
+        exact Polynomial.coeff_X_pow_self p
+      subst pol
+      have _ : (- Polynomial.X - Polynomial.C c).coeff p = 0 := by
+        refine Polynomial.coeff_eq_zero_of_natDegree_lt ?_
+        exact Nat.lt_of_lt_of_eq h3 rfl
+      simp_all
+
+    constructor
+    refine Polynomial.natDegree_eq_of_le_of_coeff_ne_zero ?_ ?_
+    exact String.Pos.Raw.mk_le_mk.mp h2
+    exact ne_zero_of_eq_one h4
+    exact Polynomial.monic_of_natDegree_le_of_coeff_eq_one p h2 h4
 
 lemma monomial_coeffs {F : Type} [Field F] (n : ℕ) (c : F) :
   (Polynomial.monomial n c).coeff n = c ∧ ∀ (m : ℕ), m ≠ n → (Polynomial.monomial n c).coeff m = 0 := by
