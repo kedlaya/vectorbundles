@@ -58,6 +58,7 @@ of a nonzero element of $H^0(X, F)$.
 \end{proof}
 
 \begin{lemma} \label{lem:minimal filtration}
+\uses{def:generalized projective line,def:complete flag}
 Let $F$ be a vector bundle of rank $n$ on $X$.
 Then $F$ admits a complete flag whose slope sequence $m_1,\dots,m_n$ has the following properties.
 \begin{enumerate}
@@ -71,7 +72,7 @@ There do not exist indices $1 \leq i < j \leq n$ such that for some $m \in \Z$,
 \end{enumerate}
 \end{lemma}
 \begin{proof}
-\uses{lem:subbundle slope bound,section from complete flag}
+\uses{lem:subbundle slope bound,L:section from complete flag}
 For each $i  \in \{1,\dots,n-1\}$, 
 Lemma~\ref{lem:subbundle slope bound}
 imposes a uniform upper bound on $m_1 + \cdots + m_i$,
@@ -154,7 +155,7 @@ We deduce that $m_n = 0$; now the induction hypothesis applies to $m_1,\dots,m_{
 \end{proof}
 
 \begin{proposition} \label{prop:semistable slope 0}
-\uses{def:generalized projective line,def:semistable bundles}
+\uses{def:generalized projective line,def:semistable bundle}
 Every semistable bundle of degree $0$ on $X$ is trivial.
 \end{proposition}
 \begin{proof}
@@ -259,7 +260,7 @@ Now $\Ext^1_X(F_2, F_1) = H^1(X, F_2^\vee \otimes F_1)$ which vanishes by Coroll
 \end{proof}
 
 \begin{proposition} \label{prop:decompose as stables}
-\uses{def:generalized projective line,def:HN filtration,def:stable bundles,def:polystable bundles}
+\uses{def:generalized projective line,def:HN filtration,def:stable bundle,def:polystable bundle}
 Every vector bundle on $X$ splits (nonuniquely) as a direct sum of stable bundles. In particular, the HN filtration always splits and every semistable bundle is polystable.
 \end{proposition}
 \begin{proof}
