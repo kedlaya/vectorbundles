@@ -1,0 +1,360 @@
+
+\section{Generalized projective lines}
+
+\begin{definition} \label{def:generalized projective line}
+\uses{def:abstract complete curve}
+A \emph{generalized projective line} is an  abstract complete curve $X$ satisfying the following conditions.
+\begin{enumerate}
+\item[(a)] Every divisor of degree $0$ is principal. In other words the map $\Pic(X) \to \Z$
+is an isomorphism.
+\item[(b)] We have $H^1(X, \cO_X) = 0$. 
+\item[(c)] There exists a closed point $x \in X$ of degree $1$.
+\end{enumerate}
+\end{definition}
+
+In the following, let $X$ be a generalized projective line.
+
+\begin{lemma} \label{L:section from complete flag}
+\uses{def:generalized projective line,def:complete flag}
+Let $F$ be a vector bundle on $X$ admitting a complete flag with slope sequence
+$-1,0,\dots,0,1$ (with $n$ zeroes for some nonnegative integer $n$).
+Then $H^0(X, F) \neq 0$.
+\end{lemma}
+\begin{proof}
+\uses{cor:function field of curve}
+Let $E$ be the ring $H^0(X, \cO_X)$, which by Corollary~\ref{cor:function field of curve} is a curve.
+By (c), we can choose a closed point $x \in X$ of degree $1$;
+let $\kappa_x$ be the residue field of $x$.
+By (a), the ideal sheaf of $x$ is isomorphic to $\cO_X(-1)$.
+Define the bundle $H$ to fit into the commutative diagram
+\[
+\begin{tikzcd}
+0 \arrow{r} & \cO_X(-1) \arrow{r} \arrow{d} & F \arrow{r}\arrow{d} & F/\cO_X(-1) \arrow{r} \arrow[d,equal] & 0 \\
+0 \arrow{r} & \cO_X \arrow{r} & H \arrow{r} & F/\cO_X(-1) \arrow{r} & 0
+\end{tikzcd}
+\]
+in which the left vertical arrow is injective with cokernel supported at $x$.
+Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes by (b), $H$ admits a filtration with successive quotients $\cO_X^{\oplus (n+1)}, \cO_X(1)$.
+
+We may assume that $H^0(X, H(-1)) = 0$, as otherwise $H$ contains the subbundle $\cO_X(1)$ whose intersection with $F$ has degree $\geq 0$ and hence
+by (b) is either $\cO_X$ or $\cO_X(1)$.
+Then $H^0(X, H)$ injects into $H^0(X, H/H(-1))$, which we reinterpret as the fiber $H_x$ of $H$ at $x$.
+Using the exact sequence
+\[
+0 \to H^0(X, \cO_X^{\oplus n+1}) \to H^0(X, H) \to H^0(X, \cO_X(1)) \to H^1(X, \cO_X^{\oplus n}) = 0
+\]
+(where the last equality comes from (b)),
+we express the image of $H^0(X, H) \to H_x$ 
+as $E e_1 + \cdots + E e_{n+1} + \kappa_x e_{n+2}$
+for some basis $e_1,\dots,e_{n+2}$ of $H_x$ over $\kappa_x$.
+
+Meanwhile, the image of $H^0(X, F) \subset H^0(X, H)$ in $H_x$ is the intersection of the image of $H^0(X, H)$ with the image of $F_x \to H_x$; the latter is a codimension 1 subspace of $H_x$ and so can be written as the kernel of a nonzero $\kappa_x$-linear functional $\lambda\colon H_x \to \kappa_x$. 
+Define $a \in E$, $b \in \kappa_x$ by
+\[
+(a,b) := \begin{cases} (0, 1) & \lambda(e_{n+2}) = 0 \\ (1, -\lambda(e_1)/\lambda(e_{n+2})) & \lambda(e_{n+2}) \neq 0; \end{cases}
+\]
+then $ae_1 + be_{n+2}$ is the image in $H_x$
+of a nonzero element of $H^0(X, F)$.
+\end{proof}
+
+\begin{lemma} \label{lem:minimal filtration}
+Let $F$ be a vector bundle of rank $n$ on $X$.
+Then $F$ admits a complete flag whose slope sequence $m_1,\dots,m_n$ has the following properties.
+\begin{enumerate}
+\item[(a)]
+For $i=1,\dots,n-1$, we have $m_{i+1} \leq m_{i}+1$.
+\item[(b)]
+There do not exist indices $1 \leq i < j \leq n$ such that for some $m \in \Z$,
+\[
+(m_i,\dots,m_j) = (m-1, m,\dots,m,m+1).
+\]
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+\uses{lem:subbundle slope bound,section from complete flag}
+For each $i  \in \{1,\dots,n-1\}$, 
+Lemma~\ref{lem:subbundle slope bound}
+imposes a uniform upper bound on $m_1 + \cdots + m_i$,
+and in all cases $m_1 +\cdots + m_n = \deg(F)$.
+Consequently, we can choose a complete flag to minimize 
+\[
+\sum_{i=1}^n i m_i 
+= (n+1) \deg(F) -\sum_{i=1}^{n-1} (m_1 + \cdots + m_i).
+\]
+We prove that this complete flag has the desired property.
+
+Suppose by way of contradiction that (a) fails for some $i$. 
+Then $F_{i+1}/F_{i-1}(m_i-1)$ admits a complete flag with degree sequence
+$-1, m_{i+1}-m_i$; we then obtain a subbundle $(F_{i+1}/F_{i-1})(-m_i-1)$
+admitting a complete flag with degree sequence $-1, 1$.
+By Lemma~\ref{L:section from complete flag}, $F_{i+1}/F_{i-1}(-m_i-1)$ admits $\cO_X$ as a (not necessarily saturated) subbundle; we thus obtain a new complete flag in which the terms
+$m_i, m_{i+1}$ in the degree sequence are replaced by new terms $m_i', m_{i+1}'$ with $m_i' > m_i$ and $m_i' + m_{i+1}' = m_i + m_{i+1}$, contradicting minimality.
+
+Suppose by way of contradiction that (b) fails for some $i,j$.
+Then $(F_j/F_i)(-m)$ admits a complete flag with degree sequence $-1,0,\dots,0,1$.
+By Lemma~\ref{L:section from complete flag} again, 
+$F_j/F_i(-m)$ admits $\cO_X$ as a (not necessarily saturated) subbundle;
+we thus obtain a new complete flag in which the terms of $m_i, \dots, m_j$ in the degree sequence
+are replaced by new terms $m_i', \dots, m_j'$ with $m_i' > m_i$
+and $m_i' + \cdots + m_k' \geq m_i + \cdots + m_k$ for $k=i+1,\dots,j$,
+again contradicting minimality.
+\end{proof}
+
+\begin{lemma} \label{lem:sequence argument1}
+\leanok
+Let $n$ be a positive integer.
+Let $m_1,\dots,m_n$ be a sequence of integers satisfying 
+the following conditions.
+\begin{enumerate}
+\item[(a)]
+For $i=1,\dots,n-1$, we have $m_{i+1} \leq m_{i}+1$.
+\item[(b)]
+There do not exist indices $1 \leq i < j \leq n$ such that for some $m \in \Z$,
+\[
+(m_i,\dots,m_j) = (m-1, m,\dots,m,m+1).
+\]
+\end{enumerate}
+Then for $1 \leq i < j \leq n$,
+\[
+m_j \leq m_i+1 \qquad (1 \leq i < j \leq n).
+\]
+\end{lemma}
+\begin{proof}
+\leanok
+We prove the claim by induction on $j-i$.
+The base case $j-i=1$ is covered by (a).
+For the induction step, suppose by way of contradiction that $m_j> m_i+1$ for some $i,j$.
+Set $m := m_i + 1$.
+For $k = i+1, \dots, j-1$ we have $m_{k} \leq m_i+1$ and $m_j \leq m_{k}+1$ by the induction hypothesis;
+combining with $m_j \geq m_i + 2$ shows that both of these must be equalities
+and so $m_k = m, m_j = m+1$.
+Now $(m_i, \dots, m_j) = (m-1, m, \dots, m, m+1)$, which contradicts (b).
+\end{proof}
+
+
+\begin{lemma} \label{lem:sequence argument2}
+\leanok
+Let $n$ be a positive integer.
+Let $m_1,\dots,m_n$ be a sequence of integers satisfying 
+the following conditions:
+\begin{align}
+m_1 +\cdots+m_n = 0 & \label{eq:bound2} \\
+m_1 + \cdots + m_i \leq 0 & \quad (i=1,\dots,n-1)  \label{eq:bound1}\\
+m_j \leq m_i+1 & \quad (1 \leq i < j \leq n). \label{eq:bound3}
+\end{align}
+Then $m_1 = \cdots = m_n = 0$.
+\end{lemma}
+\begin{proof}
+\leanok
+We proceed by induction on $n$, with trivial base case $n=1$.
+For $n > 1$, note that \eqref{eq:bound1} and \eqref{eq:bound2} together imply $m_n \geq 0$.
+On the other hand, \eqref{eq:bound1} implies $\min_{i<n} \{m_i\} \leq 0$, and then \eqref{eq:bound3}
+implies $m_n \leq 1$. Finally, if $m_n = 1$, then \eqref{eq:bound3} implies that $m_i \geq 0$ for $i=1,\dots,{n-1}$, but then $m_1 + \cdots + m_n \geq 1$ in violation of \eqref{eq:bound2}.
+We deduce that $m_n = 0$; now the induction hypothesis applies to $m_1,\dots,m_{n-1}$ to finish.
+\end{proof}
+
+\begin{proposition} \label{prop:semistable slope 0}
+\uses{def:generalized projective line,def:semistable bundles}
+Every semistable bundle of degree $0$ on $X$ is trivial.
+\end{proposition}
+\begin{proof}
+\uses{lem:minimal filtration,lem:sequence argument1,lem:sequence argument2,lem:H1 of line bundles}
+Let $F$ be a semistable vector bundle of degree $0$ and rank $n$.
+Choose a complete flag as in Lemma~\ref{lem:minimal filtration}.
+By Lemma~\ref{lem:sequence argument1} and 
+Lemma~\ref{lem:sequence argument2}, the degree sequence must be identically $0$.
+Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes by Lemma~\ref{lem:H1 of line bundles}, it follows that $F$ is trivial.
+\end{proof}
+
+\begin{lemma} \label{lem:one-step modification}
+\uses{def:generalized projective line,def:HN filtration}
+Let $F$ be a vector bundle on $X$ with all HN slopes in $[0,1)$. Then 
+for any closed point $x \in |X|$,
+for $j_x \colon x \to X$ the canonical inclusion,
+there exist a coherent sheaf $G$ on $x$ and an exact sequence
+\[
+0 \to \cO_X^{\oplus \rank(F)} \to F \to j_x^* G \to 0
+\]
+of coherent sheaves on $X$.
+\end{lemma}
+\begin{proof}
+\uses{prop:semistable slope 0}
+We show that for $i=1,\dots,\deg(F)$, we can find an exact sequence
+\begin{equation} \label{eq:modification}
+0 \to H_i \to F \to j_x^* G_i \to 0
+\end{equation}
+in which $H_i$ is a vector bundle of the same rank $F$ with degree $\deg(F)-i$ and all HN slopes nonnegative (and hence in $[0,1)$). 
+For $i = \deg(F)$,
+$H_i$ will then be semistable of degree $0$, and hence trivial by Proposition~\ref{prop:semistable slope 0}.
+
+In the case $i=1$, it suffices to check the claim after replacing $F$ with its maximum quotient having all HN slopes in $(0,1)$; at this point, \emph{every} exact sequence of the form \eqref{eq:modification},
+in which $H_1$ is a vector bundle of the same rank $F$ with degree $\deg(F)-1$, has the property that the HN slopes of $H_1$ are nonnegative.
+We achieve the general case by applying this argument repeatedly.
+\end{proof}
+
+\begin{corollary} \label{cor:slopes to sections}
+\uses{def:generalized projective line,def:HN filtration}
+Let $F$ be a nonzero vector bundle on $X$ whose HN slopes are all nonnegative.
+Then $F$ is generated by global sections and $H^1(X, F) = 0$.
+\end{corollary}
+\begin{proof}
+\uses{lem:H1 of line bundles,lem:one-step modification}
+By replacing $F$ with the first step of its HN filtration, we may reduce to the case where $F$ is semistable. By twisting, we may further ensure that $\mu(F) \in [0,1)$. We then deduce both claims from Lemma~\ref{lem:H1 of line bundles} and  Lemma~\ref{lem:one-step modification}.
+\end{proof}
+
+\begin{lemma} \label{lem:end of semistable}
+\uses{def:generalized projective line,def:semistable bundle}
+For any semistable vector bundle $F$ on $X$, $F^\vee \otimes F$ is trivial.
+\end{lemma}
+\begin{proof}
+\uses{cor:slopes to sections,lem:map of stable,prop:semistable slope 0}
+We immediately reduce to the case where $F$ is stable with slope in $[0,1)$. In this case, suppose by way of contradiction that $F^\vee \otimes F$ is not semistable, and let $G$ be the first step of its HN filtration. Since $G \otimes G$ has slope $2\mu(G) > \mu(G)$, 
+the composition map $(F^\vee \otimes F) \otimes (F^\vee \otimes F) \to F^\vee \otimes F$
+restricts to zero on $G \otimes G$.
+By Corollary~\ref{cor:slopes to sections}, $G$ is generated by global sections;
+consequently, $G \otimes G$ is generated by nonzero global sections of the form $s_1 \otimes s_2$.
+Any such section corresponds to a pair of nonzero endomorphisms $F \to F$ which compose to zero; this contradicts Lemma~\ref{lem:map of stable}.
+We deduce that $F^\vee \otimes F$ is semistable of slope $0$,
+and hence trivial by Proposition~\ref{prop:semistable slope 0}.
+\end{proof}
+
+\begin{proposition} \label{prop:tensor product of semistable}
+\uses{def:generalized projective line,def:semistable bundle}
+The tensor product of any two semistable vector bundles on $X$ is semistable.
+\end{proposition}
+\begin{proof}
+\uses{lem:end of semistable,lem:semistable from product}
+Let $F,G$ be two semistable vector bundles on $X$.
+By Lemma~\ref{lem:end of semistable}, 
+\[
+(F^\vee \otimes G^\vee) \otimes (F \otimes G)
+\cong (F^\vee \otimes F) \otimes (G^\vee \otimes G)
+\]
+is semistable. By Lemma~\ref{lem:semistable from product}, $F \otimes G$ must be semistable.
+\end{proof}
+
+\begin{lemma} \label{cor:unique stable}
+\uses{def:generalized projective line,def:stable bundle}
+For any $\lambda \in \Q$, there is at most one isomorphism class of stable vector bundles on $X$ of slope $\lambda$.
+\end{lemma}
+\begin{proof}
+\uses{prop:tensor product of semistable,lem:map of stable}
+Let $F,G$ be two such bundles. By Proposition~\ref{prop:tensor product of semistable}, $F^\vee \otimes G$ is semistable; since it has slope 0, it is trivial by Proposition~\ref{prop:semistable slope 0}.
+We can thus find a nonzero morphism $f\colon 
+F \to G$, which must be an isomorphism by Lemma~\ref{lem:map of stable}.
+\end{proof}
+
+\begin{lemma} \label{cor:split sequence in order}
+\uses{def:generalized projective line,def:HN filtration}
+Any exact sequence of vector bundles on $X$ of the form
+\[
+0 \to F_1 \to F \to F_2 \to 0,
+\]
+in which every HN slope of $F_1$ is greater than or equal to every HN slope of $F_2$, is split.
+\end{lemma}
+\begin{proof}
+\label{uses:prop:tensor product of semistable,cor:slopes to sections}
+By Proposition~\ref{prop:tensor product of semistable}, $F_2^\vee \otimes F_1$ has nonnegative HN slopes.
+Now $\Ext^1_X(F_2, F_1) = H^1(X, F_2^\vee \otimes F_1)$ which vanishes by Corollary~\ref{cor:slopes to sections}.
+\end{proof}
+
+\begin{proposition} \label{prop:decompose as stables}
+\uses{def:generalized projective line,def:HN filtration,def:stable bundles,def:polystable bundles}
+Every vector bundle on $X$ splits (nonuniquely) as a direct sum of stable bundles. In particular, the HN filtration always splits and every semistable bundle is polystable.
+\end{proposition}
+\begin{proof}
+\uses{cor:split sequence in order}
+Both assertions follow directly from Lemma~\ref{cor:split sequence in order}.
+\end{proof}
+
+\begin{lemma} \label{lem:construct semistables}
+\uses{def:generalized projective line,def:stable bundle}
+Let $E$ be the field $H^0(X, \cO_X)$.
+For $d$ a positive integer with $\dim_{E} H^0(X, \cO_X(1)) > d$
+and $c \in \Z$, there exists a semistable vector bundle on $X$ of rank $d$ and degree $c$.
+\end{lemma}
+\begin{proof}
+We may assume without loss of generality that $d>1$ and $c \in \{1,\dots,d-1\}$.
+Choose $s \in H^0(X, \cO_X(1))$ nonzero 
+and let $x \in |X|$ be the unique closed point at which $s$ vanishes.
+Set $F := \cO_X^{\oplus d}$ and let $e_1,\dots,e_d$ be the images in $F_x$
+of the standard basis vectors of $H^0(X, F) \cong P_0^{d}$ (Lemma~\ref{lem:H0 of line bundles}).
+The condition $\dim_{E} H^0(X, \cO_X(1)) > d$ is equivalent to $\dim_{E} \kappa_x \geq d$;
+consequently, we can choose elements $f_1,\dots,f_c \in \kappa_X$
+such that $1,f_1,\dots,f_c$ are linearly independent over $E$.
+Let $V \subset F_x$ be the $\kappa_x$-span of $e_1 - f_1 e_d, \dots, e_c - f_d e_d$
+and construct the subbundle $G$ of $F$
+so that we have an exact sequence
+\[
+0 \to G \to F \to j_x^* V \to 0;
+\]
+then $G^\vee$ is semistable of degree $c$.
+\end{proof}
+ 
+\begin{lemma} \label{lem:apply artin-schreier}
+\uses{def:generalized projective line,cor:function field of curve}
+Let $E$ be the field $H^0(X, \cO_X)$.
+Then one of the following conditions hold.
+\begin{enumerate}
+\item[(a)]
+We have $\dim_E H^0(X, \cO_X(1)) = 2$ and $X \cong \mathbb{P}^1_E =\Proj E[x,y]$ (the \emph{classical case}). In this case, $H^1(X, \cO_X(-1)) = 0$.
+\item[(b)]
+We have $\dim_E H^0(X, \cO_X(1)) = 3$ and $X \cong \Proj E[x,y,z]/(x^2+y^2+z^2)$ (the \emph{twistor case}). In this case, there is an isomorphism
+$X \times_E E(\sqrt{-1}) \cong \mathbb{P}^1_{E(\sqrt{-1})}$ via which $\cO_X(1)$ corresponds to $\cO_{\mathbb{P}^1}(2)$.
+\item[(c)]
+We have $\dim_E H^0(X, \cO_X(1)) = \infty$.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+\uses{thm:artin schreier thm}
+Apply Theorem~\ref{thm:artin schreier thm}.
+\end{proof}
+
+\begin{theorem} \label{thm:abstract classification}
+\uses{def:generalized projective line,def:stable bundle}
+Set
+\[
+S := \begin{cases} \Z & \mbox{in the classical case,} \\
+\tfrac{1}{2} \Z & \mbox{in the twistor case,} \\
+\Q & \mbox{otherwise}.
+\end{cases}
+\]
+Then the following statements hold.
+\begin{enumerate}
+\item[(a)]
+There exists exactly one isomorphism class of stable vector bundles $\cO_X(\lambda)$ of slope $\lambda$
+if $\lambda \in S$ and none if $\lambda \notin S$.
+\item[(b)]
+For $\lambda \in S$ with denominator $d$ in lower terms, $\rank(\cO_X(\lambda)) = d$.
+\item[(c)]
+The endomorphisms of $\cO_X(\lambda)$ form a division algebra of degree $d$ over $P_0$.
+\item[(d)]
+For $\lambda, \lambda' \in S$, $\cO_X(\lambda) \otimes \cO_X(\lambda') \cong \cO_X(\lambda+\lambda')^{\oplus m}$
+for some positive integer $m$.
+\item[(d)]
+Every vector bundle on $X$ splits (nonuniquely) as a direct sum of summands each of the form $\cO_X(\lambda)$ for some $\lambda \in S$.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+\uses{lem:construct semistables,cor:unique stable,lem:apply artin-schreier,lem:filtration by line bundles,lem:end of semistable,prop:tensor product of semistable,prop:decompose as stables}
+If $\dim_{P_0} P_1 = \infty$, then 
+we may deduce (a) and (b) from Lemma~\ref{lem:construct semistables} and Lemma~\ref{cor:unique stable}. Otherwise, by Lemma~\ref{lem:apply artin-schreier} we may argue as follows.
+\begin{itemize}
+\item 
+In the classical case, $H^1(X, \cO_X(-1)) = 0$.
+Hence any exact sequence of the form
+\[
+0 \to \cO_X \to F \to \cO_X(1) \to 0 
+\]
+splits, as then does any filtration as in Lemma~\ref{lem:minimal filtration}, proving (a).
+From this, (b) is obvious.
+\item
+In the twistor case, by identi
+by identifying $P \otimes_{P_0} P_0(\sqrt{-1})$ with $P_0(\sqrt{-1})[x^2,xy,y^2]$ and applying the classical case, we see that $S \subseteq \tfrac{1}{2}\Z$.
+We deduce (a) and (b) by applying Lemma~\ref{lem:construct semistables} to construct a stable bundle of rank $2$ and degree $1$, then applying Lemma~\ref{cor:unique stable} for uniqueness.
+\end{itemize}
+
+Given (a)--(b), (c) follows from Lemma~\ref{lem:map of stable} and Lemma~\ref{lem:end of semistable}; 
+(d) is immediate from Proposition~\ref{prop:tensor product of semistable} and Proposition~\ref{prop:decompose as stables};
+and (e) is immediate from Proposition~\ref{prop:decompose as stables}.
+\end{proof}
