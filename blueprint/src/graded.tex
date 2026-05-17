@@ -30,31 +30,53 @@ is a principal ideal domain.
 \begin{proof}
 \end{proof}
 
-\begin{proposition} \label{prop:graded ring to curve}
-\uses{def:graded ring,def:abstract complete curve}
-For $P$ as in Definition~\ref{def:graded ring}, $X := \Proj(P)$ is an abstract complete curve.
-\end{proposition}
-\begin{proof}
-\uses{prop:PID from graded ring}
-\end{proof}
-
-
-
 \begin{definition} \label{def:line bundles}
-\uses{def:vector bundles}
-For $d \in \Z$, define the line bundle $\cO_X(d)$ on $X$ as $\Proj \bigoplus_{n=0}^\infty P_{n+d}$.
+\uses{def:graded ring,def:vector bundles}
+For $P$ as in Definition~\ref{def:graded ring},
+for $d \in \Z$, define the line bundle $\cO_X(d)$ on $X$ as $\Proj \bigoplus_{n=0}^\infty P_{n+d}$.
 \end{definition}
 
-\begin{lemma} \label{lem:H0 of line bundles}
-\uses{prop:graded ring to curve,def:line bundles}
-We have 
-\[
-\cO_X(n) = \begin{cases} 0 & n < 0 \\
-P_n & n \geq 0
-\end{cases}.
-\]
+\begin{lemma} \label{lem:dimension at least 2}
+\uses{def:graded ring}
+For $P$ as in Definition~\ref{def:graded ring}, we have $\dim_{P_0} P_1 \geq 2$.
+In particular, there exist $s,t \in P_1$ which are linearly independent over $P_0$.
 \end{lemma}
 \begin{proof}
+By condition (i) of Definition~\ref{def:graded ring},
+we can pick a nonzero $s \in P_1$.
+By condition (iii) of Definition~\ref{def:graded ring}, we can find $t \in P_1$ 
+with nonzero image in $P_1/sP_0$. This proves the claim.
+\end{proof}
+
+\begin{lemma} \label{lem:H1 of line bundles}
+\uses{def:line bundles}
+We have $H^1(X, \cO_X) = 0$.
+\end{lemma}
+\begin{proof}
+\uses{lem:dimension at least 2}
+For any $s,t \in P_1$ which are linearly independent over $P_0$
+(as in Lemma~\ref{lem:dimension at least 2},
+by \eqref{eq:graded ring isom mod s} we have $P_2 = P_1 s + P_1 t$.
+By induction on $m+n+k$ we deduce that $P_{m+n+k} = P_{m+k} s^n + P_{n+k} t^m$ for any $m,n >0$ and $k \geq 0$, and hence
+\[
+H^1(X, \cO_X) = \frac{P[(st)^{-1}]_0}{P[s^{-1}]_0 + P[t^{-1}]_0} = 
+\varinjlim_m \frac{P_{2m}}{P_{m}s^m + P_{m} t^m} = 0. 
+\qedhere
+\]
+\end{proof}
+
+\begin{proposition} \label{prop:graded ring to curve}
+\uses{def:graded ring,def:abstract complete curve}
+For $P$ as in Definition~\ref{def:graded ring}, $X := \Proj(P)$ is an abstract complete curve
+for the degree function carrying every closed point to $1$.
+\end{proposition}
+\begin{proof}
+\uses{prop:PID from graded ring,lem:dimension at least 2}
+Pick $s,t$ as in Lemma~\ref{lem:dimension at least 2};
+by Lemma~\ref{lem:H1 of line bundles},
+$X$ is covered by the distinguished open subspaces corresponding to $s$ and $t$.
+By Proposition~\ref{prop:PID from graded ring},  each of these subspaces is regular of dimension 1.
+By condition (iii) of Definition~\ref{def:graded ring}, each closed point of either subspace has algebraically closed residue field.
 \end{proof}
 
 \begin{proposition} \label{prop:Pic of curve}
@@ -67,22 +89,16 @@ The map $\Pic(X) \to \Z$ carries $\cO_X(n)$ to $n$, so we need only check inject
 This follows from Proposition~\ref{prop:PID from graded ring}.
 \end{proof}
 
-\begin{lemma} \label{lem:H1 of line bundles}
-\uses{prop:graded ring to curve,def:line bundles}
-We have $H^1(X, \cO_X(n)) = 0$ for all $n \geq 0$.
-\end{lemma}
-\begin{proof}
-For any $s,t \in P_1$ which are linearly independent over $P_0$, by \eqref{eq:graded ring isom mod s} we have $P_2 = P_1 s + P_1 t$.
-By induction on $m+n+k$ we deduce that $P_{m+n+k} = P_{m+k} s^n + P_{n+k} t^m$ for any $m,n >0$ and $k \geq 0$, and hence
-\[
-H^1(X, \cO_X(n)) = \frac{P[(st)^{-1}]_n}{P[s^{-1}]_n + P[t^{-1}]_n} = 
-\varinjlim_m \frac{P_{n+2m}}{P_{n+m}s^m + P_{n+m} t^m} = 0. 
-\qedhere
-\]
-\end{proof}
-
 \begin{theorem} \label{thm:graded ring projective line}
-\uses{def:graded ring,def:abstract complete curve}
+\uses{def:graded ring,def:generalized projective line}
 For $P$ as in Definition~\ref{def:graded ring}, $X := \Proj(P)$ is a generalized projective line.
 In particular the conclusion of Theorem~\ref{thm:abstract classification} applies.
 \end{theorem}
+\begin{proof}
+\uses{prop:PID from graded ring,prop:Pic of curve,lem:dimension at least 2,lem:H1 of line bundles}
+By Proposition~\ref{prop:graded ring to curve}, $X$ is an abstract complete curve.
+Of the conditions from Definition~\ref{def:generalized projective line}, 
+(i) comes from Proposition~\ref{prop:Pic of curve};
+(ii) comes from Lemma~\ref{lem:H1 of line bundles}; and
+(iii) comes from the description of the degree function in Proposition~\ref{prop:graded ring to curve}.
+\end{proof}

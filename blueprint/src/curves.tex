@@ -117,9 +117,9 @@ If $G \cap F_1$ is zero,
 then $G \cong G/(G \cap F_1)$ is isomorphic to a subbundle of $F/F_1$ of rank $i$
 and hence has degree at most
 $\max\{m_{j_1} + \cdots + m_{j_i}: 2 \leq j_1,\dots,j_i \leq n\}$.
-nonzero, then it is a line bundle of degree at most $m_1$,
+If $G \cap F_1$ is nonzero, then it is a line bundle of degree at most $m_1$,
 while $G/(G \cap F_1)$ is a subbundle of $F/F_1$ of rank $i-1$ and hence has degree at most
-$\max\{m_{j_1} + \cdots + m_{j_{i-1}}: 2 \leq j_1,\dots,j_{i-1} \leq n\}$.
+$\max\{m_{j_1} + \cdots + m_{j_{i-1}}\colon 2 \leq j_1,\dots,j_{i-1} \leq n\}$.
 In both cases,
 \[
 \deg(G) = \deg(G \cap F_1) + \deg(G/(G \cap F_1))
@@ -140,21 +140,18 @@ We define the \emph{slope} of $F$ as
 \uses{def:slope of vector bundle}
 Let $F$ be a nonzero vector bundle on $X$.
 The bundle $F$ is \emph{stable} if there is no nonzero proper subbundle $G$ of $F$ with $\mu(G) \geq \mu(F)$.
-The bundle $F$ is \emph{semistable} if there is no nonzero subbundle $G$ of $F$ with $\mu(G) > \mu(F)$.
-The bundle $F$ is \emph{polystable} if it is a direct sum of stable vector bundles, all of the same slope.
 \end{definition}
 
 \begin{definition} \label{def:semistable bundle}
-\uses{def:stable bundle}
+\uses{def:slope of vector bundle}
 Let $F$ be a nonzero vector bundle on $X$.
 The bundle $F$ is \emph{semistable} if there is no nonzero subbundle $G$ of $F$ with $\mu(G) > \mu(F)$.
-The bundle $F$ is \emph{polystable} if it is a direct sum of stable vector bundles, all of the same slope.
 \end{definition}
 
 \begin{definition} \label{def:polystable bundle}
 \uses{def:stable bundle}
 Let $F$ be a nonzero vector bundle on $X$.
-The bundle $F$ is \emph{polystable} if it is a direct sum of stable vector bundles, all of the same slope.
+The bundle $F$ is \emph{polystable} if it can be written a direct sum of stable vector bundles, all of the same slope.
 \end{definition}
 
 \begin{lemma} \label{lem:map of stable}
@@ -193,6 +190,7 @@ Every vector bundle $F$ on $X$ admits a unique filtration
 in which each successive quotient $F_i/F_{i-1}$ is a semistable vector bundle of some slope $\mu_i$ and $\mu_1 > \cdots > \mu_l$.
 \end{proposition}
 \begin{proof}
+\uses{lem:filtration by line bundles,lem:subbundle slope bound}
 We proceed by induction on $n = \rank(F)$.
 Let $S \subseteq \Q$ be the set of slopes of nonzero subbundles of $F$.
 The set $S$ is nonempty (it contains $\mu(F)$), bounded above
