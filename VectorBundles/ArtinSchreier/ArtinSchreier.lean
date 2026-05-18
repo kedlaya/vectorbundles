@@ -18,13 +18,10 @@ public import Mathlib.FieldTheory.PrimitiveElement
 public import Mathlib.FieldTheory.PurelyInseparable.Exponent
 public import Mathlib.FieldTheory.PurelyInseparable.PerfectClosure
 public import Mathlib.FieldTheory.PurelyInseparable.Tower
-public import Mathlib.FieldTheory.Relrank
-public import Mathlib.GroupTheory.Perm.Cycle.Type
 
 public import VectorBundles.ArtinSchreier.FieldTheory
 
 @[expose] public section
-
 
 lemma finite_inseparable_extension_intermediate_small (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]

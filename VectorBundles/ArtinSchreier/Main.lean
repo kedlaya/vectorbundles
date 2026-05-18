@@ -3,12 +3,6 @@ module
 public import Mathlib.Algebra.Algebra.Basic
 public import Mathlib.Algebra.BigOperators.Finprod
 public import Mathlib.Algebra.CharP.Defs
-public import Mathlib.Algebra.Group.Subgroup.ZPowers.Basic
-public import Mathlib.Algebra.Polynomial.Splits
-public import Mathlib.Algebra.Ring.Semireal.Defs
-public import Mathlib.Algebra.Ring.SumsOfSquares
-public import Mathlib.Algebra.CharP.Frobenius
-public import Mathlib.Data.Finset.Defs
 public import Mathlib.Data.Nat.Prime.Defs
 public import Mathlib.FieldTheory.AlgebraicClosure
 public import Mathlib.FieldTheory.Galois.Basic
@@ -26,9 +20,7 @@ public import Mathlib.FieldTheory.PrimitiveElement
 public import Mathlib.FieldTheory.PurelyInseparable.Exponent
 public import Mathlib.FieldTheory.PurelyInseparable.PerfectClosure
 public import Mathlib.FieldTheory.PurelyInseparable.Tower
-public import Mathlib.FieldTheory.SplittingField.Construction
 public import Mathlib.FieldTheory.Relrank
--- public import Mathlib.GroupTheory.Perm.Cycle.Type
 
 public import VectorBundles.ArtinSchreier.ArtinSchreier
 public import VectorBundles.ArtinSchreier.ArtinSchreier2
@@ -96,10 +88,10 @@ theorem artin_schreier_thm (F : Type) (K : Type)
         (expose_names; exact zero_eq_mul.mp (id (Eq.symm h2)))
       have _ : ∃ k : F, (algebraMap F K) k = i := by
         cases h3
-        use -j
-        grind
-        use j
-        grind
+        · use -j
+          grind
+        · use j
+          grind
       apply hF
       simp_all
     have hF1 : ∀ x : K, x ∈ (algebraMap F₁ K).range := by

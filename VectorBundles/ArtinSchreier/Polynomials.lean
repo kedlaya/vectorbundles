@@ -1,41 +1,10 @@
 module
 
-public import Mathlib.Algebra.Algebra.Basic
-public import Mathlib.Algebra.BigOperators.Finprod
-public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
-public import Mathlib.Algebra.CharP.Defs
-public import Mathlib.Algebra.Group.Defs
-public import Mathlib.Algebra.Group.Subgroup.ZPowers.Basic
-public import Mathlib.Algebra.Polynomial.Degree.Defs
 public import Mathlib.Algebra.Polynomial.Splits
-public import Mathlib.Algebra.Ring.Semireal.Defs
-public import Mathlib.Algebra.Ring.SumsOfSquares
-public import Mathlib.Algebra.CharP.Frobenius
-public import Mathlib.Data.Nat.Prime.Defs
-public import Mathlib.FieldTheory.AlgebraicClosure
-public import Mathlib.FieldTheory.Galois.Basic
-public import Mathlib.FieldTheory.Galois.IsGaloisGroup
-public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
-public import Mathlib.FieldTheory.IntermediateField.Basic
-public import Mathlib.FieldTheory.IsAlgClosed.Basic
-public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
-public import Mathlib.FieldTheory.IsRealClosed.Basic
-public import Mathlib.FieldTheory.KummerExtension
-public import Mathlib.FieldTheory.KummerPolynomial
-public import Mathlib.FieldTheory.Minpoly.Basic
-public import Mathlib.FieldTheory.Minpoly.MinpolyDiv
-public import Mathlib.FieldTheory.Perfect
-public import Mathlib.FieldTheory.PrimitiveElement
-public import Mathlib.FieldTheory.PurelyInseparable.Basic
-public import Mathlib.FieldTheory.PurelyInseparable.Exponent
-public import Mathlib.FieldTheory.PurelyInseparable.PerfectClosure
-public import Mathlib.FieldTheory.PurelyInseparable.Tower
-public import Mathlib.FieldTheory.SeparableClosure
-public import Mathlib.FieldTheory.SplittingField.Construction
-public import Mathlib.FieldTheory.Relrank
-public import Mathlib.GroupTheory.Perm.Cycle.Type
 
 @[expose] public section
+
+open Polynomial
 
 lemma congruence_low_degree {F : Type} [Field F] {f g h : Polynomial F}
   (h1 : h ∣ (f-g)) (h2 : f.natDegree < h.natDegree) (h3 : g.natDegree < h.natDegree) (h4: h.Monic) :
@@ -46,60 +15,60 @@ lemma congruence_low_degree {F : Type} [Field F] {f g h : Polynomial F}
     rename_i h0
     have h5 : (f-g).natDegree < h.natDegree := by
       calc
-        (f-g).natDegree ≤ max f.natDegree g.natDegree := by apply Polynomial.natDegree_sub_le
+        (f-g).natDegree ≤ max f.natDegree g.natDegree := by apply natDegree_sub_le
         _ < h.natDegree := by
           refine max_lt_iff.mpr ?_
           constructor
           exact h2
           exact h3
     have h6 : (f-g).degree < h.degree := by
-      exact Polynomial.degree_lt_degree h5
-    have _ : (f-g) /ₘ h = 0 := (Polynomial.divByMonic_eq_zero_iff h4).mpr h6
-    have _ : (f-g) %ₘ h + h * ((f-g) /ₘ h) = f-g := Polynomial.modByMonic_add_div (f-g) h
+      exact degree_lt_degree h5
+    have _ : (f-g) /ₘ h = 0 := (divByMonic_eq_zero_iff h4).mpr h6
+    have _ : (f-g) %ₘ h + h * ((f-g) /ₘ h) = f-g := modByMonic_add_div (f-g) h
     have _ : (f-g) %ₘ h = 0 := by
-      exact (Polynomial.modByMonic_eq_zero_iff_dvd h4).mpr h1
+      exact (modByMonic_eq_zero_iff_dvd h4).mpr h1
     grind
 
 lemma artin_schreier_poly {F : Type} [Field F] (p : ℕ) (c : F) (hp : Nat.Prime p):
-  let pol := Polynomial.X ^ p + (- Polynomial.X - Polynomial.C c);
+  let pol := X ^ p + (- X - C c);
   pol.natDegree = p ∧ pol.Monic := by
-    have h1 : (- Polynomial.X - Polynomial.C c).natDegree ≤ 1 := by
-      refine (Polynomial.natDegree_sub_le_iff_right ?_).mpr ?_
-      · refine Polynomial.natDegree_neg_le_of_le ?_
-        exact Polynomial.natDegree_X_le
-      · have _ : (Polynomial.C c).natDegree = 0 := by
-          exact Polynomial.natDegree_C c
-        (expose_names; exact StrictMono.minimal_preimage_bot (fun ⦃a b⦄ a_1 => a_1) h 1)
-    have h3 : (- Polynomial.X - Polynomial.C c).natDegree < p := by
+    have h1 : (- X - C c).natDegree ≤ 1 := by
+      refine (natDegree_sub_le_iff_right ?_).mpr ?_
+      · refine natDegree_neg_le_of_le ?_
+        exact natDegree_X_le
+      · have h2 : (C c).natDegree = 0 := by
+          exact natDegree_C c
+        exact StrictMono.minimal_preimage_bot (fun ⦃a b⦄ a_1 => a_1) h2 1
+    have h3 : (- X - C c).natDegree < p := by
       calc
-        (- Polynomial.X - Polynomial.C c).natDegree ≤ 1 := h1
+        (- X - C c).natDegree ≤ 1 := h1
         _ < p := by exact Nat.Prime.one_lt hp
-    have h2   : ( Polynomial.X ^ p + (- Polynomial.X - Polynomial.C c)).natDegree ≤ p := by
-      refine Polynomial.natDegree_add_le_of_degree_le ?_ ?_
-      exact Polynomial.natDegree_X_pow_le p
+    have h2   : ( X ^ p + (- X - C c)).natDegree ≤ p := by
+      refine natDegree_add_le_of_degree_le ?_ ?_
+      exact natDegree_X_pow_le p
       exact Nat.le_of_succ_le h3
-    let pol := Polynomial.X ^ p + (- Polynomial.X - Polynomial.C c)
+    let pol := X ^ p + (- X - C c)
     have h4 : pol.coeff p = 1 := by
-      have _ : (( Polynomial.X : Polynomial F)^ p ).coeff p = 1 := by
-        exact Polynomial.coeff_X_pow_self p
+      have _ : (( X : Polynomial F)^ p ).coeff p = 1 := by
+        exact coeff_X_pow_self p
       subst pol
-      have _ : (- Polynomial.X - Polynomial.C c).coeff p = 0 := by
-        refine Polynomial.coeff_eq_zero_of_natDegree_lt ?_
+      have _ : (- X - C c).coeff p = 0 := by
+        refine coeff_eq_zero_of_natDegree_lt ?_
         exact Nat.lt_of_lt_of_eq h3 rfl
       simp_all
 
     constructor
-    refine Polynomial.natDegree_eq_of_le_of_coeff_ne_zero ?_ ?_
+    refine natDegree_eq_of_le_of_coeff_ne_zero ?_ ?_
     exact String.Pos.Raw.mk_le_mk.mp h2
     exact ne_zero_of_eq_one h4
-    exact Polynomial.monic_of_natDegree_le_of_coeff_eq_one p h2 h4
+    exact monic_of_natDegree_le_of_coeff_eq_one p h2 h4
 
 lemma monomial_coeffs {F : Type} [Field F] (n : ℕ) (c : F) :
-  (Polynomial.monomial n c).coeff n = c ∧ ∀ (m : ℕ), m ≠ n → (Polynomial.monomial n c).coeff m = 0 := by
+  (monomial n c).coeff n = c ∧ ∀ (m : ℕ), m ≠ n → (monomial n c).coeff m = 0 := by
   constructor
-  exact Polynomial.coeff_monomial_same n c
+  exact coeff_monomial_same n c
   intro m hm
-  exact Polynomial.coeff_monomial_of_ne c hm
+  exact coeff_monomial_of_ne c hm
 
 lemma polynomial_monic_divisor {F : Type} [Field F] {f : Polynomial F} {g: Polynomial F}
   (h1 : f.Monic) (h2 : g.Monic) (h3 : f ∣ g):
@@ -109,28 +78,28 @@ lemma polynomial_monic_divisor {F : Type} [Field F] {f : Polynomial F} {g: Polyn
   use e
   have h_ftimese : e * f = g := by
     have h4 : g %ₘ f + f * (g /ₘ f) = g :=
-      Polynomial.modByMonic_add_div g f
+      modByMonic_add_div g f
     have h5 : g %ₘ f = 0 := by
-      exact (Polynomial.modByMonic_eq_zero_iff_dvd h1).mpr h3
+      exact (modByMonic_eq_zero_iff_dvd h1).mpr h3
     subst e
     grind
   constructor
   exact h_ftimese
   have h6 : e.Monic := by
     have h7 : e.leadingCoeff = g.leadingCoeff := by
-      refine Polynomial.leadingCoeff_divByMonic_of_monic h1 ?_
-      apply Polynomial.degree_le_of_dvd h3
-      exact Polynomial.Monic.ne_zero h2
-    refine Polynomial.Monic.def.mpr ?_
+      refine leadingCoeff_divByMonic_of_monic h1 ?_
+      apply degree_le_of_dvd h3
+      exact Monic.ne_zero h2
+    refine Monic.def.mpr ?_
     simp_all
   constructor
   exact h6
   constructor
   have _ : (e * f).natDegree = e.natDegree + f.natDegree := by
-    exact Polynomial.Monic.natDegree_mul h6 h1
+    exact Monic.natDegree_mul h6 h1
   simp_all
-  refine Polynomial.degree_eq_natDegree ?_
-  exact Polynomial.Monic.ne_zero h6
+  refine degree_eq_natDegree ?_
+  exact Monic.ne_zero h6
 
 lemma monic_divisor_of_same_degree {F : Type} [Field F] (f g : Polynomial F)
   (h1: f.Monic) (h2 : g.Monic) (hdiv: f ∣ g) (hdeg: f.natDegree = g.natDegree) : f = g := by
@@ -140,41 +109,41 @@ lemma monic_divisor_of_same_degree {F : Type} [Field F] (f g : Polynomial F)
   obtain ⟨res, _, h_resmonic, _, _⟩ := h_e
   have h_resdeg : res.natDegree = 0 := by
     have _ : (res * f).natDegree = res.natDegree + f.natDegree := by
-      exact Polynomial.Monic.natDegree_mul h_resmonic h1
+      exact Monic.natDegree_mul h_resmonic h1
     grind
-  have _ : res = Polynomial.C 1 := by
-    have _ : res.natDegree = 0 ↔ ∃ x : F, Polynomial.C x = res := by
-      apply Polynomial.natDegree_eq_zero
+  have _ : res = C 1 := by
+    have _ : res.natDegree = 0 ↔ ∃ x : F, C x = res := by
+      apply natDegree_eq_zero
     simp
-    exact (Polynomial.Monic.natDegree_eq_zero h_resmonic).mp h_resdeg
+    exact (Monic.natDegree_eq_zero h_resmonic).mp h_resdeg
   simp_all
 
 lemma divisor_of_irreducible_poly {F : Type} [Field F] (f g : Polynomial F)
   (hdiv: f ∣ g) (hirr: Irreducible g) : f.natDegree = 0 ∨ f.natDegree = g.natDegree := by
-  let f0 := f * Polynomial.C (1 / f.leadingCoeff)
-  let g0 := g * Polynomial.C (1 / g.leadingCoeff)
-  have _ : g ≠ 0 := by
+  let f0 := f * C (1 / f.leadingCoeff)
+  let g0 := g * C (1 / g.leadingCoeff)
+  have hg0 : g ≠ 0 := by
     exact Irreducible.ne_zero hirr
   have h_gmon : g0.Monic := by
-    refine Polynomial.monic_mul_C_of_leadingCoeff_mul_eq_one ?_
-    have _ : g.leadingCoeff ≠ 0 := by
-      (expose_names; exact Polynomial.leadingCoeff_ne_zero.mpr h)
+    refine monic_mul_C_of_leadingCoeff_mul_eq_one ?_
+    have _ : g.leadingCoeff ≠ 0 :=
+      leadingCoeff_ne_zero.mpr hg0
     simp_all
-  have _ : f ≠ 0 := by
-    (expose_names; exact ne_zero_of_dvd_ne_zero h hdiv)
+  have hf0 : f ≠ 0 :=
+    ne_zero_of_dvd_ne_zero hg0 hdiv
   have h_fmon : f0.Monic := by
-    refine Polynomial.monic_mul_C_of_leadingCoeff_mul_eq_one ?_
-    have _ : f.leadingCoeff ≠ 0 := by
-      (expose_names; exact Polynomial.leadingCoeff_ne_zero.mpr h_1)
+    refine monic_mul_C_of_leadingCoeff_mul_eq_one ?_
+    have _ : f.leadingCoeff ≠ 0 :=
+      leadingCoeff_ne_zero.mpr hf0
     simp_all
   have h_div : f0 ∣ g0 := by
     refine mul_dvd_mul hdiv ?_
     simp_all
   have _ : f0.natDegree = f.natDegree := by
-    apply Polynomial.natDegree_mul_C
+    apply natDegree_mul_C
     simp_all
   have _ : g0.natDegree = g.natDegree := by
-    apply Polynomial.natDegree_mul_C
+    apply natDegree_mul_C
     simp_all
   have h_e:  ∃ (e : Polynomial F), e * f0 = g0 ∧ e.Monic ∧ e.natDegree + f0.natDegree = g0.natDegree
   ∧ e.degree = e.natDegree :=
@@ -182,58 +151,58 @@ lemma divisor_of_irreducible_poly {F : Type} [Field F] (f g : Polynomial F)
   obtain ⟨e, _, h_resmonic, h_degs, _⟩ := h_e
   have _ : Irreducible g0 := by
     subst g0
-    have _ : IsUnit (Polynomial.C (1 / g.leadingCoeff)) := by
-      refine Polynomial.isUnit_C.mpr ?_
+    have h_unit : IsUnit (C (1 / g.leadingCoeff)) := by
+      refine isUnit_C.mpr ?_
       simp_all
-    (expose_names; exact (irreducible_mul_isUnit h_4).mpr hirr)
+    exact (irreducible_mul_isUnit h_unit).mpr hirr
   have h_isunit : IsUnit e ∨ IsUnit f0 := by
-    (expose_names; exact h_4.isUnit_or_isUnit (id (Eq.symm left)))
-  cases h_isunit
-  · right
-    have h_edeg : e.natDegree = 0 := by
-      (expose_names; exact Polynomial.natDegree_eq_zero_of_isUnit h_5)
+    (expose_names; exact h_2.isUnit_or_isUnit (id (Eq.symm left)))
+  cases h_isunit with
+  | inl h_isunit =>
+    have h_edeg : e.natDegree = 0 :=
+      natDegree_eq_zero_of_isUnit h_isunit
     simp_all
-  · left
-    have _ : f0.natDegree = 0 := by
-      (expose_names; exact Polynomial.natDegree_eq_zero_of_isUnit h_5)
+  | inr h_isunit =>
+    have _ : f0.natDegree = 0 :=
+      natDegree_eq_zero_of_isUnit h_isunit
     simp_all
 
 lemma odd_irreducible_factor {F : Type} [Field F] (f : Polynomial F)
   (h : Odd f.natDegree) : ∃ (g : Polynomial F), Irreducible g ∧ g ∣ f ∧ Odd g.natDegree := by
-    have _ : f ≠ 0 := by
+    have hf0 : f ≠ 0 := by
       unfold Odd at h
       obtain ⟨k, _⟩ := h
       have t : f.natDegree > 0 := by
         grind
-      exact Polynomial.ne_zero_of_natDegree_gt t
+      exact ne_zero_of_natDegree_gt t
     let S := UniqueFactorizationMonoid.factors f
-    have h_prod : Associated S.prod f := by
-      (expose_names; exact UniqueFactorizationMonoid.factors_prod h_1)
-    have _ : 0 ∉ S := by
+    have h_prod : Associated S.prod f :=
+      UniqueFactorizationMonoid.factors_prod hf0
+    have h0S : 0 ∉ S := by
       by_contra
       have hS : S.prod = 0 := by
         exact Multiset.prod_eq_zero this
       have _ : Associated 0 f := by
-        simp_all
+        rw [hS] at h_prod
+        exact h_prod
       have _ : Associated f 0 := by
         grind [Associated.symm]
       have _ : Associated f 0 ↔ f = 0 :=
         associated_zero_iff_eq_zero f
-      grind
-    have _ : S.prod.degree = f.degree := by
-      exact Polynomial.degree_eq_degree_of_associated h_prod
-    have _ : S.prod.natDegree = f.natDegree := by
-      (expose_names; exact Polynomial.natDegree_eq_of_degree_eq h_3)
-    have _ : Odd S.prod.natDegree := by
-      grind
+      simp_all
+    have _ : S.prod.natDegree = f.natDegree :=
+      have h1 : S.prod.degree = f.degree := by
+        exact degree_eq_degree_of_associated h_prod
+      natDegree_eq_of_degree_eq h1
     have hg : ∃ g ∈ S, Odd g.natDegree := by
+      have _ : Odd S.prod.natDegree := by
+        grind
       by_contra
-      let T := S.map Polynomial.natDegree
+      push Not at this
+      let T := S.map natDegree
       have _ : S.prod.natDegree = T.sum := by
-        apply Polynomial.natDegree_multiset_prod
-        grind
-      have h_even : ∀ g ∈ S, Even g.natDegree := by
-        grind
+        apply natDegree_multiset_prod
+        exact h0S
       have ht : ∀ t : ℕ, t ∈ T → Even t := by
         by_contra
         push Not at this
@@ -250,9 +219,9 @@ lemma odd_irreducible_factor {F : Type} [Field F] (f : Polynomial F)
         specialize ht x
         simp_all
         obtain ⟨r, ht⟩ := ht
-        have _ : x = 2*r := by
+        have hx2r : x = 2*r := by
           grind
-        (expose_names; exact dvd_of_mul_right_eq r (id (Eq.symm h_6)))
+        exact dvd_of_mul_right_eq r (id (Eq.symm hx2r))
       grind
     obtain ⟨g, hg1, hg2⟩ := hg
     use g

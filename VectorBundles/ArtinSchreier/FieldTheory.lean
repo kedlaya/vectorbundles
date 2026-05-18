@@ -8,10 +8,7 @@ public import Mathlib.Algebra.Divisibility.Basic
 public import Mathlib.Algebra.Group.Defs
 public import Mathlib.Algebra.Group.Subgroup.ZPowers.Basic
 public import Mathlib.Algebra.Order.Group.Abs
-public import Mathlib.Algebra.Order.Group.Unbundled.Int
 public import Mathlib.Algebra.Polynomial.Splits
-public import Mathlib.Algebra.Ring.Semireal.Defs
-public import Mathlib.Algebra.Ring.SumsOfSquares
 public import Mathlib.Algebra.CharP.Frobenius
 public import Mathlib.Data.Nat.Prime.Defs
 public import Mathlib.FieldTheory.AlgebraicClosure
@@ -21,9 +18,7 @@ public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 public import Mathlib.FieldTheory.IntermediateField.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
-public import Mathlib.FieldTheory.IsRealClosed.Basic
 public import Mathlib.FieldTheory.KummerExtension
-public import Mathlib.FieldTheory.KummerPolynomial
 public import Mathlib.FieldTheory.Minpoly.Basic
 public import Mathlib.FieldTheory.Minpoly.MinpolyDiv
 public import Mathlib.FieldTheory.Perfect
@@ -33,9 +28,8 @@ public import Mathlib.FieldTheory.PurelyInseparable.Exponent
 public import Mathlib.FieldTheory.PurelyInseparable.PerfectClosure
 public import Mathlib.FieldTheory.PurelyInseparable.Tower
 public import Mathlib.FieldTheory.SeparableClosure
-public import Mathlib.FieldTheory.SplittingField.Construction
 public import Mathlib.FieldTheory.Relrank
-public import Mathlib.GroupTheory.Perm.Cycle.Type
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 
 public import VectorBundles.ArtinSchreier.Polynomials
 
@@ -420,22 +414,21 @@ lemma nonsquare_in_quadratic_extension (F : Type) (K : Type)
     have hd : d ∣ 2 := by
       have h_de : Field.finSepDegree F K * Field.finInsepDegree F K = Module.finrank F K := by
         exact Field.finSepDegree_mul_finInsepDegree F K
-      have _ : e * d = Module.finrank F K := by
-        subst d e
-        apply h_de
-      have _ : e * d = 2 := by
-        simp_all
-      (expose_names; exact dvd_of_mul_left_eq e h_4)
+      have h_de_prod : e * d = 2 := by
+        calc
+          e * d = Module.finrank F K := by
+            subst d e
+            apply h_de
+          _ = 2 := hrank
+      exact dvd_of_mul_left_eq e h_de_prod
     have hf : ∃ f : ℕ, d = q^f := by
       apply finInsepDegree_eq_pow
     obtain ⟨f, hf⟩ := hf
     by_cases d = 1
     · (expose_names; exact (isSeparable_iff_finInsepDegree_eq_one F K).mpr h_3)
     · have h_f : d = 2 := by
-        have _ : Nat.Prime 2 := by
-          exact Nat.prime_two
-        have _ : Nat.Prime 2 → (d ∣ 2 ↔ d = 1 ∨ d = 2) :=
-          Nat.dvd_prime
+        have _ : d = 1 ∨ d = 2 :=
+          (Nat.dvd_prime Nat.prime_two).mp hd
         simp_all
       have h_chars : ∀ (p q : ℕ) [hp : CharP F p] [hq : ExpChar F q], p = q ↔ Nat.Prime p :=
         char_eq_expChar_iff F
@@ -531,15 +524,15 @@ lemma trivial_absolute_galois_group (F : Type) (K : Type)
     have _ : (minpoly F b).natDegree ≤ Module.finrank F K := by
       apply minpoly.natDegree_le
     have _ : pol.natDegree ≤ 1 := by
-      grind
-    have _ : Irreducible pol := by
+      (expose_names; exact le_of_le_of_eq h_5 h_3)
+    have h_polirr : Irreducible pol := by
       refine minpoly.irreducible ?_
       exact Algebra.IsIntegral.isIntegral b
-    have _ : Irreducible pol → 0 < Polynomial.natDegree pol :=
-      Irreducible.natDegree_pos
-    have _ : pol.natDegree ≠ 0 := by
-      (expose_names; exact Nat.ne_zero_iff_zero_lt.mpr (h_8 h_7))
-    grind
+    have h_poldeg : 0 < Polynomial.natDegree pol :=
+      Irreducible.natDegree_pos h_polirr
+    have _ : pol.natDegree ≠ 0 :=
+      Nat.ne_zero_iff_zero_lt.mpr h_poldeg
+    (expose_names; exact Eq.symm (Nat.le_antisymm h_poldeg h_6))
   refine IsAlgClosed.of_exists_root F ?_
   intro p h1 h2
   have hb: ∃ (b : K), Polynomial.aeval b p = 0 := by
