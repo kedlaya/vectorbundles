@@ -33,8 +33,8 @@ public import Mathlib.RingTheory.Polynomial.UniqueFactorization
 public import Mathlib.RingTheory.UniqueFactorizationDomain.Defs
 
 public import VectorBundles.ArtinSchreier.Polynomials
+public import VectorBundles.ArtinSchreier.FieldTheory2
 public import VectorBundles.ArtinSchreier.ArtinSchreier
-public import VectorBundles.ArtinSchreier.ArtinSchreier2
 
 @[expose] public section
 
@@ -45,11 +45,9 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type)
   (h1 : ∀ i : F, i^2 ≠ -1) (h2 : ∃ i : K, i^2 = -1 ∧ F⟮i⟯ = ⊤)
   : IsRealClosed F := by
 
-  have h_alg : IsAlgClosed K := by
-    exact IsAlgClosure.isAlgClosed F
+  have h_alg : IsAlgClosed K := IsAlgClosure.isAlgClosed F
   obtain ⟨i, h2a, h2b⟩ := h2
-  have h_int : IsIntegral F i := by
-    exact Algebra.IsIntegral.isIntegral i
+  have h_int : IsIntegral F i := Algebra.IsIntegral.isIntegral i
   let i_pol := minpoly F i
   let iota := algebraMap F K
 

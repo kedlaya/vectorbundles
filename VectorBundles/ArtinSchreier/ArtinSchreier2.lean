@@ -2,271 +2,393 @@ module
 
 public import Mathlib.Algebra.Algebra.Basic
 public import Mathlib.Algebra.CharP.Defs
-public import Mathlib.Algebra.Group.Subgroup.ZPowers.Basic
+public import Mathlib.Algebra.CharP.Lemmas
 public import Mathlib.Algebra.Polynomial.Splits
-public import Mathlib.Algebra.Ring.Semireal.Defs
-public import Mathlib.Algebra.Ring.SumsOfSquares
 public import Mathlib.Algebra.CharP.Frobenius
 public import Mathlib.Data.Nat.Prime.Defs
 public import Mathlib.FieldTheory.AlgebraicClosure
+public import Mathlib.FieldTheory.Finite.Basic
 public import Mathlib.FieldTheory.Galois.Basic
-public import Mathlib.FieldTheory.Galois.IsGaloisGroup
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 public import Mathlib.FieldTheory.IntermediateField.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
-public import Mathlib.FieldTheory.IsRealClosed.Basic
 public import Mathlib.FieldTheory.KummerExtension
 public import Mathlib.FieldTheory.KummerPolynomial
 public import Mathlib.FieldTheory.Minpoly.Basic
 public import Mathlib.FieldTheory.Minpoly.MinpolyDiv
 public import Mathlib.FieldTheory.Perfect
-public import Mathlib.FieldTheory.PrimitiveElement
-public import Mathlib.FieldTheory.PurelyInseparable.Exponent
-public import Mathlib.FieldTheory.PurelyInseparable.PerfectClosure
-public import Mathlib.FieldTheory.PurelyInseparable.Tower
+public import Mathlib.FieldTheory.SeparableClosure
 public import Mathlib.FieldTheory.SplittingField.Construction
-public import Mathlib.FieldTheory.Relrank
-public import Mathlib.GroupTheory.Perm.Cycle.Type
 
-public import VectorBundles.ArtinSchreier.ArtinSchreier
+public import VectorBundles.ArtinSchreier.FieldTheory
+public import VectorBundles.ArtinSchreier.FieldTheory2
 public import VectorBundles.ArtinSchreier.Polynomials
+public import VectorBundles.ArtinSchreier.ArtinSchreier
 
 @[expose] public section
 
-lemma quadratic_algebraic_closure (F : Type) (K : Type)
+open IntermediateField
+open Polynomial
+
+
+lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
-  (h : Module.finrank F K = 2) :
-  ∀ (a b : F), IsSquare (a^2+b) ∨ IsSquare (-b) := by
-  intro a b
-  have h_ac: IsAlgClosed K :=
-    IsAlgClosure.isAlgClosed F
-  let g := Polynomial.monomial 4 1 + Polynomial.monomial 2 (-2*a) + Polynomial.monomial 0 (a^2+b)
-  have hg_all : g.coeff 0 = (a^2 + b) ∧ g.coeff 1 = 0 ∧ g.coeff 2 = - 2 * a ∧ g.coeff 3 = 0
-    ∧ g.coeff 4 = 1 ∧ ∀ (n : ℕ), n > 4 → g.coeff n = 0 := by
-    let g1 := Polynomial.monomial 4 (1 : F)
-    let g2 := Polynomial.monomial 2 (-2*a)
-    let g3 := Polynomial.monomial 0 (a^2+b)
-    have h_coeffg1 : g1.coeff 4 = 1 ∧  ∀ (n : ℕ), n ≠ 4 → g1.coeff n = 0 := by
-      apply monomial_coeffs 4 1
-    have h_coeffg2 : g2.coeff 2 = -2*a ∧  ∀ (n : ℕ), n ≠ 2 → g2.coeff n = 0 := by
-      apply monomial_coeffs 2 (-2*a)
-    have h_coeffg3 : g3.coeff 0 = a^2 + b ∧  ∀ (n : ℕ), n ≠ 0 → g3.coeff n = 0 := by
-      apply monomial_coeffs 0 (a^2 + b)
-    have _ : g = g1 + g2 + g3 := by
-      grind
-    have h_coeff : ∀ n : ℕ, g.coeff n = g1.coeff n + g2.coeff n + g3.coeff n := by
-      intro n
-      aesop
-    obtain ⟨h_coeffg1a, h_coeffg1b⟩ := h_coeffg1
-    obtain ⟨h_coeffg2a, h_coeffg2b⟩ := h_coeffg2
-    obtain ⟨h_coeffg3a, h_coeffg3b⟩ := h_coeffg3
+    (hp: Nat.Prime p) (h: Module.finrank F K = p)
+      (hsep: IsGalois F K): ¬ ringChar F = p := by
+  by_contra
+  let iota := algebraMap F K
+  have ha : ∃ (a : F), ∃ (x : K), minpoly F x = X ^ p -  X - C a :=
+    cyclic_char_p_as_artin_schreier F K p hp h hsep this
+  obtain ⟨a, x, ha⟩ := ha
+  have h_int : IsIntegral F x := Algebra.IsIntegral.isIntegral x
+  let aspol := X ^ p -  X -  C a
+  have h_irras : Irreducible aspol ∧ aspol.Monic ∧ aspol.natDegree = p ∧ aspol.degree = p := by
+    have h_minpoly : minpoly F x = aspol := by rw [ha]
+    have h_natdeg : aspol.natDegree = p := by
+      rw [← h_minpoly]
+      rw [ha]
+      simp
+      refine FiniteField.X_pow_card_sub_X_natDegree_eq F ?_
+      exact Nat.Prime.one_lt hp
     constructor
-    · specialize h_coeff 0
-      specialize h_coeffg1b 0
-      specialize h_coeffg2b 0
-      simp_all
+    · rw [← h_minpoly]
+      exact minpoly.irreducible h_int
     constructor
-    · specialize h_coeff 1
-      specialize h_coeffg1b 1
-      specialize h_coeffg2b 1
-      specialize h_coeffg3b 1
-      simp_all
+    · rw [← h_minpoly]
+      exact minpoly.monic h_int
     constructor
-    · specialize h_coeff 2
-      specialize h_coeffg1b 2
-      specialize h_coeffg3b 2
-      simp_all
-    constructor
-    · specialize h_coeff 3
-      specialize h_coeffg1b 3
-      specialize h_coeffg2b 3
-      specialize h_coeffg3b 3
-      simp_all
-    constructor
-    · specialize h_coeff 4
-      specialize h_coeffg2b 4
-      specialize h_coeffg3b 4
-      simp_all
-    intro n hn
-    specialize h_coeff n
-    specialize h_coeffg1b n
-    specialize h_coeffg2b n
-    specialize h_coeffg3b n
-    grind
-  obtain ⟨hg0, hg1, hg2, hg3, hg4, hg5⟩ := hg_all
-  have h_gdeg: g.natDegree = 4 ∧ g ≠ 0 ∧ g.degree = 4 := by
-    have _ : g.natDegree ≤ 4 := by
-      exact Polynomial.natDegree_le_iff_coeff_eq_zero.mpr hg5
-    have _ : g.coeff 4 ≠ 0 := by
-      exact ne_zero_of_eq_one hg4
-    have hdeg : g.natDegree = 4 := by
-      (expose_names; exact Polynomial.natDegree_eq_of_le_of_coeff_ne_zero h_1 h_2)
-    constructor
-    · exact hdeg
-    have h0 : g ≠ 0 := by
-      by_contra
-      have h0 : (0 : Polynomial K).natDegree = 0 := Polynomial.natDegree_zero
-      simp_all
-    constructor
-    · apply h0
-    have _ : Polynomial.degree g = Polynomial.natDegree g := by
-        apply Polynomial.degree_eq_natDegree
-        exact h0
+    · exact h_natdeg
+    refine (Polynomial.degree_eq_iff_natDegree_eq_of_pos ?_).mpr h_natdeg
+    exact Nat.Prime.pos hp
+  obtain ⟨h_irr, h_mon, h_natdeg, h_deg⟩ := h_irras
+
+  let pb := IntermediateField.adjoin.powerBasis h_int
+  have h_pbdim : pb.dim = p := by
+    have h_pb_dim : (minpoly F (PowerBasis.gen pb)).natDegree = PowerBasis.dim pb := by
+      apply PowerBasis.natDegree_minpoly
+    calc
+      pb.dim = (minpoly F (PowerBasis.gen pb)).natDegree := by
+        symm
+        exact h_pb_dim
+      _ = (minpoly F x).natDegree := by
+        exact Nat.succ_inj.mp (congrArg Nat.succ h_pb_dim)
+      _ = aspol.natDegree := by exact
+        Polynomial.natDegree_eq_of_degree_eq (congrArg Polynomial.degree ha)
+      _ = p := h_natdeg
+
+  let pol :=  X ^ p -  X -  C (x ^ (p-1) * (iota a))
+  have hpol : pol.natDegree = p ∧ pol.Monic :=
+    artin_schreier_poly (x ^ (p-1) * (iota a)) hp
+  obtain ⟨hpol1, hpol2⟩ := hpol
+  have hy : ∃ y : K, aeval y pol = 0 := by
+    have h_poldeg : pol.degree = p := by
+      refine (Polynomial.degree_eq_iff_natDegree_eq_of_pos ?_).mpr ?_
+      exact Nat.Prime.pos hp
+      exact Eq.symm ((fun {a b} ↦ Nat.succ_inj.mp) (congrArg Nat.succ (id (Eq.symm hpol1))))
+    have _ : IsAlgClosed K := IsAlgClosure.isAlgClosed F
+    refine IsAlgClosed.exists_aeval_eq_zero K pol ?_
+    rw [h_poldeg]
+    refine Nat.cast_ne_zero.mpr ?_
+    exact Nat.Prime.ne_zero hp
+  obtain ⟨y, hy⟩ := hy
+  have hy2 : y^p - y - x^(p-1) * iota a = 0:= by
+    unfold aeval at hy
+    unfold aevalEquiv at hy
+    subst pol
     simp_all
-  obtain ⟨h_gnatdeg, h_gnonzero, h_gdeg⟩ := h_gdeg
-  have h_gmon : g.Monic := by
-    refine Polynomial.monic_of_natDegree_le_of_coeff_eq_one 4 ?_ ?_
-    simp_all
-    exact hg4
-  have hf : ∃ f0 : Polynomial F, f0.Monic ∧ f0.natDegree = 2 ∧ f0 ∣ g := by
-    have hc : ∃ c : K, Polynomial.aeval c g = 0 := by
-      refine IsAlgClosed.exists_aeval_eq_zero_of_injective K ?_ g ?_
-      exact FaithfulSMul.algebraMap_injective F K
-      simp_all
-    obtain ⟨c, hc⟩ := hc
-    let f := minpoly F c
-    have h_int : IsIntegral F c := by
-      exact Algebra.IsIntegral.isIntegral c
-    have h_fmon: f.Monic := by
-      refine minpoly.monic ?_
-      exact h_int
-    have h_div : f ∣ g := by
-      exact minpoly.dvd_iff.mpr hc
-    have h_fdeg : f.natDegree = 1 ∨ f.natDegree = 2 := by
-      have _ : f.natDegree > 0 := by
-        refine minpoly.natDegree_pos ?_
-        exact h_int
-      have _ : f.natDegree ≤ g.natDegree := by
-        refine Polynomial.natDegree_le_of_dvd h_div ?_
-        exact Polynomial.Monic.ne_zero h_gmon
-      have _ : (minpoly F c).natDegree ≤ Module.finrank F K := by
-        apply minpoly.natDegree_le
-      grind
-    cases h_fdeg
-    · have h_e : ∃ (e : Polynomial F), e * f = g ∧ e.Monic ∧ e.natDegree + f.natDegree = g.natDegree
-  ∧ e.degree = e.natDegree :=
-        polynomial_monic_divisor h_fmon h_gmon h_div
-      obtain ⟨e, _, h_emonic, _, _⟩ := h_e
-      have _ : e.natDegree = 3 := by
-        grind
-      have hc : ∃ c : K, Polynomial.aeval c e = 0 := by
-        refine IsAlgClosed.exists_aeval_eq_zero_of_injective K ?_ e ?_
-        exact FaithfulSMul.algebraMap_injective F K
-        simp_all
-      obtain ⟨c, hc⟩ := hc
-      let f := minpoly F c
-      have h_int : IsIntegral F c := by
-        exact Algebra.IsIntegral.isIntegral c
-      have h_fmon: f.Monic := by
-        refine minpoly.monic ?_
-        exact h_int
-      have h_div2 : f ∣ e := by
-        exact minpoly.dvd_iff.mpr hc
-      have h_fdeg : f.natDegree = 1 ∨ f.natDegree = 2 := by
-        have _ : f.natDegree > 0 := by
-          refine minpoly.natDegree_pos ?_
-          exact h_int
-        have _ : f.natDegree ≤ e.natDegree := by
-          refine Polynomial.natDegree_le_of_dvd h_div2 ?_
-          exact Polynomial.Monic.ne_zero h_emonic
-        have _ : (minpoly F c).natDegree ≤ Module.finrank F K := by
-          apply minpoly.natDegree_le
-        grind
-      have h_div1a : e ∣ g := by
-        (expose_names; exact dvd_of_mul_right_eq f_1 left)
-      have h_div3 : f ∣ g := by
-        apply dvd_trans h_div2 h_div1a
-      cases h_fdeg
-      · have h_d : ∃ (d : Polynomial F), d * f = e ∧ d.Monic
-          ∧ d.natDegree + f.natDegree = e.natDegree ∧ d.degree = d.natDegree :=
-          polynomial_monic_divisor h_fmon h_emonic h_div2
-        obtain ⟨d, _, h_dmonic, _, _⟩ := h_d
-        use d
-        constructor
-        exact h_dmonic
-        constructor
-        simp_all
-        have h_div4 : d ∣ e := by
-          (expose_names; exact dvd_of_mul_right_eq f left_2)
-        exact dvd_trans h_div4 h_div1a
-      · use f
-    · use f
-  obtain ⟨f, hf1, hf2, hf3⟩ := hf
-  have h_e : ∃ (e : Polynomial F), e * f = g ∧ e.Monic ∧ e.natDegree + f.natDegree = g.natDegree
-  ∧ e.degree = e.natDegree :=
-    polynomial_monic_divisor hf1 h_gmon hf3
-  obtain ⟨e, h_ftimese, h_emon, _, _⟩ := h_e
-  have _ : f.coeff 2 = 1 := by
-    have _ :  Polynomial.coeff f (Polynomial.natDegree f) = Polynomial.leadingCoeff f :=
-      Polynomial.coeff_natDegree
-    simp_all
-  have _ : f.coeff 3 = 0 := by
-    have _ : f.natDegree ≤ 2 ↔ ∀ (N : ℕ), 2 < N → f.coeff N = 0 :=
-      Polynomial.natDegree_le_iff_coeff_eq_zero
-    simp_all
-  have _ : f.coeff 4 = 0 := by
-    have _ : f.natDegree ≤ 2 ↔ ∀ (N : ℕ), 2 < N → f.coeff N = 0 :=
-      Polynomial.natDegree_le_iff_coeff_eq_zero
-    simp_all
-  have _ : e.coeff 2 = 1 := by
-    have _ :  Polynomial.coeff e (Polynomial.natDegree e) = Polynomial.leadingCoeff e :=
-      Polynomial.coeff_natDegree
-    simp_all
-  have _ : e.coeff 3 = 0 := by
-    have _ : e.natDegree ≤ 2 ↔ ∀ (N : ℕ), 2 < N → e.coeff N = 0 :=
-      Polynomial.natDegree_le_iff_coeff_eq_zero
-    simp_all
-  have _ : e.coeff 4 = 0 := by
-    have _ : e.natDegree ≤ 2 ↔ ∀ (N : ℕ), 2 < N → e.coeff N = 0 :=
-      Polynomial.natDegree_le_iff_coeff_eq_zero
-    simp_all
-  have h_prod: ∀ (n : ℕ), (e * f).coeff n =
-    ∑ x ∈ Finset.antidiagonal n, e.coeff x.1 * f.coeff x.2 :=
-    Polynomial.coeff_mul e f
-  have h_prod0 : (e.coeff 0) * (f.coeff 0) = a^2 + b := by
-    specialize h_prod 0
-    unfold Finset.antidiagonal at h_prod
-    unfold Finset.Nat.instHasAntidiagonal at h_prod
-    simp_all
-  have h_prod1 : (e.coeff 0) * (f.coeff 1) + (e.coeff 1) * (f.coeff 0) = 0 := by
-    specialize h_prod 1
-    unfold Finset.antidiagonal at h_prod
-    unfold Finset.Nat.instHasAntidiagonal at h_prod
-    simp_all
-  have h_prod2 : (f.coeff 0) + (e.coeff 1) * (f.coeff 1) + (e.coeff 0) = -2*a := by
-    specialize h_prod 2
-    unfold Finset.antidiagonal at h_prod
-    unfold Finset.Nat.instHasAntidiagonal at h_prod
-    simp_all
-    ring
-  have h_prod3 : (e.coeff 1) + (f.coeff 1) = 0 := by
-    specialize h_prod 3
-    unfold Finset.antidiagonal at h_prod
-    unfold Finset.Nat.instHasAntidiagonal at h_prod
-    simp_all
-  by_cases f.coeff 1 = 0
-  · right
-    unfold IsSquare
-    use f.coeff 0 + a
-    have _ : e.coeff 0 = - (f.coeff 0) - 2*a := by
-      grind
-    have _ : (- (f.coeff 0) - 2*a) * (f.coeff 0) = a^2 + b := by
-      grind
-    simp_all
-    grind
-  · left
-    have _ : e.coeff 0 = f.coeff 0 := by
-      grind
-    unfold IsSquare
-    use (f.coeff 0)
+
+  have h_sub : ∀ (z : K), z ∈ F⟮x⟯ := by
+    intro z
+    have h_minpolydeg : (minpoly F x).degree = ↑(Module.finrank F K) := by
+      calc
+        (minpoly F x).degree = (X ^ p - X - C a).degree := by rw [ha]
+        _ = aspol.degree := by rfl
+        _ = p := h_deg
+        _ = ↑(Module.finrank F K) := Nat.cast_inj.mpr (id (Eq.symm h))
+    have h_topcr : F⟮x⟯ = (⊤: IntermediateField F K) :=
+      (Field.primitive_element_iff_minpoly_degree_eq F x).mpr h_minpolydeg
+    have h_ext : ∀ (z : K), z ∈ F⟮x⟯ ↔ z ∈ (⊤: IntermediateField F K) :=
+      IntermediateField.ext_iff.mp h_topcr
+    exact (h_ext z).mpr mem_top
+
+  have hy3 : ∃ (y0 : ↥F⟮x⟯), y0 = y := CanLift.prf y (h_sub y)
+  obtain ⟨y0, hy3⟩ := hy3
+  have hy4 : y0^p = y0 + x^(p-1) * iota a := by
     grind
 
-lemma quadratic_algebraic_closure_no_i (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
-  (h : Module.finrank F K = 2) :
-  ∀ (a : F), IsSquare a ∨ IsSquare (-a) := by
-  intro a
-  have _ : IsSquare (0 ^ 2 + a) ∨ IsSquare (-a) := by
-    apply quadratic_algebraic_closure F K h 0 (a)
+  have h_pb_rep : ∀ (y : ↥F⟮x⟯), ∃ (f : Polynomial F), f.natDegree < PowerBasis.dim pb ∧
+    y = (aeval (PowerBasis.gen pb)) f := PowerBasis.exists_eq_aeval pb
+
+  obtain ⟨y0_rep, h_pb_rep_y01, h_pb_rep_y02⟩ := h_pb_rep y0
+  have h_pb_rep_y01 : y0_rep.natDegree < p := by
+    calc
+      y0_rep.natDegree < pb.dim := h_pb_rep_y01
+      _ = p := h_pbdim
+
+  have _ : CharP F p := by
+    exact ringChar.of_eq this
+  have _ : ExpChar F p := by
+    exact ExpChar.prime hp
+  let frob := frobenius F p
+
+  have h_rwx : x^p = x + (algebraMap F F⟮x⟯) a := by
+    have h_evalx : aspol.aeval x = 0 := by
+      calc
+        aspol.aeval x = (minpoly F x).aeval x := by
+          exact AlgHom.congr_arg (aeval x) (id (Eq.symm ha))
+        _ = 0 := minpoly.aeval F x
+    subst aspol
+    unfold aeval at h_evalx
+    unfold aevalEquiv at h_evalx
+    simp_all
+    refine eq_add_of_sub_eq' ?_
+    grind
+
+  have h_power: (aeval pb.gen) ((map frob y0_rep).comp (X +  C a)) = y0 ^ p := by
+
+    have h_pow_by_frobexp : ∀ (g: Polynomial F), (aeval pb.gen) (map frob ((Polynomial.expand F p) g)) =
+      (aeval pb.gen g) ^ p  := by
+        intro g
+        calc
+          (aeval pb.gen) (map frob ((Polynomial.expand F p) g)) = (aeval pb.gen) (g ^ p) := by
+            refine AlgHom.congr_arg (aeval pb.gen) ?_
+            exact map_frobenius_expand p g
+          _ = (aeval pb.gen) g ^ p := map_pow (aeval pb.gen) g p
+
+    have h_apply_frob_across_p : (map frob (y0_rep.comp (X ^ p))) = (map frob y0_rep).comp (X ^ p) := by
+      calc
+        (map frob (y0_rep.comp (X ^ p)))
+          = (map frob y0_rep).comp (map frob (X ^ p)) := map_comp frob y0_rep (X ^ p)
+        _ = (map frob y0_rep).comp (X ^ p) := by
+          have h1 : map frob (X ^ p) = X ^ p := by
+            calc
+              map frob (X ^ p) = (map frob X)^p := Polynomial.map_pow frob p
+              _=  X ^ p := by
+                have h2 : map frob X = X := map_X frob
+                exact Polynomial.ext (congrFun (congrArg coeff (congrFun (congrArg HPow.hPow h2) p)))
+          exact Polynomial.ext (congrFun
+            (congrArg coeff (congrArg (Polynomial.map frob y0_rep).comp h1)))
+
+    have h_eval_at_power :  ∀ (f : Polynomial F), (aeval (pb.gen^p)) f =
+      (aeval pb.gen) (f.comp (X ^ p)) := by
+      intro f
+      have _ : aeval pb.gen (f.comp (X ^ p)) = aeval (aeval pb.gen (X ^ p)) f :=
+        aeval_comp pb.gen
+      calc
+        aeval (pb.gen ^ p) f
+        _ = aeval (aeval pb.gen (X ^ p)) f := by
+            have _ : aeval pb.gen ((X : Polynomial F) ^ p) = pb.gen ^ p := by
+              exact aeval_X_pow pb.gen
+            (expose_names; exact AlgHom.congr_fun (congrArg aeval (id (Eq.symm h_4))) f)
+        _ = (aeval pb.gen) (f.comp (X ^ p)) := by
+          exact Eq.symm (aeval_comp pb.gen)
+
+    have h_rwx_bp : pb.gen ^ p = pb.gen + (algebraMap F F⟮x⟯) a :=
+      SetLike.coe_eq_coe.mp h_rwx
+
+    have h_eval_at_sum : ∀ (f : Polynomial F), (aeval (pb.gen + (algebraMap F F⟮x⟯) a)) f =
+      (aeval pb.gen) (f.comp (X  +  C a)) := by
+      intro f
+      have _ : aeval pb.gen (f.comp (X  +  C a)) = aeval (aeval pb.gen (X  +  C a)) f :=
+        aeval_comp pb.gen
+      calc
+        aeval (pb.gen + (algebraMap F F⟮x⟯) a) f
+        _ = aeval (aeval pb.gen (X  +  C a)) f := by
+            have _ : aeval pb.gen (X  +  C a) = pb.gen + (algebraMap F F⟮x⟯) a := by
+              calc
+                aeval pb.gen (X  +  C a) = aeval pb.gen ( X : Polynomial F)
+                   + aeval pb.gen (C a) := aeval_add pb.gen
+                _ = pb.gen + aeval pb.gen (C a) := by
+                  refine (add_left_inj ((aeval pb.gen) (C a))).mpr ?_
+                  exact aeval_X pb.gen
+                _ = pb.gen + (algebraMap F F⟮x⟯) a := by
+                  refine add_left_cancel_iff.mpr ?_
+                  exact aeval_C pb.gen a
+            (expose_names; exact AlgHom.congr_fun (congrArg aeval (id (Eq.symm h_4))) f)
+        _ = (aeval pb.gen) (f.comp (X  +  C a)) := by
+          exact Eq.symm (aeval_comp pb.gen)
+
+    calc
+      (aeval pb.gen) ((map frob y0_rep).comp (X +  C a))
+      _ = (aeval (pb.gen + (algebraMap F F⟮x⟯) a)) (map frob y0_rep) :=
+        SetLike.coe_eq_coe.mp (congrArg Subtype.val (h_eval_at_sum (map frob y0_rep))).symm
+      _ = (aeval (pb.gen^p)) (map frob y0_rep) :=
+          AlgHom.congr_fun (congrArg aeval (id (Eq.symm h_rwx_bp))) (map frob y0_rep)
+      _  = (aeval pb.gen) ((map frob y0_rep).comp (X ^ p)) :=
+        SetLike.coe_eq_coe.mp (congrArg Subtype.val (h_eval_at_power (map frob y0_rep)))
+      _  = (aeval pb.gen) ((Polynomial.expand F p) (map frob y0_rep)) :=
+        AlgHom.congr_arg (aeval pb.gen) rfl
+      _  = (aeval pb.gen) (map frob ((expand F p) y0_rep)) := by
+        refine Eq.symm (AlgHom.congr_arg (aeval pb.gen) ?_)
+        exact map_expand
+      _ = (aeval pb.gen y0_rep) ^ p :=
+        SetLike.coe_eq_coe.mp (congrArg Subtype.val (h_pow_by_frobexp y0_rep))
+      _ = y0 ^ p :=
+        SetLike.coe_eq_coe.mp
+          (congrArg Subtype.val (congrFun (congrArg HPow.hPow (id (Eq.symm h_pb_rep_y02))) p))
+
+  let y0p_rep := (map frob y0_rep).comp (X +  C a)
+  let c := y0_rep.coeff (p-1)
+  have h_y0rep : y0p_rep.natDegree < p ∧ y0p_rep.coeff (p-1) = c ^ p :=
+    linear_substitution F p p a y0_rep hp (Nat.Prime.one_lt hp) h_pb_rep_y01
+  obtain ⟨h_y0rep1, h_y0rep2⟩ := h_y0rep
+  let y1p_rep := y0_rep +  X ^ (p-1) *  C a
+  have h_matchcoeff : y0p_rep.coeff (p-1) = y1p_rep.coeff (p-1) := by
+    have h7 : ∀ f : Polynomial F, ((algebraMap F⟮x⟯ K) ∘ (aeval pb.gen)) f = aeval x f := by
+      intro f
+      have h1 : ↑((aeval pb.gen) (X : Polynomial F)) = aeval x (X : Polynomial F) := by
+        unfold PowerBasis.gen
+        unfold aeval
+        unfold aevalEquiv
+        simp_all
+        refine exists_eq_subtype_mk_iff.mp ?_
+        (expose_names; exact exists_apply_eq_apply (fun a => pb.1) (h_sub_1 x))
+      aesop
+    have h5 : aeval x y0p_rep = y0 ^p := by
+      calc
+        aeval x y0p_rep = aeval pb.gen y0p_rep := Eq.symm (h7 y0p_rep)
+        _ = aeval pb.gen ((Polynomial.map frob y0_rep).comp (X + C a)) := by rfl
+        _ = y0^p := by
+          convert h_power
+          exact { mp := fun a => h_power, mpr := congrArg Subtype.val }
+    have h4 : aeval x y1p_rep = y0 + x^(p-1) * iota a := by
+      calc
+        aeval x y1p_rep = aeval pb.gen y1p_rep := Eq.symm (h7 y1p_rep)
+        _ = aeval pb.gen y0_rep + aeval pb.gen (X^(p-1) * (C a)) := by
+          subst y1p_rep
+          aesop
+        _ = y0 + aeval pb.gen (X^(p-1) * (C a)) := by
+          rw [h_pb_rep_y02]
+        _ = y0 + pb.gen ^ (p-1) * iota a := by
+          refine add_left_cancel_iff.mpr ?_
+          unfold aeval
+          unfold aevalEquiv
+          have _ : (algebraMap F ↥F⟮x⟯) a * pb.gen ^ (p - 1) = pb.gen ^ (p - 1) * (algebraMap F ↥F⟮x⟯) a := by
+            (expose_names; exact Algebra.commutes a (↑pb.gen ^ (p - 1)))
+          simp_all
+          left
+          rfl
+        _ = y0 + x^(p-1) * iota a := by
+          exact (add_left_inj (↑pb.gen ^ (p - 1) * iota a)).mpr rfl
+    have h6 : aeval x (y0p_rep - y1p_rep) = 0 := by
+      calc
+        aeval x (y0p_rep - y1p_rep) =  aeval x y0p_rep - aeval x y1p_rep :=
+          aeval_sub x
+        _ = 0 := by
+          rw [h5]
+          rw [h4]
+          exact sub_eq_zero.mpr hy4
+    have h3 : (minpoly F x) ∣ (y0p_rep - y1p_rep) := by
+      refine minpoly.dvd_iff.mpr ?_
+      exact AddMonoidHom.mem_mker.mp h6
+    have h1 : y0p_rep.natDegree < (minpoly F x).natDegree :=
+      Nat.lt_of_lt_of_eq h_y0rep1 (id (Eq.symm h_pbdim))
+    have h2 : y1p_rep.natDegree < (minpoly F x).natDegree :=
+      calc
+      y1p_rep.natDegree ≤ max y0_rep.natDegree (C a * X ^ (p - 1)).natDegree := by
+        refine natDegree_add_le_of_le ?_ ?_
+        exact Nat.le_refl y0_rep.natDegree
+        have h7 : (C a * X ^ (p - 1)).natDegree = (X ^ (p - 1) * C a).natDegree := by
+          refine Eq.symm (Monic.natDegree_mul_comm ?_ (C a))
+          exact monic_X_pow (p - 1)
+        exact Nat.le_of_eq (id (Eq.symm h7))
+      _ < p := by
+        refine Nat.max_lt.mpr ?_
+        constructor
+        · (expose_names; exact Nat.lt_of_lt_of_eq h_pb_rep_y01_1 h_pbdim)
+        · refine (Nat.le_sub_one_iff_lt ?_).mp ?_
+          exact Nat.zero_lt_of_lt h_y0rep1
+          apply Polynomial.natDegree_C_mul_X_pow_le a (p-1)
+      _ = (minpoly F x).natDegree := by
+        exact Nat.succ_inj.mp (congrArg Nat.succ (id (Eq.symm h_pbdim)))
+    have h : y0p_rep = y1p_rep :=
+      congruence_low_degree h3 h1 h2 (minpoly.monic h_int)
+    exact ext_iff.mp h (p-1)
+  have h_fieldeq: c^p - c = a := by
+    calc
+      c^p - c = y0p_rep.coeff (p-1) - c := by
+        refine sub_left_inj.mpr ?_
+        exact Eq.symm h_y0rep2
+      _ = y1p_rep.coeff (p-1) - c := sub_left_inj.mpr h_matchcoeff
+      _ = y0_rep.coeff (p-1) + (X ^ (p-1) * C a).coeff (p-1) - c := by
+        refine sub_left_inj.mpr ?_
+        exact coeff_add y0_rep (X ^ (p-1) * C a) (p - 1)
+      _ = y0_rep.coeff (p-1) + a - c := by
+        refine sub_left_inj.mpr ?_
+        refine (add_right_inj (y0_rep.coeff (p - 1))).mpr ?_
+        have h_moncoeff : ((monomial (p-1)) a).coeff (p-1) = if (p-1) = (p-1) then a else 0 :=
+          coeff_monomial
+        unfold monomial at h_moncoeff
+        simp
+      _ = c + a - c := sub_right_inj.mpr rfl
+      _ = a := by ring
+  have h_deg1 : (minpoly F x).natDegree ≤ 1 := by
+    have _ : Fact (Nat.Prime p) := fact_iff.mpr hp
+    have _ : CharP K p := by
+      (expose_names; exact (Algebra.charP_iff F K p).mp h_1)
+    let x1 := x - iota c
+    have fieldeq : x1^p = x1 := by
+      calc
+        x1^p = (x - iota c)^p := by rfl
+        _ = x^p - iota c ^ p := sub_pow_char x (iota c)
+        _ = x + iota a - iota c ^ p := sub_left_inj.mpr h_rwx
+        _ = x + iota (c^p - c) - iota c ^ p := by
+          (expose_names;
+            exact
+              sub_left_inj.mpr
+                (congrArg (HAdd.hAdd x) (congrArg (⇑iota) (id (Eq.symm h_fieldeq)))))
+        _ = x + iota (c^p) - iota c - iota c ^ p := by
+          have hsub : iota (c^p - c) = iota (c^p) - iota c :=
+            algebraMap.coe_sub (c ^ p) c
+          rw [hsub]
+          refine sub_left_inj.mpr ?_
+          exact add_sub x (iota (c ^ p)) (iota c)
+        _ = x + iota c ^ p - iota c - iota c ^ p := by simp
+        _ = x1 := by ring
+    have hn : ∃ (n : ℤ), ↑n = x1 :=
+      have h_bot : x1 ∈ (⊥ : Subfield K) := by
+        exact (Subfield.mem_bot_iff_pow_eq_self K p).mpr fieldeq
+      (mem_bot_iff_intCast p K).mp h_bot
+    obtain ⟨n, hn⟩ := hn
+    have _ : ∃ d : F, x = iota d := by
+      use (n + c)
+      calc
+      x = x1 + iota c := Eq.symm (sub_add_cancel x (iota c))
+      _ = n + iota c := by rw [← hn]
+      _ = iota n + iota c := by
+        refine (add_left_inj (iota c)).mpr ?_
+        exact Eq.symm (map_intCast iota n)
+      _ = iota (n + c) := Eq.symm (algebraMap.coe_add (↑n) c)
+    let pol1 :=  X -  C (n + c)
+    have _ : minpoly F x ∣ pol1 := by
+      have h_evalpol1 : aeval x pol1 = 0 := by
+        calc
+        aeval x pol1 = aeval x ( X -  C (n + c)) := by rfl
+        _ =  aeval x (X : Polynomial F) - aeval x ( C (n + c)) := aeval_sub x
+        _ = x - aeval x ( C (n + c)) := by
+          refine sub_left_inj.mpr ?_
+          exact aeval_X x
+        _ = x - iota (n + c) := by
+          refine sub_right_inj.mpr ?_
+          exact aeval_C x (↑n + c)
+        _ = x1 + iota c - iota (n + c) := by
+          refine sub_left_inj.mpr ?_
+          exact Eq.symm (sub_add_cancel x (iota c))
+        _ = 0 := by
+          rw [← hn]
+          simp
+      exact minpoly.dvd_iff.mpr h_evalpol1
+    calc
+      (minpoly F x).natDegree ≤ pol1.natDegree := by
+        (expose_names; refine natDegree_le_of_dvd h_6 ?_)
+        exact X_sub_C_ne_zero (↑n + c)
+      _ = 1 := natDegree_X_sub_C (n+c)
+      _ ≤ 1 := by exact NeZero.one_le
+  have _ : 1 < 1 := by
+    calc
+      1 < p := Nat.Prime.one_lt hp
+      p = aspol.natDegree := Eq.symm h_natdeg
+      _ = (minpoly F x).natDegree := Eq.symm (natDegree_eq_of_degree_eq (congrArg degree ha))
+      _ ≤ 1 := h_deg1
   simp_all

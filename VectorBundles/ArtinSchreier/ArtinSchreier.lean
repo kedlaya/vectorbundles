@@ -3,6 +3,9 @@ module
 public import Mathlib.Algebra.Algebra.Basic
 public import Mathlib.Algebra.CharP.Defs
 public import Mathlib.Algebra.Group.Subgroup.ZPowers.Basic
+public import Mathlib.Algebra.Polynomial.Splits
+public import Mathlib.Algebra.Ring.Semireal.Defs
+public import Mathlib.Algebra.Ring.SumsOfSquares
 public import Mathlib.Algebra.CharP.Frobenius
 public import Mathlib.Data.Nat.Prime.Defs
 public import Mathlib.FieldTheory.AlgebraicClosure
@@ -12,285 +15,213 @@ public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 public import Mathlib.FieldTheory.IntermediateField.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+public import Mathlib.FieldTheory.IsRealClosed.Basic
+public import Mathlib.FieldTheory.KummerExtension
+public import Mathlib.FieldTheory.KummerPolynomial
 public import Mathlib.FieldTheory.Minpoly.Basic
+public import Mathlib.FieldTheory.Minpoly.MinpolyDiv
 public import Mathlib.FieldTheory.Perfect
 public import Mathlib.FieldTheory.PrimitiveElement
 public import Mathlib.FieldTheory.PurelyInseparable.Exponent
 public import Mathlib.FieldTheory.PurelyInseparable.PerfectClosure
 public import Mathlib.FieldTheory.PurelyInseparable.Tower
+public import Mathlib.FieldTheory.SplittingField.Construction
+public import Mathlib.FieldTheory.Relrank
 
-public import VectorBundles.ArtinSchreier.FieldTheory
+public import VectorBundles.ArtinSchreier.Polynomials
+public import VectorBundles.ArtinSchreier.FieldTheory2
 
 @[expose] public section
 
-lemma finite_inseparable_extension_intermediate_small (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
-  [IsPurelyInseparable F K] (h: Module.finrank F K > 1) :
-  ∃ E: IntermediateField F K, Module.finrank F E = ringChar F := by
-
-  have hx : ∃ x : K, x ∉ (algebraMap F K).range := by
-    have h1 : Module.finrank F K > 1 → ¬ Function.Surjective (algebraMap F K) :=
-      finite_extension_degree_one F K
-    unfold Function.Surjective at h1
-    simp_all
-  obtain ⟨x, hx⟩ := hx
-  let e := IsPurelyInseparable.elemExponent F x
-  have he : e > 0 := by
-    by_contra
-    subst e
-    unfold IsPurelyInseparable.elemExponent at this
-    simp_all
-    obtain ⟨x₁, h⟩ := this
-    specialize hx x₁
-    have _ : (algebraMap F K) x₁ = x := by
-      refine minpoly.root ?_ ?_
-      exact Algebra.IsIntegral.isIntegral x
-      refine Polynomial.IsRoot.def.mpr ?_
-      have _ : Polynomial.eval x₁ (Polynomial.X - Polynomial.C x₁) = 0 := by
-        simp_all
+lemma quadratic_algebraic_closure (F : Type) (K : Type)
+  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
+  (h : Module.finrank F K = 2) :
+  ∀ (a b : F), IsSquare (a^2+b) ∨ IsSquare (-b) := by
+  intro a b
+  have h_ac: IsAlgClosed K := IsAlgClosure.isAlgClosed F
+  let g := Polynomial.monomial 4 1 + Polynomial.monomial 2 (-2*a) + Polynomial.monomial 0 (a^2+b)
+  have hg_all : g.coeff 0 = (a^2 + b) ∧ g.coeff 1 = 0 ∧ g.coeff 2 = - 2 * a ∧ g.coeff 3 = 0
+    ∧ g.coeff 4 = 1 ∧ ∀ (n : ℕ), n > 4 → g.coeff n = 0 := by
+    let g1 := Polynomial.monomial 4 (1 : F)
+    let g2 := Polynomial.monomial 2 (-2*a)
+    let g3 := Polynomial.monomial 0 (a^2+b)
+    have h_coeffg1c : ∀ n : ℕ, g1.coeff n = if 4 = n then 1 else 0 := by
+      intro n
+      apply Polynomial.coeff_monomial
+    have h_coeffg2c : ∀ n : ℕ, g2.coeff n = if 2 = n then (-2*a) else 0 := by
+      intro n
+      apply Polynomial.coeff_monomial
+    have h_coeffg3c : ∀ n : ℕ, g3.coeff n = if 0 = n then (a^2+b) else 0 := by
+      intro n
+      apply Polynomial.coeff_monomial
+    have _ : g = g1 + g2 + g3 := by
       grind
-    grind
-  let p := ringChar F
-  let q := ringExpChar F
-  have h : ∀ (p q : ℕ) [CharP F p] [ExpChar F q], p = q ↔ Nat.Prime p :=
-    char_eq_expChar_iff F
-  specialize h p (ringExpChar F)
-  have hpp : Nat.Prime p := by
-    have hn : ∃ n, Module.finrank F K = q ^ n := by
-      apply IsPurelyInseparable.finrank_eq_pow
-    have _ : Nat.Prime p ∨ p = 0 := by
-      apply CharP.char_is_prime_or_zero F p
-    have _ : ExpChar F q := by
-      exact ringExpChar.expChar F
-    have hpq : ∀ (p q : ℕ) [CharP F p] [ExpChar F q], q = 1 ↔ p = 0 := by
-      exact expChar_one_iff_char_zero F
-    specialize hpq p q
-    by_contra
-    simp_all
-  have hp : p = ringExpChar F := by
-    simp_all
-  let y := x^(p^(e-1))
-  let z := IsPurelyInseparable.elemReduct F x
-  let pol1 :=  Polynomial.X ^ (p^e) - Polynomial.C z
-  have _ : minpoly F x = pol1 := by
-    grind [IsPurelyInseparable.minpoly_eq F x]
-  let pol := Polynomial.X ^ p - Polynomial.C z
-  have hx1 : IsIntegral F x := by
-    exact Algebra.IsIntegral.isIntegral x
-  have _ : IsIntegral F y := by
-    exact Algebra.IsIntegral.isIntegral y
-  have hirr : Irreducible pol := by
-    have hirr1 : Irreducible (minpoly F x) := by
-      apply minpoly.irreducible
-      simp_all
-    have hirr2 : Irreducible (Polynomial.X ^ (p^e) - Polynomial.C z) →
-    ∀ {m : ℕ}, m ∣ p^e → m ≠ 1 → ∀ (b : F), b ^ m ≠ z :=
-      pow_ne_of_irreducible_X_pow_sub_C
-    have _ : ∀ (a : F), a^p ≠ z := by
-      apply hirr2
-      grind
-      simp
-      left
-      grind
-      exact CharP.ringChar_ne_one
-    have _ : Irreducible (Polynomial.X ^ p - Polynomial.C z) ↔ ∀ (a : F), a ^ p ≠ z := by
-      apply X_pow_sub_C_irreducible_iff_of_prime
-      apply hpp
-    grind
-  have _ : minpoly F y = pol := by
-    have _ : (Polynomial.aeval x) (minpoly F x) = 0 := by
-      apply minpoly.aeval
-    have _ : pol1.aeval x = 0 := by
-      simp_all
-    have _ : pol.aeval y = pol1.aeval x := by
-      unfold Polynomial.aeval
-      simp_all
-      subst pol
-      subst pol1
-      subst y
-      unfold Polynomial.aevalEquiv
-      simp
-      have h: ∀ (x : K) (p e : ℕ), (x ^ p ^ e) ^ p = x ^ p ^ (e+1) := by
-        ring_nf
-        simp_all
-      have h1 : ∃ (f : ℕ), e = f + 1 := by
-        simp_all
-      obtain ⟨f, _ ⟩ := h1
-      specialize h x p f
-      simp_all
-    have hy : pol.aeval y = 0 := by
-      simp_all
-    have _ : pol.aeval y = 0 ↔ minpoly F y ∣ pol := by
-      apply minpoly.isIntegrallyClosed_dvd_iff
-      simp_all
-    have hpol : minpoly F y ∣ pol := by
-      simp_all
-    unfold Polynomial.aeval at hy
-    have _ : ExpChar F p := by
-      exact ringExpChar.eq_iff.mp (id (Eq.symm hp))
-    have hp1 : ∀ [ExpChar F p], 0 < p := by
-      apply expChar_pos
-    have _ : pol.Monic := by
-      refine Polynomial.monic_X_pow_sub_C z ?_
-      specialize hp1
-      linarith
-    have _ : (minpoly F y).Monic := by
-      (expose_names; exact minpoly.monic h_3)
-    have hfg : ∀ (f g : Polynomial F) (hf: f.Monic) (hg: Irreducible g) (hg1 : g.Monic) (_: f.natDegree > 0) (_ : f ∣ g),
-      f = g := by
-      intro f g hf hg hg1 hfd hdiv
-      have _ : g %ₘ f = 0 := by
-        grind [Polynomial.modByMonic_eq_zero_iff_dvd]
-      let quo := g /ₘ f
-      have _ : f * quo + g %ₘ f = g := by
-        grind [Polynomial.modByMonic_add_div]
-      have _ : f * quo = g := by
-        grind
-      have _ : quo ≠ 0 := by
-        have _ : g ≠ 0 := by
-          exact Polynomial.Monic.ne_zero hg1
-        grind
-      have hlead : (f * quo).leadingCoeff = f.leadingCoeff * quo.leadingCoeff := by
-        apply Polynomial.leadingCoeff_mul
-      have _ : quo.Monic := by
-        refine Polynomial.Monic.def.mpr ?_
-        simp_all
-      have hirr2 : (Irreducible g ↔
-        g ≠ 1 ∧ ∀ (f g_1: Polynomial F), f.Monic → g_1.Monic → f * g_1 = g → f.natDegree = 0 ∨ g_1.natDegree = 0) :=
-        Polynomial.Monic.irreducible_iff_natDegree hg1
-      simp_all
-      obtain ⟨_, hg⟩ := hg
-      specialize hg f quo
-      have _ : f ≠ 1 := by
-        exact (Polynomial.Monic.natDegree_pos hf).mp hfd
-      simp_all
-    specialize hfg (minpoly F y) pol
-    have _ : (minpoly F y).natDegree > 0 := by
-      (expose_names; exact minpoly.natDegree_pos h_3)
-    simp_all
-  let E := IntermediateField.adjoin F {y}
-  use E
-  have _ : IsIntegral F y →  Module.finrank F E = (minpoly F y).natDegree := by
-    exact fun a => IntermediateField.adjoin.finrank a
-  have _ : pol.natDegree = p := by
-    exact Polynomial.natDegree_X_pow_sub_C
-  grind
-
-lemma finite_inseparable_extension_intermediate_internal (n : ℕ) :
-  ∀ (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
-  [IsPurelyInseparable F K], Module.finrank F K = (ringChar F)^n ∧ n > 0 →
-  ∃ (E : IntermediateField F K), Module.finrank E K = ringChar F := by
-  induction n with
-  | zero => simp_all -- This case doesn't occur
-  | succ n hyp =>
-    intro F K _ _ _ _ _ t
-    obtain ⟨h1, h2⟩ := t
-    let p := ringChar F
-    let q := ringExpChar F
-    have h : ∀ (p q : ℕ) [CharP F p] [ExpChar F q], p = q ↔ Nat.Prime p :=
-      char_eq_expChar_iff F
-    specialize h p (ringExpChar F)
-    have _ : Nat.Prime p ∨ p = 0 := by
-      apply CharP.char_is_prime_or_zero F p
-    have _ : ExpChar F q := by
-      exact ringExpChar.expChar F
-    have hn : ∃ n, Module.finrank F K = q ^ n := by
-      apply IsPurelyInseparable.finrank_eq_pow
-    obtain ⟨n₁, hn⟩ := hn
-    have hpp : Nat.Prime p := by
-      have hpq : ∀ (p q : ℕ) [CharP F p] [ExpChar F q], q = 1 ↔ p = 0 := by
-        exact expChar_one_iff_char_zero F
-      specialize hpq p q
-      by_contra
-      grind
-    have hp : p = ringExpChar F := by
-      simp_all
-    have _ : ExpChar F p := by
-      exact ringExpChar.eq_iff.mp (id (Eq.symm hp))
-    have _ : p ≥ 2 := by
-      exact Nat.Prime.two_le hpp
-    by_cases n = 0
-    · use (⊥: IntermediateField F K)
-      simp_all
-    · have _ : p^(n+1) ≥ 2^(n+1) := by
-        (expose_names; exact Nat.pow_le_pow_left h_4 (n + 1))
-      have _ : 2^(n+1) > 1 := by
-        exact Nat.one_lt_two_pow' n
-      have _ : p^(n+1) > 1 := by
-        grind
-      have hr : Module.finrank F K > 1 := by
-        grind
-      have hE₀: ∃ E₀: IntermediateField F K, Module.finrank F E₀ = ringChar F :=
-        finite_inseparable_extension_intermediate_small F K hr
-      obtain ⟨E₀, hE₀⟩ := hE₀
-      let _ := IntermediateField E₀ K
-      have _ : Module.finrank E₀ K = ringChar E₀ ^ n ∧ n > 0 →
-        ∃ (E: IntermediateField E₀ K), Module.finrank E K = ringChar E₀ :=
-        hyp E₀ K
-      have _ : Module.finrank F E₀ = p := by
-        simp_all
-        grind
-      have _ : ringChar E₀ = p := by
-        exact Eq.symm (Algebra.ringChar_eq F ↥E₀)
-      have hE : ∃ E: IntermediateField E₀ K, Module.finrank E K = ringChar E₀ := by
-        apply hyp E₀ K
-        constructor
-        · have hmul : Module.finrank F E₀ * Module.finrank E₀ K = Module.finrank F K :=
-            Module.finrank_mul_finrank F E₀ K
-          have _ : Module.finrank F K = p^(n+1) := by
-            simp_all
-          have h3 : p * Module.finrank E₀ K = p * p^n := by
-            grind
-          have _ : p > 0 := by
-            (expose_names; exact Nat.zero_lt_of_lt h_4)
-          have h4 : (p * Module.finrank E₀ K) / p = (p * p^n) / p := by
-            grind
-          have h4 (a b c : ℕ) : a * b = a * c ∧ a ≠ 0 → b = c := by
-            intro h5
-            obtain ⟨h5, h6⟩ := h5
-            exact (Nat.mul_right_inj h6).mp h5
-          have _ :  Module.finrank E₀ K = p^n := by
-            grind
-          grind
-        · grind
-      obtain ⟨E, _⟩ := hE
-      let E₁ := IntermediateField.restrictScalars F E
-      use E₁
-      grind
-
-lemma finite_inseparable_extension_intermediate (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
-  [IsPurelyInseparable F K] (hr: Module.finrank F K > 1) :
-  ∃ E : IntermediateField F K, Module.finrank E K = ringChar F := by
-    let p := ringChar F
-    let q := ringExpChar F
-    have h : ∀ (p q : ℕ) [CharP F p] [ExpChar F q], p = q ↔ Nat.Prime p :=
-      char_eq_expChar_iff F
-    specialize h p (ringExpChar F)
-    have _ : Nat.Prime p ∨ p = 0 := by
-      apply CharP.char_is_prime_or_zero F p
-    have _ : ExpChar F q := by
-      exact ringExpChar.expChar F
-    have hn : ∃ n, Module.finrank F K = q ^ n := by
-      apply IsPurelyInseparable.finrank_eq_pow
-    obtain ⟨n, hn⟩ := hn
-    have hpp : Nat.Prime p := by
-      have hpq : ∀ (p q : ℕ) [CharP F p] [ExpChar F q], q = 1 ↔ p = 0 := by
-        exact expChar_one_iff_char_zero F
-      specialize hpq p q
-      by_contra
-      simp_all
-    have hp : p = ringExpChar F := by
-      simp_all
-    apply finite_inseparable_extension_intermediate_internal n F K
+    have h_coeff : ∀ n : ℕ, g.coeff n = g1.coeff n + g2.coeff n + g3.coeff n := by
+      intro n
+      aesop
     constructor
-    · have hp : p = ringExpChar F := by
+    · simp_all
+    constructor
+    · simp_all
+    constructor
+    · simp_all
+    constructor
+    · simp_all
+    constructor
+    · simp_all
+    · intro n hn
+      grind
+  obtain ⟨hg0, hg1, hg2, hg3, hg4, hg5⟩ := hg_all
+  have h_gdeg: g.natDegree = 4 ∧ g ≠ 0 ∧ g.degree = 4 := by
+    have h1 : g.natDegree ≤ 4 :=
+      Polynomial.natDegree_le_iff_coeff_eq_zero.mpr hg5
+    have h2 : g.coeff 4 ≠ 0 := ne_zero_of_eq_one hg4
+    have hdeg : g.natDegree = 4 :=
+      Polynomial.natDegree_eq_of_le_of_coeff_ne_zero h1 h2
+    constructor
+    · exact hdeg
+    have h0 : g ≠ 0 := by
+      by_contra
+      have h0 : (0 : Polynomial K).natDegree = 0 := Polynomial.natDegree_zero
+      simp_all
+    constructor
+    · apply h0
+    have _ : Polynomial.degree g = Polynomial.natDegree g := by
+        apply Polynomial.degree_eq_natDegree
+        exact h0
+    simp_all
+  obtain ⟨h_gnatdeg, h_gnonzero, h_gdeg⟩ := h_gdeg
+  have h_gmon : g.Monic := by
+    refine Polynomial.monic_of_natDegree_le_of_coeff_eq_one 4 ?_ ?_
+    simp_all
+    exact hg4
+  have hf : ∃ f0 : Polynomial F, f0.Monic ∧ f0.natDegree = 2 ∧ f0 ∣ g := by
+    have hc : ∃ c : K, Polynomial.aeval c g = 0 := by
+      refine IsAlgClosed.exists_aeval_eq_zero_of_injective K ?_ g ?_
+      exact FaithfulSMul.algebraMap_injective F K
+      simp_all
+    obtain ⟨c, hc⟩ := hc
+    let f := minpoly F c
+    have h_int : IsIntegral F c := Algebra.IsIntegral.isIntegral c
+    have h_fmon: f.Monic := minpoly.monic h_int
+    have h_div : f ∣ g := minpoly.dvd_iff.mpr hc
+    have h_fdeg : f.natDegree = 1 ∨ f.natDegree = 2 := by
+      have _ : f.natDegree > 0 := by
+        refine minpoly.natDegree_pos ?_
+        exact h_int
+      have _ : f.natDegree ≤ g.natDegree := by
+        refine Polynomial.natDegree_le_of_dvd h_div ?_
+        exact Polynomial.Monic.ne_zero h_gmon
+      have _ : (minpoly F c).natDegree ≤ Module.finrank F K := by
+        apply minpoly.natDegree_le
+      grind
+    cases h_fdeg
+    · have h_e : ∃ (e : Polynomial F), e * f = g ∧ e.Monic ∧ e.natDegree + f.natDegree = g.natDegree
+        ∧ e.degree = e.natDegree := polynomial_monic_divisor h_fmon h_gmon h_div
+      obtain ⟨e, h_ef1, h_emonic, h_ef2, _⟩ := h_e
+      have _ : e.natDegree = 3 := by grind
+      have h_div1a : e ∣ g := dvd_of_mul_right_eq f h_ef1
+      have hc : ∃ c : K, Polynomial.aeval c e = 0 := by
+        refine IsAlgClosed.exists_aeval_eq_zero_of_injective K ?_ e ?_
+        exact FaithfulSMul.algebraMap_injective F K
         simp_all
-      grind
-    · have _ : p > 1 := by
-        exact Nat.Prime.one_lt hpp
-      have _ : p^n > 1 := by
+      obtain ⟨c, hc⟩ := hc
+      let f := minpoly F c
+      have h_int : IsIntegral F c := Algebra.IsIntegral.isIntegral c
+      have h_fmon: f.Monic := minpoly.monic h_int
+      have h_div2 : f ∣ e := minpoly.dvd_iff.mpr hc
+      have h_fdeg : f.natDegree = 1 ∨ f.natDegree = 2 := by
+        have _ : f.natDegree > 0 := by
+          refine minpoly.natDegree_pos ?_
+          exact h_int
+        have _ : f.natDegree ≤ e.natDegree := by
+          refine Polynomial.natDegree_le_of_dvd h_div2 ?_
+          exact Polynomial.Monic.ne_zero h_emonic
+        have _ : (minpoly F c).natDegree ≤ Module.finrank F K := by
+          apply minpoly.natDegree_le
         grind
-      have _ : n > 0 := by
-        (expose_names; exact (Nat.pow_lt_pow_iff_right h_3).mp h_4)
+      have h_div3 : f ∣ g := dvd_trans h_div2 h_div1a
+      cases h_fdeg
+      · have h_d : ∃ (d : Polynomial F), d * f = e ∧ d.Monic
+          ∧ d.natDegree + f.natDegree = e.natDegree ∧ d.degree = d.natDegree :=
+          polynomial_monic_divisor h_fmon h_emonic h_div2
+        obtain ⟨d, h_d1, h_dmonic, h_d2, h_d3⟩ := h_d
+        use d
+        constructor
+        · exact h_dmonic
+        constructor
+        · linarith
+        · have h_div4 : d ∣ e := dvd_of_mul_right_eq f h_d1
+          exact dvd_trans h_div4 h_div1a
+      · use f
+    · use f
+  obtain ⟨f, hf1, hf2, hf3⟩ := hf
+  have h_e : ∃ (e : Polynomial F), e * f = g ∧ e.Monic ∧ e.natDegree + f.natDegree = g.natDegree
+    ∧ e.degree = e.natDegree :=
+    polynomial_monic_divisor hf1 h_gmon hf3
+  obtain ⟨e, h_ftimese, h_emon, _, _⟩ := h_e
+  have _ : f.coeff 2 = 1 := by
+    have _ :  Polynomial.coeff f (Polynomial.natDegree f) = Polynomial.leadingCoeff f :=
+      Polynomial.coeff_natDegree
+    simp_all
+  have _ : f.coeff 3 = 0 := by
+    have _ : f.natDegree ≤ 2 ↔ ∀ (N : ℕ), 2 < N → f.coeff N = 0 :=
+      Polynomial.natDegree_le_iff_coeff_eq_zero
+    simp_all
+  have _ : f.coeff 4 = 0 := by
+    have _ : f.natDegree ≤ 2 ↔ ∀ (N : ℕ), 2 < N → f.coeff N = 0 :=
+      Polynomial.natDegree_le_iff_coeff_eq_zero
+    simp_all
+  have _ : e.coeff 2 = 1 := by
+    have _ :  Polynomial.coeff e (Polynomial.natDegree e) = Polynomial.leadingCoeff e :=
+      Polynomial.coeff_natDegree
+    simp_all
+  have _ : e.coeff 3 = 0 ∧ e.coeff 4 = 0 := by
+    have _ : e.natDegree ≤ 2 ↔ ∀ (N : ℕ), 2 < N → e.coeff N = 0 :=
+      Polynomial.natDegree_le_iff_coeff_eq_zero
+    simp_all
+  have h_prod: ∀ (n : ℕ), (e * f).coeff n =
+    ∑ x ∈ Finset.antidiagonal n, e.coeff x.1 * f.coeff x.2 :=
+    Polynomial.coeff_mul e f
+  have h_prod0 : (e.coeff 0) * (f.coeff 0) = a^2 + b := by
+    rw [←hg0, ←h_ftimese]
+    apply (Polynomial.mul_coeff_zero e f).symm
+  have h_prod1 : (e.coeff 0) * (f.coeff 1) + (e.coeff 1) * (f.coeff 0) = 0 := by
+    rw [←hg1, ←h_ftimese]
+    apply (Polynomial.mul_coeff_one e f).symm
+  have h_prod2 : (f.coeff 0) + (e.coeff 1) * (f.coeff 1) + (e.coeff 0) = -2*a := by
+    specialize h_prod 2
+    unfold Finset.antidiagonal at h_prod
+    unfold Finset.Nat.instHasAntidiagonal at h_prod
+    simp_all
+    ring
+  have h_prod3 : (e.coeff 1) + (f.coeff 1) = 0 := by
+    specialize h_prod 3
+    unfold Finset.antidiagonal at h_prod
+    unfold Finset.Nat.instHasAntidiagonal at h_prod
+    simp_all
+  by_cases f.coeff 1 = 0
+  · right
+    unfold IsSquare
+    use f.coeff 0 + a
+    have _ : e.coeff 0 = - (f.coeff 0) - 2*a := by
       grind
+    have _ : (- (f.coeff 0) - 2*a) * (f.coeff 0) = a^2 + b := by
+      grind
+    simp_all
+    grind
+  · left
+    have _ : e.coeff 0 = f.coeff 0 := by
+      grind
+    unfold IsSquare
+    use (f.coeff 0)
+    grind
+
+lemma quadratic_algebraic_closure_no_i (F : Type) (K : Type)
+  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
+  (h : Module.finrank F K = 2) :
+  ∀ (a : F), IsSquare a ∨ IsSquare (-a) := by
+  intro a
+  have _ : IsSquare (0 ^ 2 + a) ∨ IsSquare (-a) := by
+    apply quadratic_algebraic_closure F K h 0 (a)
+  simp_all

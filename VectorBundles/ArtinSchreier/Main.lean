@@ -22,10 +22,10 @@ public import Mathlib.FieldTheory.PurelyInseparable.PerfectClosure
 public import Mathlib.FieldTheory.PurelyInseparable.Tower
 public import Mathlib.FieldTheory.Relrank
 
+public import VectorBundles.ArtinSchreier.FieldTheory2
 public import VectorBundles.ArtinSchreier.ArtinSchreier
 public import VectorBundles.ArtinSchreier.ArtinSchreier2
 public import VectorBundles.ArtinSchreier.ArtinSchreier3
-public import VectorBundles.ArtinSchreier.ArtinSchreier4
 public import VectorBundles.ArtinSchreier.RealClosed
 
 @[expose] public section
@@ -35,8 +35,7 @@ open IntermediateField
 theorem artin_schreier_thm (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
   [IsAlgClosure F K] : IsAlgClosed F ∨ IsRealClosed F := by
-  have _: IsAlgClosed K := by
-    exact IsAlgClosure.isAlgClosed F
+  have _: IsAlgClosed K := IsAlgClosure.isAlgClosed F
   have have_i: ∃ i : K, i^2 = -1 := by
     apply IsAlgClosed.exists_pow_nat_eq
     simp -- to prove 0 < 2
@@ -44,12 +43,10 @@ theorem artin_schreier_thm (F : Type) (K : Type)
   if hF : i ∈ (algebraMap F K).range then
     left
     apply finite_algebraic_closure_with_i F K
-    have hj : ∃ j : F, (algebraMap F K) j = i := by
-      exact Set.mem_range.mp hF
+    have hj : ∃ j : F, (algebraMap F K) j = i := Set.mem_range.mp hF
     obtain ⟨j, hj⟩ := hj
     have _ : j^2 = -1 := by
-      have _ : Function.Injective (algebraMap F K) := by
-        exact FaithfulSMul.algebraMap_injective F K
+      have _ : Function.Injective (algebraMap F K) := FaithfulSMul.algebraMap_injective F K
       have _ : (algebraMap F K) (j^2) = (algebraMap F K) (-1) := by
         simp_all
       grind
@@ -57,15 +54,13 @@ theorem artin_schreier_thm (F : Type) (K : Type)
   else
     right
     let F₁ := F⟮i⟯
-    have h_iF1 : i ∈ F₁ :=
-      mem_adjoin_simple_self F i
+    have h_iF1 : i ∈ F₁ := mem_adjoin_simple_self F i
     let iota₁ := algebraMap F₁ K
     have _: IsAlgClosure F₁ K := by
       apply IsAlgClosure.ofAlgebraic F₁ K
     have _: IsAlgClosed F₁ := by
       apply finite_algebraic_closure_with_i F₁ K
-      have hj : ∃ j : F₁, iota₁ j = i :=
-        CanLift.prf i h_iF1
+      have hj : ∃ j : F₁, iota₁ j = i := CanLift.prf i h_iF1
       obtain ⟨j, hj⟩ := hj
       have _ : j^2 = -1 := by
         have _ : Function.Injective iota₁ := by
@@ -74,8 +69,7 @@ theorem artin_schreier_thm (F : Type) (K : Type)
           simp_all
         grind
       use j
-    have _ : IsAlgClosure F₁ F₁ := by
-      exact IsAlgClosed.instIsAlgClosure ↥F₁
+    have _ : IsAlgClosure F₁ F₁ := IsAlgClosed.instIsAlgClosure ↥F₁
     have _ : ∀ i : F, i^2 ≠ -1 := by
       by_contra
       push Not at this
