@@ -18,17 +18,18 @@ public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 public import Mathlib.FieldTheory.KummerExtension
 public import Mathlib.FieldTheory.Minpoly.Basic
 public import Mathlib.FieldTheory.Minpoly.MinpolyDiv
-public import Mathlib.FieldTheory.Perfect
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 
 public import VectorBundles.ArtinSchreier.Polynomials
 
 @[expose] public section
 
 open IntermediateField
+open Polynomial
 
 lemma finite_extension_degree_one (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] :
-  Module.finrank F K > 1 → ¬ Function.Surjective (algebraMap F K) := by
+    Module.finrank F K > 1 → ¬ Function.Surjective (algebraMap F K) := by
     intro h
     by_contra
     have h1 : 0 ≤ Module.rank F (Algebra.linearMap F K).ker :=
@@ -45,7 +46,7 @@ lemma finite_extension_degree_one (F : Type) (K : Type)
 lemma fixed_field_of_cyclic_subgroup (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
     [IsGalois F K] (g : Gal(K/F)) : ∀ x : K, g x = x →
-      x ∈ IntermediateField.fixedField (Subgroup.zpowers g) := by
+      x ∈ fixedField (Subgroup.zpowers g) := by
   intro x hg
   have h_pow : ∀ n : ℕ, (g^n) x = x := by
     intro n
@@ -66,16 +67,15 @@ lemma fixed_field_of_cyclic_subgroup (F : Type) (K : Type)
       refine (Submonoid.mem_powers_iff h g).mp ?_
       exact mem_powers_iff_mem_zpowers.mpr h1
     obtain ⟨n, h2⟩ := h2
-    specialize h_pow n
     subst h
-    exact h_pow
-  exact (IntermediateField.mem_fixedField_iff (Subgroup.zpowers g) x).mpr h_sub
+    exact h_pow n
+  exact (mem_fixedField_iff (Subgroup.zpowers g) x).mpr h_sub
 
 lemma cyclic_char_p_as_artin_schreier (F : Type) (K : Type) (p : ℕ)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
     (hp: Nat.Prime p) (hrank: Module.finrank F K = p)
       (hsep: IsGalois F K) (hchar: ringChar F = p) : ∃ (a : F), ∃ (x : K),
-         minpoly F x = Polynomial.X ^ p - Polynomial.X - Polynomial.C a := by
+         minpoly F x = X ^ p - X - C a := by
   have hy : ∃ (y : K), Algebra.trace F K y = 1 := by
     have h : Function.Surjective (Algebra.trace F K) := Algebra.trace_surjective F K
     exact Set.mem_range.mp (h 1)
@@ -196,13 +196,12 @@ lemma cyclic_char_p_as_artin_schreier (F : Type) (K : Type) (p : ℕ)
             exact AddMonoidWithOne.natCast_zero
           exact add_eq_left.mpr h
         _ = ∑ i ∈ Finset.range (p-1), f (i+1) + f (p-1+1) := by
-          have _ : f p = 0 := by
-            have _ : (p : K) = 0 := CharP.cast_eq_zero K p
-            (expose_names; exact mul_eq_zero_of_right (-(g ^ p) y) h)
+          have _ : f p = 0 :=
+            have h : (p : K) = 0 := CharP.cast_eq_zero K p
+            mul_eq_zero_of_right (-(g ^ p) y) h
           simp_all
-        _ = ∑ i ∈ Finset.range (p-1+1), f (i+1) := by
-          symm
-          apply Finset.sum_range_succ (fun i => f (i+1)) (p-1)
+        _ = ∑ i ∈ Finset.range (p-1+1), f (i+1) :=
+          (Finset.sum_range_succ (fun i => f (i+1)) (p-1)).symm
         _ = ∑ i ∈ Finset.range p, f (i+1) := by simp_all
         _ = ∑ i : Finset.range p, f (i+1) := by
           refine Finset.sum_subtype (Finset.range p) ?_ (fun i => f (i+1))
@@ -210,23 +209,22 @@ lemma cyclic_char_p_as_artin_schreier (F : Type) (K : Type) (p : ℕ)
         _ = ∑ i : Finset.range p, - ((g^((i+1):ℕ)) y) * ((i+1):K) := by
           subst f
           simp
-    have _ : ∑ i : Finset.range p, - ((g^((i+1):ℕ)) y) * (i:K) = z + 1 := by
-      have _ : ∑ i : Finset.range p, - ((g^((i+1):ℕ)) y) * (i:K) =
-         ∑ i : Finset.range p, (- (((g^((i+1):ℕ)) y) * ((i:K) + 1)) + (g^((i+1):ℕ)) y)
-        := by
+    have : ∑ i : Finset.range p, - ((g^((i+1):ℕ)) y) * (i:K) = z + 1 := by
+      have : ∑ i : Finset.range p, - ((g^((i+1):ℕ)) y) * (i:K) =
+        ∑ i : Finset.range p, (- (((g^((i+1):ℕ)) y) * ((i:K) + 1)) + (g^((i+1):ℕ)) y) := by
         have _ : ∀ i : Finset.range p, ( - (((g^((i+1):ℕ)) y) * ( (i:K) + 1 )) + (g^((i+1):ℕ)) y)
           =  - ((g^((i+1):ℕ)) y) * ( i:K ) := by
           intro i
-          have h : - (((g^((i+1):ℕ)) y) * ( (i:K) + 1 ))
-            =  - (((g^((i+1):ℕ)) y) * ( i:K )) - (((g^((i+1):ℕ)) y) * ( 1 )) := by grind
-          have h_sub :  (- (((g^((i+1):ℕ)) y) * ( (i:K) + 1 ))) + ((g^((i+1):ℕ)) y)
-            =  (- (((g^((i+1):ℕ)) y) * ( i:K )) - (((g^((i+1):ℕ)) y) * ( 1 ))) + ((g^((i+1):ℕ)) y) :=
+          have h : - (((g^((i+1):ℕ)) y) * ((i:K) + 1))
+            =  - (((g^((i+1):ℕ)) y) * (i:K)) - (((g^((i+1):ℕ)) y) * 1) := by grind
+          have :  (- (((g^((i+1):ℕ)) y) * ((i:K) + 1))) + ((g^((i+1):ℕ)) y)
+            =  (- (((g^((i+1):ℕ)) y) * (i:K)) - (((g^((i+1):ℕ)) y) * 1)) + ((g^((i+1):ℕ)) y) :=
               (add_left_inj ((g^((i+1):ℕ)) y)).mpr h
-          have _ : (- (((g^((i+1):ℕ)) y) * ( i:K )) - (((g^((i+1):ℕ)) y) * ( 1 ))) + ((g^((i+1):ℕ)) y)
-            = - ((g^((i+1):ℕ)) y) * ( i:K ) := by simp
+          have _ : (- (((g^((i+1):ℕ)) y) * (i:K)) - (((g^((i+1):ℕ)) y) * 1)) + ((g^((i+1):ℕ)) y)
+            = - ((g^((i+1):ℕ)) y) * (i:K) := by simp
           simp_all
         grind
-      have _ : ∑ i : Finset.range p, ( - (((g^((i+1):ℕ)) y) * ( (i:K) + 1 )) + (g^((i+1):ℕ)) y)
+      have : ∑ i : Finset.range p, ( - (((g^((i+1):ℕ)) y) * ( (i:K) + 1 )) + (g^((i+1):ℕ)) y)
         = ∑ i : Finset.range p, ( - (((g^((i+1):ℕ)) y) * ( (i:K) + 1 )))
         +  ∑ i : Finset.range p, ((g^((i+1):ℕ)) y) := Finset.sum_add_distrib
       simp_all
@@ -240,18 +238,18 @@ lemma cyclic_char_p_as_artin_schreier (F : Type) (K : Type) (p : ℕ)
         _ = z^p + 1^p - (z + 1) := sub_left_inj.mpr (add_pow_char z 1 p)
         _ = z^p + 1 - (z + 1) := by simp
         _ = b := add_sub_add_right_eq_sub (z ^ p) z 1
-    have h_fix : b ∈ IntermediateField.fixedField (Subgroup.zpowers g) :=
+    have h_fix : b ∈ fixedField (Subgroup.zpowers g) :=
       fixed_field_of_cyclic_subgroup F K g b hb
     aesop
   obtain ⟨a, ha⟩ := ha
   use a, z
-  let pol := Polynomial.X ^ p - Polynomial.X - Polynomial.C a
+  let pol := X ^ p - X - C a
   have h_pol : pol.natDegree = p ∧ pol.Monic := artin_schreier_poly a hp
   obtain ⟨h_pdeg, h_mon⟩ := h_pol
-  have h_eval : Polynomial.aeval z pol = 0 := by
+  have h_eval : aeval z pol = 0 := by
     calc
-      Polynomial.aeval z pol = Polynomial.aeval z ((Polynomial.X : Polynomial F) ^ p)
-          - Polynomial.aeval z (Polynomial.X : Polynomial F) - Polynomial.aeval z (Polynomial.C a) := by grind
+      aeval z pol = aeval z ((X : Polynomial F) ^ p)
+          - aeval z (X : Polynomial F) - aeval z (C a) := by grind
       _ = 0 := by simp_all
   have h_gen1 : ∃ g : G, ∀ x, x ∈ Subgroup.zpowers g := IsCyclic.exists_generator
   have h_int: IsIntegral F z := Algebra.IsIntegral.isIntegral z
@@ -310,10 +308,10 @@ lemma nonsquare_in_quadratic_extension (F : Type) (K : Type)
       by_contra
       push Not at this
       aesop
-    have h_q2 : q ∣ 2 := by
-      have _ : q^1 ∣ q^f := Nat.pow_dvd_pow q hf1
-      grind
     have _ : q = 2 := by
+      have h_q2 : q ∣ 2 := by
+        have _ : q^1 ∣ q^f := Nat.pow_dvd_pow q hf1
+        grind
       have _ : q = 1 ∨ q = 2 :=
         (Nat.dvd_prime (Nat.prime_two)).mp h_q2
       have _ : q ≠ 1 := by
@@ -369,10 +367,10 @@ lemma nonsquare_in_quadratic_extension (F : Type) (K : Type)
 
 lemma trivial_absolute_galois_group (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [Algebra.IsSeparable F K] [IsAlgClosure F K]
-  [FiniteDimensional F K] (h : Nat.card Gal(K/F) = 1) : IsAlgClosed F := by
+    [FiniteDimensional F K] (h : Nat.card Gal(K/F) = 1) : IsAlgClosed F := by
   have : IsGalois F K := by
     (expose_names; exact { to_isSeparable := inst_3, to_normal := IsAlgClosure.normal F K })
-  have : Module.finrank F K = 1 := by
+  have h_rank : Module.finrank F K = 1 := by
     calc
     Module.finrank F K = Nat.card Gal(K/F) := (IsGaloisGroup.card_eq_finrank Gal(K/F) F K).symm
     _ = 1 := h
@@ -381,29 +379,28 @@ lemma trivial_absolute_galois_group (F : Type) (K : Type)
     intro b
     let pol := minpoly F b
     refine minpoly.natDegree_eq_one_iff.mp ?_
-    have h_deg1 : pol.natDegree ≤ 1 := by
-      have h_degrank : (minpoly F b).natDegree ≤ Module.finrank F K := by
-        apply minpoly.natDegree_le
-      (expose_names; exact le_of_le_of_eq h_degrank this_2)
-    have h_poldeg : 0 < Polynomial.natDegree pol :=
+    have h_deg1 : pol.natDegree ≤ 1 :=
+      have h_degrank : (minpoly F b).natDegree ≤ Module.finrank F K :=
+        minpoly.natDegree_le b
+      le_of_le_of_eq h_degrank h_rank
+    have h_poldeg : 0 < natDegree pol :=
       have h_polirr : Irreducible pol :=
         minpoly.irreducible (Algebra.IsIntegral.isIntegral b)
       Irreducible.natDegree_pos h_polirr
-    exact Eq.symm (Nat.le_antisymm h_poldeg h_deg1)
+    exact (Nat.le_antisymm h_poldeg h_deg1).symm
   refine IsAlgClosed.of_exists_root F ?_
   intro p h1 h2
-  have hb: ∃ (b : K), Polynomial.aeval b p = 0 := by
+  have hb: ∃ (b : K), aeval b p = 0 := by
     let p_K := p.map (algebraMap F K)
     have _ : p_K.Splits := IsAlgClosed.splits p_K
     refine IsAlgClosed.exists_aeval_eq_zero K p ?_
-    have _ : 0 < Polynomial.degree p := Irreducible.degree_pos h2
-    (expose_names; exact Ne.symm (Std.ne_of_lt h_2))
+    have h_2 : 0 < degree p := Irreducible.degree_pos h2
+    exact (Std.ne_of_lt h_2).symm
   obtain ⟨b, hb⟩ := hb
-  specialize h_range b
-  have ha : ∃ (a : F), (algebraMap F K) a = b := by
-    exact Set.mem_range.mp h_range
+  have ha : ∃ (a : F), (algebraMap F K) a = b :=
+    Set.mem_range.mp (h_range b)
   obtain ⟨a, ha⟩ := ha
   use a
-  have _ : (algebraMap F K) (Polynomial.eval a p) = Polynomial.eval ((algebraMap F K) a) (p.map (algebraMap F K)) := by
-    exact Eq.symm (Polynomial.eval_map_apply (algebraMap F K) a)
+  have _ : (algebraMap F K) (eval a p) = eval ((algebraMap F K) a) (p.map (algebraMap F K)) :=
+    (eval_map_apply (algebraMap F K) a).symm
   simp_all

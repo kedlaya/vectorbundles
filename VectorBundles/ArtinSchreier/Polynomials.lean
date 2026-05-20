@@ -242,13 +242,10 @@ lemma linear_substitution (F : Type) [Field F] (p : ℕ) [ExpChar F p] (d : ℕ)
       calc
       ((map frob f).comp (X + C a)).natDegree ≤
         (map frob f).natDegree * (X + C a).natDegree := natDegree_comp_le
-      _ = (map frob f).natDegree * 1 :=
-        Nat.succ_inj.mp
-          (congrArg Nat.succ
-            (congrArg (HMul.hMul (map frob f).natDegree) (natDegree_X_add_C a)))
+      _ = (map frob f).natDegree * 1 := by rw [natDegree_X_add_C a]
       _ = (map frob f).natDegree := Nat.mul_one (map frob f).natDegree
       _ ≤ f.natDegree := natDegree_map_le
-  let y0p_rep := (comp (map frob y0_rep)) (X + C a)
+  let y0p_rep := (map frob y0_rep).comp (X + C a)
   constructor
   · calc
     y0p_rep.natDegree
@@ -269,16 +266,13 @@ lemma linear_substitution (F : Type) [Field F] (p : ℕ) [ExpChar F p] (d : ℕ)
         refine coeff_eq_zero_of_natDegree_lt ?_
         calc
           y0_rep.natDegree ≤ d-1 := h_deg1
-          _ < N := by
-            grind
-  let y0p_low := (comp (map frob y0_low)) (X + C a)
-  let y0p_high := (comp (map frob y0_high)) (X + C a)
+          _ < N := by grind
+  let y0p_low := (map frob y0_low).comp (X + C a)
+  let y0p_high := (map frob y0_high).comp (X + C a)
   have h_map: map frob y0_rep = map frob y0_low + map frob y0_high := by
     calc
-    map frob y0_rep = map frob (y0_high + y0_low) := by
-      rw [← h_sum]
-    _ = map frob y0_high + map frob y0_low :=
-      Polynomial.map_add frob
+    map frob y0_rep = map frob (y0_high + y0_low) := by rw [← h_sum]
+    _ = map frob y0_high + map frob y0_low := Polynomial.map_add frob
     _ = map frob y0_low + map frob y0_high :=
        AddCommMagma.add_comm (map frob y0_high)
         (map frob y0_low)
@@ -307,7 +301,7 @@ lemma linear_substitution (F : Type) [Field F] (p : ℕ) [ExpChar F p] (d : ℕ)
       _ = (1 : F) := by simp
     calc
     y0p_high.coeff (d-1)
-      = ((comp (map frob y0_high)) (X + C a)).coeff (d-1) := by rfl
+      = ((map frob y0_high).comp (X + C a)).coeff (d-1) := by rfl
       _ = ( (C (c^p)) * (X + C a) ^ (d-1)).coeff (d-1) := by grind
       _ = c^p * ( (X + C a) ^ (d-1)).coeff (d-1) := coeff_C_mul ((X + C a) ^ (d - 1))
       _ = c^p := by aesop

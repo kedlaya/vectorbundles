@@ -1,30 +1,11 @@
 module
 
-public import Mathlib.Algebra.Algebra.Basic
-public import Mathlib.Algebra.BigOperators.Finprod
-public import Mathlib.Algebra.CharP.Defs
-public import Mathlib.Data.Nat.Prime.Defs
 public import Mathlib.FieldTheory.AlgebraicClosure
-public import Mathlib.FieldTheory.Galois.Basic
-public import Mathlib.FieldTheory.Galois.IsGaloisGroup
-public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 public import Mathlib.FieldTheory.IntermediateField.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 public import Mathlib.FieldTheory.IsRealClosed.Basic
-public import Mathlib.FieldTheory.KummerExtension
-public import Mathlib.FieldTheory.KummerPolynomial
-public import Mathlib.FieldTheory.Minpoly.Basic
-public import Mathlib.FieldTheory.Perfect
-public import Mathlib.FieldTheory.PrimitiveElement
-public import Mathlib.FieldTheory.PurelyInseparable.Exponent
-public import Mathlib.FieldTheory.PurelyInseparable.PerfectClosure
-public import Mathlib.FieldTheory.PurelyInseparable.Tower
-public import Mathlib.FieldTheory.Relrank
 
-public import VectorBundles.ArtinSchreier.FieldTheory2
-public import VectorBundles.ArtinSchreier.ArtinSchreier
-public import VectorBundles.ArtinSchreier.ArtinSchreier2
 public import VectorBundles.ArtinSchreier.ArtinSchreier3
 public import VectorBundles.ArtinSchreier.RealClosed
 
@@ -36,18 +17,19 @@ theorem artin_schreier_thm (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
   [IsAlgClosure F K] : IsAlgClosed F ∨ IsRealClosed F := by
   have _: IsAlgClosed K := IsAlgClosure.isAlgClosed F
+  let iota := algebraMap F K
   have have_i: ∃ i : K, i^2 = -1 := by
     apply IsAlgClosed.exists_pow_nat_eq
     simp -- to prove 0 < 2
   obtain ⟨i, hi⟩ := have_i
-  if hF : i ∈ (algebraMap F K).range then
+  if hF : i ∈ iota.range then
     left
     apply finite_algebraic_closure_with_i F K
-    have hj : ∃ j : F, (algebraMap F K) j = i := Set.mem_range.mp hF
+    have hj : ∃ j : F, iota j = i := Set.mem_range.mp hF
     obtain ⟨j, hj⟩ := hj
     have _ : j^2 = -1 := by
-      have _ : Function.Injective (algebraMap F K) := FaithfulSMul.algebraMap_injective F K
-      have _ : (algebraMap F K) (j^2) = (algebraMap F K) (-1) := by
+      have _ : Function.Injective iota := FaithfulSMul.algebraMap_injective F K
+      have _ : iota (j^2) = iota (-1) := by
         simp_all
       grind
     use j
@@ -74,13 +56,13 @@ theorem artin_schreier_thm (F : Type) (K : Type)
       by_contra
       push Not at this
       obtain ⟨j, hj⟩ := this
-      have _ : (algebraMap F K) (j^2) = ((algebraMap F K) j)^2 := by
-        exact algebraMap.coe_pow j 2
-      have h2 : ((algebraMap F K) j + i) * ((algebraMap F K) j - i) = 0 := by
+      have _ : iota (j^2) = (iota j)^2 :=
+        algebraMap.coe_pow j 2
+      have h2 : (iota j + i) * (iota j - i) = 0 := by
         grind
-      have h3 : (algebraMap F K) j + i = 0 ∨ (algebraMap F K) j - i = 0 := by
-        (expose_names; exact zero_eq_mul.mp (id (Eq.symm h2)))
-      have _ : ∃ k : F, (algebraMap F K) k = i := by
+      have h3 : iota j + i = 0 ∨ iota j - i = 0 :=
+        zero_eq_mul.mp (id h2.symm)
+      have _ : ∃ k : F, iota k = i := by
         cases h3
         · use -j
           grind
@@ -88,17 +70,16 @@ theorem artin_schreier_thm (F : Type) (K : Type)
           grind
       apply hF
       simp_all
-    have hF1 : ∀ x : K, x ∈ (algebraMap F₁ K).range := by
+    have hF1 : ∀ x : K, x ∈ (algebraMap F₁ K).range :=
       have h_deg1 : ∀ x : K, (minpoly F₁ x).degree = 1 := by
         intro x
         let pol := minpoly F₁ x
-        have hirr : Irreducible pol := by
-          apply minpoly.irreducible
-          exact Algebra.IsIntegral.isIntegral x
+        have hirr : Irreducible pol :=
+          minpoly.irreducible (Algebra.IsIntegral.isIntegral x)
         exact IsAlgClosed.degree_eq_one_of_irreducible (↥F₁) hirr
-      exact fun x => minpoly.mem_range_of_degree_eq_one (↥F₁) x (h_deg1 x)
+      fun x => minpoly.mem_range_of_degree_eq_one (↥F₁) x (h_deg1 x)
     have _ : F₁ = ⊤ := by
-      refine Eq.symm (ext ?_)
+      refine (ext ?_).symm
       intro x
       constructor
       · simp_all

@@ -3,7 +3,6 @@ module
 public import Mathlib.Algebra.Algebra.Basic
 public import Mathlib.Algebra.CharP.Defs
 public import Mathlib.Algebra.CharP.Lemmas
-public import Mathlib.Algebra.Polynomial.Splits
 public import Mathlib.Algebra.CharP.Frobenius
 public import Mathlib.Data.Nat.Prime.Defs
 public import Mathlib.FieldTheory.AlgebraicClosure
@@ -13,13 +12,8 @@ public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 public import Mathlib.FieldTheory.IntermediateField.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
-public import Mathlib.FieldTheory.KummerExtension
-public import Mathlib.FieldTheory.KummerPolynomial
 public import Mathlib.FieldTheory.Minpoly.Basic
 public import Mathlib.FieldTheory.Minpoly.MinpolyDiv
-public import Mathlib.FieldTheory.Perfect
-public import Mathlib.FieldTheory.SeparableClosure
-public import Mathlib.FieldTheory.SplittingField.Construction
 
 public import VectorBundles.ArtinSchreier.FieldTheory
 public import VectorBundles.ArtinSchreier.FieldTheory2
@@ -30,7 +24,6 @@ public import VectorBundles.ArtinSchreier.ArtinSchreier
 
 open IntermediateField
 open Polynomial
-
 
 lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
@@ -59,8 +52,8 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
       exact minpoly.monic h_int
     constructor
     · exact h_natdeg
-    refine (Polynomial.degree_eq_iff_natDegree_eq_of_pos ?_).mpr h_natdeg
-    exact Nat.Prime.pos hp
+    · refine (degree_eq_iff_natDegree_eq_of_pos ?_).mpr h_natdeg
+      exact Nat.Prime.pos hp
   obtain ⟨h_irr, h_mon, h_natdeg, h_deg⟩ := h_irras
 
   let pb := IntermediateField.adjoin.powerBasis h_int
@@ -68,13 +61,9 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
     have h_pb_dim : (minpoly F (PowerBasis.gen pb)).natDegree = PowerBasis.dim pb := by
       apply PowerBasis.natDegree_minpoly
     calc
-      pb.dim = (minpoly F (PowerBasis.gen pb)).natDegree := by
-        symm
-        exact h_pb_dim
-      _ = (minpoly F x).natDegree := by
-        exact Nat.succ_inj.mp (congrArg Nat.succ h_pb_dim)
-      _ = aspol.natDegree := by exact
-        Polynomial.natDegree_eq_of_degree_eq (congrArg Polynomial.degree ha)
+      pb.dim = (minpoly F (PowerBasis.gen pb)).natDegree := h_pb_dim.symm
+      _ = (minpoly F x).natDegree := Nat.succ_inj.mp (congrArg Nat.succ h_pb_dim)
+      _ = aspol.natDegree := natDegree_eq_of_degree_eq (congrArg degree ha)
       _ = p := h_natdeg
 
   let pol :=  X ^ p -  X -  C (x ^ (p-1) * (iota a))
@@ -83,7 +72,7 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
   obtain ⟨hpol1, hpol2⟩ := hpol
   have hy : ∃ y : K, aeval y pol = 0 := by
     have h_poldeg : pol.degree = p := by
-      refine (Polynomial.degree_eq_iff_natDegree_eq_of_pos ?_).mpr ?_
+      refine (degree_eq_iff_natDegree_eq_of_pos ?_).mpr ?_
       exact Nat.Prime.pos hp
       exact Eq.symm ((fun {a b} ↦ Nat.succ_inj.mp) (congrArg Nat.succ (id (Eq.symm hpol1))))
     have _ : IsAlgClosed K := IsAlgClosure.isAlgClosed F
@@ -92,7 +81,7 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
     refine Nat.cast_ne_zero.mpr ?_
     exact Nat.Prime.ne_zero hp
   obtain ⟨y, hy⟩ := hy
-  have hy2 : y^p - y - x^(p-1) * iota a = 0:= by
+  have hy2 : y^p - y - x^(p-1) * iota a = 0 := by
     unfold aeval at hy
     unfold aevalEquiv at hy
     subst pol
@@ -103,7 +92,6 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
     have h_minpolydeg : (minpoly F x).degree = ↑(Module.finrank F K) := by
       calc
         (minpoly F x).degree = (X ^ p - X - C a).degree := by rw [ha]
-        _ = aspol.degree := by rfl
         _ = p := h_deg
         _ = ↑(Module.finrank F K) := Nat.cast_inj.mpr (id (Eq.symm h))
     have h_topcr : F⟮x⟯ = (⊤: IntermediateField F K) :=
@@ -119,24 +107,20 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
 
   have h_pb_rep : ∀ (y : ↥F⟮x⟯), ∃ (f : Polynomial F), f.natDegree < PowerBasis.dim pb ∧
     y = (aeval (PowerBasis.gen pb)) f := PowerBasis.exists_eq_aeval pb
-
   obtain ⟨y0_rep, h_pb_rep_y01, h_pb_rep_y02⟩ := h_pb_rep y0
   have h_pb_rep_y01 : y0_rep.natDegree < p := by
     calc
       y0_rep.natDegree < pb.dim := h_pb_rep_y01
       _ = p := h_pbdim
 
-  have _ : CharP F p := by
-    exact ringChar.of_eq this
-  have _ : ExpChar F p := by
-    exact ExpChar.prime hp
+  have _ : CharP F p := ringChar.of_eq this
+  have _ : ExpChar F p := ExpChar.prime hp
   let frob := frobenius F p
 
   have h_rwx : x^p = x + (algebraMap F F⟮x⟯) a := by
     have h_evalx : aspol.aeval x = 0 := by
       calc
-        aspol.aeval x = (minpoly F x).aeval x := by
-          exact AlgHom.congr_arg (aeval x) (id (Eq.symm ha))
+        aspol.aeval x = (minpoly F x).aeval x := AlgHom.congr_arg (aeval x) (id (Eq.symm ha))
         _ = 0 := minpoly.aeval F x
     subst aspol
     unfold aeval at h_evalx
@@ -147,11 +131,11 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
 
   have h_power: (aeval pb.gen) ((map frob y0_rep).comp (X +  C a)) = y0 ^ p := by
 
-    have h_pow_by_frobexp : ∀ (g: Polynomial F), (aeval pb.gen) (map frob ((Polynomial.expand F p) g)) =
+    have h_pow_by_frobexp : ∀ (g: Polynomial F), (aeval pb.gen) (map frob ((expand F p) g)) =
       (aeval pb.gen g) ^ p  := by
         intro g
         calc
-          (aeval pb.gen) (map frob ((Polynomial.expand F p) g)) = (aeval pb.gen) (g ^ p) := by
+          (aeval pb.gen) (map frob ((expand F p) g)) = (aeval pb.gen) (g ^ p) := by
             refine AlgHom.congr_arg (aeval pb.gen) ?_
             exact map_frobenius_expand p g
           _ = (aeval pb.gen) g ^ p := map_pow (aeval pb.gen) g p
@@ -159,16 +143,15 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
     have h_apply_frob_across_p : (map frob (y0_rep.comp (X ^ p))) = (map frob y0_rep).comp (X ^ p) := by
       calc
         (map frob (y0_rep.comp (X ^ p)))
-          = (map frob y0_rep).comp (map frob (X ^ p)) := map_comp frob y0_rep (X ^ p)
+        = (map frob y0_rep).comp (map frob (X ^ p)) := map_comp frob y0_rep (X ^ p)
         _ = (map frob y0_rep).comp (X ^ p) := by
           have h1 : map frob (X ^ p) = X ^ p := by
             calc
               map frob (X ^ p) = (map frob X)^p := Polynomial.map_pow frob p
-              _=  X ^ p := by
+              _ =  X ^ p := by
                 have h2 : map frob X = X := map_X frob
-                exact Polynomial.ext (congrFun (congrArg coeff (congrFun (congrArg HPow.hPow h2) p)))
-          exact Polynomial.ext (congrFun
-            (congrArg coeff (congrArg (Polynomial.map frob y0_rep).comp h1)))
+                rw [h2]
+          rw [h1]
 
     have h_eval_at_power :  ∀ (f : Polynomial F), (aeval (pb.gen^p)) f =
       (aeval pb.gen) (f.comp (X ^ p)) := by
@@ -178,11 +161,10 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
       calc
         aeval (pb.gen ^ p) f
         _ = aeval (aeval pb.gen (X ^ p)) f := by
-            have _ : aeval pb.gen ((X : Polynomial F) ^ p) = pb.gen ^ p := by
-              exact aeval_X_pow pb.gen
-            (expose_names; exact AlgHom.congr_fun (congrArg aeval (id (Eq.symm h_4))) f)
-        _ = (aeval pb.gen) (f.comp (X ^ p)) := by
-          exact Eq.symm (aeval_comp pb.gen)
+            have h : aeval pb.gen ((X : Polynomial F) ^ p) = pb.gen ^ p :=
+              aeval_X_pow pb.gen
+            rw [h]
+        _ = (aeval pb.gen) (f.comp (X ^ p)) := (aeval_comp pb.gen).symm
 
     have h_rwx_bp : pb.gen ^ p = pb.gen + (algebraMap F F⟮x⟯) a :=
       SetLike.coe_eq_coe.mp h_rwx
@@ -195,45 +177,41 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
       calc
         aeval (pb.gen + (algebraMap F F⟮x⟯) a) f
         _ = aeval (aeval pb.gen (X  +  C a)) f := by
-            have _ : aeval pb.gen (X  +  C a) = pb.gen + (algebraMap F F⟮x⟯) a := by
+            have h : aeval pb.gen (X  +  C a) = pb.gen + (algebraMap F F⟮x⟯) a := by
               calc
-                aeval pb.gen (X  +  C a) = aeval pb.gen ( X : Polynomial F)
-                   + aeval pb.gen (C a) := aeval_add pb.gen
+                aeval pb.gen (X  +  C a)
+                = aeval pb.gen ( X : Polynomial F) + aeval pb.gen (C a) := aeval_add pb.gen
                 _ = pb.gen + aeval pb.gen (C a) := by
                   refine (add_left_inj ((aeval pb.gen) (C a))).mpr ?_
                   exact aeval_X pb.gen
                 _ = pb.gen + (algebraMap F F⟮x⟯) a := by
                   refine add_left_cancel_iff.mpr ?_
                   exact aeval_C pb.gen a
-            (expose_names; exact AlgHom.congr_fun (congrArg aeval (id (Eq.symm h_4))) f)
-        _ = (aeval pb.gen) (f.comp (X  +  C a)) := by
-          exact Eq.symm (aeval_comp pb.gen)
+            rw [h]
+        _ = (aeval pb.gen) (f.comp (X  +  C a)) := (aeval_comp pb.gen).symm
 
     calc
       (aeval pb.gen) ((map frob y0_rep).comp (X +  C a))
-      _ = (aeval (pb.gen + (algebraMap F F⟮x⟯) a)) (map frob y0_rep) :=
-        SetLike.coe_eq_coe.mp (congrArg Subtype.val (h_eval_at_sum (map frob y0_rep))).symm
-      _ = (aeval (pb.gen^p)) (map frob y0_rep) :=
-          AlgHom.congr_fun (congrArg aeval (id (Eq.symm h_rwx_bp))) (map frob y0_rep)
-      _  = (aeval pb.gen) ((map frob y0_rep).comp (X ^ p)) :=
-        SetLike.coe_eq_coe.mp (congrArg Subtype.val (h_eval_at_power (map frob y0_rep)))
-      _  = (aeval pb.gen) ((Polynomial.expand F p) (map frob y0_rep)) :=
-        AlgHom.congr_arg (aeval pb.gen) rfl
+      _ = (aeval (pb.gen + (algebraMap F F⟮x⟯) a)) (map frob y0_rep) := by
+        rw [h_eval_at_sum (map frob y0_rep)]
+      _ = (aeval (pb.gen^p)) (map frob y0_rep) := by
+        rw [h_rwx_bp]
+      _  = (aeval pb.gen) ((map frob y0_rep).comp (X ^ p)) := by
+        rw [← h_eval_at_power (map frob y0_rep)]
+      _  = (aeval pb.gen) ((expand F p) (map frob y0_rep)) := by rfl
       _  = (aeval pb.gen) (map frob ((expand F p) y0_rep)) := by
-        refine Eq.symm (AlgHom.congr_arg (aeval pb.gen) ?_)
-        exact map_expand
-      _ = (aeval pb.gen y0_rep) ^ p :=
-        SetLike.coe_eq_coe.mp (congrArg Subtype.val (h_pow_by_frobexp y0_rep))
-      _ = y0 ^ p :=
-        SetLike.coe_eq_coe.mp
-          (congrArg Subtype.val (congrFun (congrArg HPow.hPow (id (Eq.symm h_pb_rep_y02))) p))
+        rw [map_expand]
+      _ = (aeval pb.gen y0_rep) ^ p := by
+        rw [h_pow_by_frobexp y0_rep]
+      _ = y0 ^ p := by
+        rw [h_pb_rep_y02]
 
-  let y0p_rep := (map frob y0_rep).comp (X +  C a)
+  let y0p_rep := (map frob y0_rep).comp (X + C a)
   let c := y0_rep.coeff (p-1)
   have h_y0rep : y0p_rep.natDegree < p ∧ y0p_rep.coeff (p-1) = c ^ p :=
     linear_substitution F p p a y0_rep hp (Nat.Prime.one_lt hp) h_pb_rep_y01
   obtain ⟨h_y0rep1, h_y0rep2⟩ := h_y0rep
-  let y1p_rep := y0_rep +  X ^ (p-1) *  C a
+  let y1p_rep := y0_rep + X ^ (p-1) *  C a
   have h_matchcoeff : y0p_rep.coeff (p-1) = y1p_rep.coeff (p-1) := by
     have h7 : ∀ f : Polynomial F, ((algebraMap F⟮x⟯ K) ∘ (aeval pb.gen)) f = aeval x f := by
       intro f
@@ -248,10 +226,10 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
     have h5 : aeval x y0p_rep = y0 ^p := by
       calc
         aeval x y0p_rep = aeval pb.gen y0p_rep := Eq.symm (h7 y0p_rep)
-        _ = aeval pb.gen ((Polynomial.map frob y0_rep).comp (X + C a)) := by rfl
+        _ = aeval pb.gen ((map frob y0_rep).comp (X + C a)) := by rfl
         _ = y0^p := by
-          convert h_power
-          exact { mp := fun a => h_power, mpr := congrArg Subtype.val }
+          rw [h_power]
+          simp
     have h4 : aeval x y1p_rep = y0 + x^(p-1) * iota a := by
       calc
         aeval x y1p_rep = aeval pb.gen y1p_rep := Eq.symm (h7 y1p_rep)
@@ -269,15 +247,13 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
           simp_all
           left
           rfl
-        _ = y0 + x^(p-1) * iota a := by
-          exact (add_left_inj (↑pb.gen ^ (p - 1) * iota a)).mpr rfl
+        _ = y0 + x^(p-1) * iota a := by rfl
     have h6 : aeval x (y0p_rep - y1p_rep) = 0 := by
       calc
         aeval x (y0p_rep - y1p_rep) =  aeval x y0p_rep - aeval x y1p_rep :=
           aeval_sub x
         _ = 0 := by
-          rw [h5]
-          rw [h4]
+          rw [h5, h4]
           exact sub_eq_zero.mpr hy4
     have h3 : (minpoly F x) ∣ (y0p_rep - y1p_rep) := by
       refine minpoly.dvd_iff.mpr ?_
@@ -300,8 +276,8 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
         · refine (Nat.le_sub_one_iff_lt ?_).mp ?_
           exact Nat.zero_lt_of_lt h_y0rep1
           apply Polynomial.natDegree_C_mul_X_pow_le a (p-1)
-      _ = (minpoly F x).natDegree := by
-        exact Nat.succ_inj.mp (congrArg Nat.succ (id (Eq.symm h_pbdim)))
+      _ = (minpoly F x).natDegree :=
+        Nat.succ_inj.mp (congrArg Nat.succ (id (Eq.symm h_pbdim)))
     have h : y0p_rep = y1p_rep :=
       congruence_low_degree h3 h1 h2 (minpoly.monic h_int)
     exact ext_iff.mp h (p-1)
@@ -328,27 +304,24 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
     have _ : CharP K p := by
       (expose_names; exact (Algebra.charP_iff F K p).mp h_1)
     let x1 := x - iota c
-    have fieldeq : x1^p = x1 := by
-      calc
-        x1^p = (x - iota c)^p := by rfl
-        _ = x^p - iota c ^ p := sub_pow_char x (iota c)
-        _ = x + iota a - iota c ^ p := sub_left_inj.mpr h_rwx
-        _ = x + iota (c^p - c) - iota c ^ p := by
-          (expose_names;
-            exact
-              sub_left_inj.mpr
-                (congrArg (HAdd.hAdd x) (congrArg (⇑iota) (id (Eq.symm h_fieldeq)))))
-        _ = x + iota (c^p) - iota c - iota c ^ p := by
-          have hsub : iota (c^p - c) = iota (c^p) - iota c :=
-            algebraMap.coe_sub (c ^ p) c
-          rw [hsub]
-          refine sub_left_inj.mpr ?_
-          exact add_sub x (iota (c ^ p)) (iota c)
-        _ = x + iota c ^ p - iota c - iota c ^ p := by simp
-        _ = x1 := by ring
     have hn : ∃ (n : ℤ), ↑n = x1 :=
-      have h_bot : x1 ∈ (⊥ : Subfield K) := by
-        exact (Subfield.mem_bot_iff_pow_eq_self K p).mpr fieldeq
+      have fieldeq : x1^p = x1 := by
+        calc
+          x1^p = (x - iota c)^p := by rfl
+          _ = x^p - iota c ^ p := sub_pow_char x (iota c)
+          _ = x + iota a - iota c ^ p := sub_left_inj.mpr h_rwx
+          _ = x + iota (c^p - c) - iota c ^ p := by
+            rw [h_fieldeq]
+          _ = x + iota (c^p) - iota c - iota c ^ p := by
+            have hsub : iota (c^p - c) = iota (c^p) - iota c :=
+              algebraMap.coe_sub (c ^ p) c
+            rw [hsub]
+            refine sub_left_inj.mpr ?_
+            exact add_sub x (iota (c ^ p)) (iota c)
+          _ = x + iota c ^ p - iota c - iota c ^ p := by simp
+          _ = x1 := by ring
+      have h_bot : x1 ∈ (⊥ : Subfield K) :=
+        (Subfield.mem_bot_iff_pow_eq_self K p).mpr fieldeq
       (mem_bot_iff_intCast p K).mp h_bot
     obtain ⟨n, hn⟩ := hn
     have _ : ∃ d : F, x = iota d := by
@@ -360,21 +333,20 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
         refine (add_left_inj (iota c)).mpr ?_
         exact Eq.symm (map_intCast iota n)
       _ = iota (n + c) := Eq.symm (algebraMap.coe_add (↑n) c)
-    let pol1 :=  X -  C (n + c)
+    let pol1 :=  X - C (n + c)
     have _ : minpoly F x ∣ pol1 := by
       have h_evalpol1 : aeval x pol1 = 0 := by
         calc
-        aeval x pol1 = aeval x ( X -  C (n + c)) := by rfl
-        _ =  aeval x (X : Polynomial F) - aeval x ( C (n + c)) := aeval_sub x
+        aeval x pol1 = aeval x ( X - C (n + c)) := by
+          rfl
+        _ =  aeval x (X : Polynomial F) - aeval x ( C (n + c)) :=
+          aeval_sub x
         _ = x - aeval x ( C (n + c)) := by
-          refine sub_left_inj.mpr ?_
-          exact aeval_X x
+          rw [aeval_X x]
         _ = x - iota (n + c) := by
-          refine sub_right_inj.mpr ?_
-          exact aeval_C x (↑n + c)
+          rw [aeval_C x (↑n + c)]
         _ = x1 + iota c - iota (n + c) := by
-          refine sub_left_inj.mpr ?_
-          exact Eq.symm (sub_add_cancel x (iota c))
+          rw [← sub_add_cancel x (iota c)]
         _ = 0 := by
           rw [← hn]
           simp

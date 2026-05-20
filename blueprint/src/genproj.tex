@@ -23,18 +23,17 @@ Then $H^0(X, F) \neq 0$.
 \begin{proof}
 \uses{cor:function field of curve}
 Let $E$ be the ring $H^0(X, \cO_X)$, which by Corollary~\ref{cor:function field of curve} is a curve.
-By (c), we can choose a closed point $x \in X$ of degree $1$;
+By condition (c) of Definition~\ref{def:generalized projective line}, we can choose a closed point $x \in X$ of degree $1$;
 let $\kappa_x$ be the residue field of $x$.
-By (a), the ideal sheaf of $x$ is isomorphic to $\cO_X(-1)$.
-Define the bundle $H$ to fit into the commutative diagram
+By condition (a) of Definition~\ref{def:generalized projective line}, the ideal sheaf $J_x$ of $x$ is isomorphic to $\cO_X(-1)$.
+We can thus construct the pushout $H$ as in the commutative diagram
 \[
 \begin{tikzcd}
-0 \arrow{r} & \cO_X(-1) \arrow{r} \arrow{d} & F \arrow{r}\arrow{d} & F/\cO_X(-1) \arrow{r} \arrow[d,equal] & 0 \\
-0 \arrow{r} & \cO_X \arrow{r} & H \arrow{r} & F/\cO_X(-1) \arrow{r} & 0
+0 \arrow{r} & J_x \arrow{r} \arrow{d} & F \arrow{r}\arrow{d} & F/J_x \arrow{r} \arrow[d,equal] & 0 \\
+0 \arrow{r} & \cO_X \arrow{r} & H \arrow{r} & F/J_x \arrow{r} & 0
 \end{tikzcd}
 \]
-in which the left vertical arrow is injective with cokernel supported at $x$.
-Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes by (b), $H$ admits a filtration with successive quotients $\cO_X^{\oplus (n+1)}, \cO_X(1)$.
+Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes by condition (b) of Definition~\ref{def:generalized projective line}, $H$ admits a filtration with successive quotients $\cO_X^{\oplus (n+1)}, \cO_X(1)$.
 
 We may assume that $H^0(X, H(-1)) = 0$, as otherwise $H$ contains the subbundle $\cO_X(1)$ whose intersection with $F$ has degree $\geq 0$ and hence
 by (b) is either $\cO_X$ or $\cO_X(1)$.
@@ -164,14 +163,32 @@ Let $F$ be a semistable vector bundle of degree $0$ and rank $n$.
 Choose a complete flag as in Lemma~\ref{lem:minimal filtration}.
 By Lemma~\ref{lem:sequence argument1} and 
 Lemma~\ref{lem:sequence argument2}, the degree sequence must be identically $0$.
-Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes for a generalized projective line, it follows that $F$ is trivial.
+Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes by condition (b) of Definition~\ref{def:generalized projective line}, it follows that $F$ is trivial.
+\end{proof}
+
+\begin{lemma} \label{lem:one-step modification induction}
+\uses{def:generalized projective line,def:HN filtration}
+Let $F$ be a vector bundle on $X$ of rank $n$ with all HN slopes in $[0,1)$.
+Let $x \in X$ be a closed point of degree $1$
+and let $j_x \colon x \to X$ the canonical inclusion.
+Then for $i=0,\dots,d$,
+there exist a coherent sheaf $G_i$ on $x$ and an exact sequence
+\begin{equation} \label{eq:modification}
+0 \to H_i \to F \to j_x^* G_i \to 0
+\end{equation}
+of coherent sheaves on $X$ in which $\deg(H_i) = d-i$ and the HN slopes of $H_i$ are all nonnegative.
+\end{lemma}
+\begin{proof}
+Each $i$-dimensional quotient $G_i$ of the fiber $F_x$ gives rise to an exact sequence as in \eqref{eq:modification} with $\deg(H_i) = d_i$. It thus suffices to enforce that $H_i$ has all HN slopesn nonnegative.
+As the base case $i=0$ is vacuously true, we proceed to the induction step. To construct $G_i$,
+let $K$ be the maximal submodule of $H_{i-1}$ of slope $0$; more precisely, $K$ is the first step of the HN filtration of $H_{i-1}$ if 0 occurs as an HN slope of $H_{i-1}$ and the zero subbundle otherwise. It then suffices to choose $G_i$ so that $K \subseteq H_i$, which is possible because $K \neq H_{i-1}$ (as otherwise $\deg(H_{i-1})=d-i+1$ would be zero).
 \end{proof}
 
 \begin{lemma} \label{lem:one-step modification}
 \uses{def:generalized projective line,def:HN filtration}
-Let $F$ be a vector bundle on $X$ with all HN slopes in $[0,1)$. Then 
-for any closed point $x \in |X|$,
-for $j_x \colon x \to X$ the canonical inclusion,
+Let $F$ be a vector bundle on $X$ with all HN slopes in $[0,1)$.
+Let $x \in X$ be a closed point of degree $1$.
+Then for $j_x \colon x \to X$ the canonical inclusion,
 there exist a coherent sheaf $G$ on $x$ and an exact sequence
 \[
 0 \to \cO_X^{\oplus \rank(F)} \to F \to j_x^* G \to 0
@@ -179,18 +196,8 @@ there exist a coherent sheaf $G$ on $x$ and an exact sequence
 of coherent sheaves on $X$.
 \end{lemma}
 \begin{proof}
-\uses{prop:semistable slope 0}
-We show that for $i=1,\dots,\deg(F)$, we can find an exact sequence
-\begin{equation} \label{eq:modification}
-0 \to H_i \to F \to j_x^* G_i \to 0
-\end{equation}
-in which $H_i$ is a vector bundle of the same rank $F$ with degree $\deg(F)-i$ and all HN slopes nonnegative (and hence in $[0,1)$). 
-For $i = \deg(F)$,
-$H_i$ will then be semistable of degree $0$, and hence trivial by Proposition~\ref{prop:semistable slope 0}.
-
-In the case $i=1$, it suffices to check the claim after replacing $F$ with its maximum quotient having all HN slopes in $(0,1)$; at this point, \emph{every} exact sequence of the form \eqref{eq:modification},
-in which $H_1$ is a vector bundle of the same rank $F$ with degree $\deg(F)-1$, has the property that the HN slopes of $H_1$ are nonnegative.
-We achieve the general case by applying this argument repeatedly.
+\uses{prop:semistable slope 0,lem:one-step modification induction}
+Apply Lemma~\ref{lem:one-step modification induction} with $i = d :=\deg(F)$ to construct an exact sequence as in \eqref{eq:modification} in which $\deg(H_d) = 0$ and the HN slopes of $H_d$ are all nonnegative. Then $H_d$ is semistable of degree $0$, and hence trivial by Proposition~\ref{prop:semistable slope 0}.
 \end{proof}
 
 \begin{corollary} \label{cor:slopes to sections}
@@ -269,29 +276,75 @@ Every vector bundle on $X$ splits (nonuniquely) as a direct sum of stable bundle
 Both assertions follow directly from Lemma~\ref{cor:split sequence in order}.
 \end{proof}
 
-\begin{lemma} \label{lem:construct semistables}
+\begin{lemma} \label{lem:construct stable degree 1}
 \uses{def:generalized projective line,def:stable bundle,cor:function field of curve}
 Let $E$ be the field $H^0(X, \cO_X)$ (Corollary~\ref{cor:function field of curve}).
-For $d$ a positive integer with $\dim_{E} H^0(X, \cO_X(1)) > d$
-and $c \in \Z$, there exists a semistable vector bundle on $X$ of rank $d$ and degree $c$.
+For $d$ a positive integer with $\dim_{E} H^0(X, \cO_X(1)) > d$,
+there exists a semistable vector bundle on $X$ of rank $d$ and degree $1$.
 \end{lemma}
 \begin{proof}
-We may assume without loss of generality that $d>1$ and $c \in \{1,\dots,d-1\}$.
-Choose $s \in H^0(X, \cO_X(1))$ nonzero 
-and let $x \in |X|$ be the unique closed point at which $s$ vanishes.
+Let $x$ be a closed point of $X$ of degree 1.
 Set $F := \cO_X^{\oplus d}$ and let $e_1,\dots,e_d$ be the images in $F_x$
 of the standard basis vectors of $H^0(X, F) \cong E^{d}$.
 The condition $\dim_{E} H^0(X, \cO_X(1)) > d$ is equivalent to $\dim_{E} \kappa_x \geq d$;
-consequently, we can choose elements $f_1,\dots,f_c \in \kappa_x$
-such that $1,f_1,\dots,f_c$ are linearly independent over $E$.
-Let $V \subset F_x$ be the $\kappa_x$-span of $e_1 - f_1 e_d, \dots, e_c - f_d e_d$
-and construct the subbundle $G$ of $F$
+consequently, we can choose a one-dimensional quotient $V$ of $F_x$
+for which the composition $E^d \to F_x \to V$ is injective.
+Construct the subbundle $G$ of $F$
 so that we have an exact sequence
 \[
-0 \to G \to F \to j_x^* V \to 0;
+0 \to G \to F \to j_x^* V \to 0.
 \]
-then $G^\vee$ is semistable of degree $c$.
+We then have another exact sequence
+\[
+0 \to F \to G^\vee \to j_x^* V^\vee \to 0
+\]
+using which we see that $G^\vee$ is stable of degree $1$.
 \end{proof}
+
+\begin{lemma} \label{lem:construct semistables}
+\uses{def:generalized projective line,def:semistable bundle,cor:function field of curve}
+Let $E$ be the field $H^0(X, \cO_X)$ (Corollary~\ref{cor:function field of curve}).
+Suppose that $\dim_{E} H^0(X, \cO_X(1)) = \infty$.
+Then for every positive integer $d$
+and every $c \in \Z$ coprime to $d$, there exists a stable vector bundle on $X$ of rank $d$ and degree $c$.
+\end{lemma}
+\begin{proof}
+\uses{prop:decompose as stables,lem:construct stable degree 1,cor:unique stable}
+We proceed by induction on $d$, the case $d=1$ being evident because $\cO_X(c)$ is stable for all $c \in \Z$. 
+
+We will produce several examples of semistable bundles $F$ of slope $\frac{c}{d}$. For each such bundle, 
+we may apply Proposition~\ref{prop:decompose as stables} to decompose $F$ as a sum of stable bundles.
+Let $G$ be one such bundle; by Lemma~\ref{cor:unique stable}, all of the other summands are isomorphic to $G$, and so $\rank(G)$ divides $\rank(F)$. By Lemma~\ref{cor:unique stable} again, the isomorphism class of $G$ does not depend on the choice of $F$ either. It will thus suffice to produce enough examples so that the gcd of the resulting values of $\rank(F)$ is equal to $d$.
+
+\begin{itemize}
+\item
+For $d>1$, we can choose $b \in \{1,\dots,d-1\}$ with $bc \equiv 1 \pmod{d}$.
+By Lemma~\ref{lem:construct stable degree 1}, we can find a stable bundle $G_1$ of rank $bd$ and degree $1$. By the induction hypothesis, we can find a stable bundle $G_2$ of rank $b$ and degree $(bc-1)/d$. 
+By Proposition~\ref{prop:tensor product of semistable}, $G_1 \otimes G_2$ is semistable of rank $b^2 d$ and slope
+\[
+\frac{1}{bd} + \frac{(bc-1)/d}{b} = \frac{c}{d}.
+\]
+
+\item
+By Lemma~\ref{lem:construct stable degree 1} again, we can find a stable bundle $G_1'$ of rank $(d-b)d$ and degree $1$. By the induction hypothesis, we can find a stable bundle $G_2'$ of rank $d-b$ and degree $((d-b) c+1)/d$. 
+By Proposition~\ref{prop:tensor product of semistable}, $(G_1')^\vee \otimes G_2$ is semistable of rank $(d-b)^2 d$ and slope
+\[
+-\frac{1}{(d-b)d} + \frac{((d-b)c+1)/d}{d-b} = \frac{c}{d}.
+\]
+By Proposition~\ref{prop:decompose as stables}, $(G_1')^\vee \otimes G_2$ decomposes as a sum of stable bundles  of slope $\frac{c}{d}$. Let $G'$ be one such bundle; by Lemma~\ref{cor:unique stable}, all of the other summands are isomorphic to $G'$. We deduce that $\rank(G')$ divides $(d-b)^2 d$.
+
+\item
+By Lemma~\ref{lem:construct stable degree 1} again, we can find a stable bundle $G''_1$ of rank $d$ and degree $1$. 
+By Proposition~\ref{prop:tensor product of semistable}, $(G''_1)^{\otimes c}$ is semistable of rank $d^c$ and slope $\frac{c}{d}$.
+\end{itemize}
+We deduce that there exists a stable bundle $G$ of slope $\frac{c}{d}$ and degree dividing
+\[
+\gcd(b^2 d, (d-b)^2 d, d^c) = d \gcd(b^2, (d-b)^2, d^{c-1}) = d.
+\]
+On the other hand, since $\deg(G) \in \Z$, $\rank(G)$ must be divisible by $d$.
+Hence $G$ is the desired stable bundle of rank $d$ and degree $c$.
+\end{proof}
+
  
 \begin{lemma} \label{lem:apply artin-schreier}
 \uses{def:generalized projective line,cor:function field of curve}
@@ -302,7 +355,7 @@ Then one of the following conditions hold.
 We have $\dim_E H^0(X, \cO_X(1)) = 2$ and $X \cong \mathbf{P}^1_E =\Proj E[x,y]$ (the \emph{classical case}). In this case, $H^1(X, \cO_X(-1)) = 0$.
 \item[(b)]
 We have $\dim_E H^0(X, \cO_X(1)) = 3$ and $X \cong \Proj E[x,y,z]/(x^2+y^2+z^2)$ (the \emph{twistor case}). In this case, there is an isomorphism
-$X \times_E E(\sqrt{-1}) \cong \mathbf{P}^1_{E(\sqrt{-1})}$ via which $\cO_X(1)$ corresponds to $\cO_{\mathbb{P}^1}(2)$.
+$X \times_E E(\sqrt{-1}) \cong \mathbf{P}^1_{E(\sqrt{-1})}$ via which $\cO_X(1)$ corresponds to $\cO_{\mathbf{P}^1}(2)$.
 \item[(c)]
 We have $\dim_E H^0(X, \cO_X(1)) = \infty$.
 \end{enumerate}
@@ -353,7 +406,7 @@ From this, (b) is obvious.
 \item
 In the twistor case, by identi
 by identifying $P \otimes_{P_0} P_0(\sqrt{-1})$ with $P_0(\sqrt{-1})[x^2,xy,y^2]$ and applying the classical case, we see that $S \subseteq \tfrac{1}{2}\Z$.
-We deduce (a) and (b) by applying Lemma~\ref{lem:construct semistables} to construct a stable bundle of rank $2$ and degree $1$, then applying Lemma~\ref{cor:unique stable} for uniqueness.
+We deduce (a) and (b) by applying Lemma~\ref{lem:construct stable degree 1} to construct a stable bundle of rank $2$ and degree $1$, then applying Lemma~\ref{cor:unique stable} for uniqueness.
 \end{itemize}
 
 Given (a)--(b), (c) follows from Lemma~\ref{lem:map of stable} and Lemma~\ref{lem:end of semistable}; 
