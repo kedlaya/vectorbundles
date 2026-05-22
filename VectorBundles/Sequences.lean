@@ -143,32 +143,69 @@ lemma partial_sums_of_monotone_sequence (n : ℕ) (m : ℕ → ℤ)
     grind
   | succ n hyp =>
     intro i hi
-    have h1 : ∑ a ∈ Finset.range n, m a ≤ n * m n :=
+    have h1 : ∑ a ∈ Finset.range (n+1), m a ≤ (n+1) * m n :=
       calc
-      ∑ a ∈ Finset.range n, m a ≤ ∑ a ∈ Finset.range n, m n := by
-        have h2 : ∀ i ∈ Finset.range n, m i ≤ m n := by
+      ∑ a ∈ Finset.range (n+1), m a ≤ ∑ a ∈ Finset.range (n+1), m n := by
+        have h2 : ∀ i ∈ Finset.range (n+1), m i ≤ m n := by
           grind
         exact Finset.sum_le_sum h2
-      _ = n * m n := by simp
+      _ = (n+1) * m n := by simp
     by_cases hn: n = 0
-    · grind
-    · have : n * (n + 1) * ∑ a ∈ Finset.range i, m a ≤ n * i * ∑ a ∈ Finset.range (n+1), m a := by
-        sorry
-      have h3 : (n + 1) * ∑ a ∈ Finset.range i, m a ≤ i * ∑ a ∈ Finset.range (n+1), m a := by
-        have _ : n > 0 := by sorry
-        sorry
-      have hdiv : ∀ (a : ℕ), ∀ (b c : ℤ), 0 < a → a * b ≤ c → b ≤ c / a := by
+    · have : i = 0 := by grind
+      rw [this]
+      simp
+    · have hdiv : ∀ (a : ℕ), ∀ (b c : ℤ), 0 < a → a * b ≤ c → b ≤ c / a := by
         intro a b c h1 h2
         refine Int.le_ediv_of_mul_le ?_ ?_
-        exact Int.natCast_pos.mpr h1
-        grind
-      have : ∀ (a : ℕ), ∀ (c : ℤ), 0 < a → 0 ≤ a * c → 0 ≤ c := by
-        intro a c h1 h2
-        apply?
-        sorry
-      have h2 : 0 < n + 1 := by grind
+        · exact Int.natCast_pos.mpr h1
+        · grind
+      have h5 : n * ((n + 1) * ∑ a ∈ Finset.range i, m a) ≤ n * i * ∑ a ∈ Finset.range (n+1), m a := by
+        calc
+        n * ((n + 1) * ∑ a ∈ Finset.range i, m a) = (n + 1) * n * ∑ a ∈ Finset.range i, m a := by grind
+        _ ≤ (n + 1) * n * ((i * ∑ a ∈ Finset.range n, m a) / n) := by
+          have h : ∑ a ∈ Finset.range i, m a ≤ (i * ∑ a ∈ Finset.range n, m a) / n := by
+            by_cases hi1: i = n
+            · rw [hi1]
+              have : ∑ a ∈ Finset.range n, m a = (↑n * ∑ a ∈ Finset.range n, m a) / ↑n := by
+                aesop
+              grind
+            · refine hyp ?_ i ?_
+              · grind
+              · grind
+          refine (Int.mul_le_mul_left ?_).mpr h
+          grind
+        _ = (n + 1) * (n * ((i * ∑ a ∈ Finset.range n, m a) / n)) := by grind
+        _ ≤ (n + 1) * (i * ∑ a ∈ Finset.range n, m a) := by
+          have h : ∀ (a : ℕ), ∀ (b : ℤ), 0 < a → a * (b/a) ≤ b := by
+            intro a b ha
+            refine Int.mul_ediv_self_le ?_
+            exact Int.natCast_ne_zero_iff_pos.mpr ha
+          specialize h n (i * ∑ a ∈ Finset.range n, m a) (Nat.ne_zero_iff_zero_lt.mp hn)
+          refine Int.mul_le_mul_of_nonneg_left h ?_
+          grind
+        _ = (n+1) * i * ∑ a ∈ Finset.range n, m a := by grind
+        _ = (n+1) * i * (∑ a ∈ Finset.range (n+1), m a - m n) := by
+          have h : ∑ a ∈ Finset.range n, m a + m n = ∑ a ∈ Finset.range (n+1), m a :=
+            Eq.symm (Finset.sum_range_succ m n)
+          grind
+        _ = (n+1) * i * ∑ a ∈ Finset.range (n+1), m a - (n + 1) * i * m n := by grind
+        _ = n * i * ∑ a ∈ Finset.range (n+1), m a - i * ((n + 1) * m n - ∑ a ∈ Finset.range (n+1), m a) := by grind
+        _ ≤ n * i * ∑ a ∈ Finset.range (n+1), m a := by
+          refine Int.sub_le_self (↑n * ↑i * ∑ a ∈ Finset.range (n + 1), m a) ?_
+          refine Int.mul_nonneg ?_ ?_
+          · grind
+          · exact Int.sub_nonneg_of_le h1
+      have h3 : (n + 1) * ∑ a ∈ Finset.range i, m a ≤ i * ∑ a ∈ Finset.range (n+1), m a := by
+        have h4 : n > 0 := by grind
+        calc
+        (n + 1) * ∑ a ∈ Finset.range i, m a ≤ (n * i * ∑ a ∈ Finset.range (n+1), m a) / n :=
+          hdiv n ((n + 1) * ∑ a ∈ Finset.range i, m a) (n * i * ∑ a ∈ Finset.range (n+1), m a) h4 h5
+        _ = i * ∑ a ∈ Finset.range (n+1), m a := by
+          refine Int.ediv_eq_of_eq_mul_left ?_ ?_
+          · grind
+          · grind
       exact hdiv (n+1) (∑ a ∈ Finset.range i, m a)
-        ((↑i * ∑ a ∈ Finset.range (n + 1), m a)) h2 h3
+        ((↑i * ∑ a ∈ Finset.range (n + 1), m a)) (Nat.zero_lt_succ n) h3
 
 lemma sequence_argument4 (n: ℕ) (c: ℤ) (h0: 0 ≤ c ∧ c < n) (S : Set (ℕ → ℤ))
   (h1 : S.Nonempty) (h2 : ∀ (m : ℕ → ℤ), m ∈ S → ∑ a ∈ Finset.range n, m a = c)
