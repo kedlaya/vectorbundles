@@ -1,6 +1,5 @@
 module
 
-public import Mathlib.Algebra.Algebra.Basic
 public import Mathlib.Algebra.CharP.Defs
 public import Mathlib.Algebra.Ring.Semireal.Defs
 public import Mathlib.Algebra.Ring.SumsOfSquares
@@ -25,8 +24,8 @@ open Polynomial
 
 lemma RealClosed_from_quadratic (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
-  (h1 : ∀ i : F, i^2 ≠ -1) (h2 : ∃ i : K, i^2 = -1 ∧ F⟮i⟯ = ⊤)
-  : IsRealClosed F := by
+    (h1 : ∀ i : F, i^2 ≠ -1) (h2 : ∃ i : K, i^2 = -1 ∧ F⟮i⟯ = ⊤)
+      : IsRealClosed F := by
 
   have h_alg : IsAlgClosed K := IsAlgClosure.isAlgClosed F
   obtain ⟨i, h2a, h2b⟩ := h2

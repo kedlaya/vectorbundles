@@ -1,3 +1,130 @@
+\section{Lemmas about integer sequences}
+
+\begin{lemma} \label{lem:sequence argument1}
+\lean{sequence_argument1}
+\leanok
+Let $n$ be a positive integer.
+Let $m_1,\dots,m_n$ be a sequence of integers.
+Suppose that there are no indices $1 \leq i < j \leq n$ such that
+\begin{equation} \label{eq:sequence condition}
+m_k = m_i + 1 \quad (i < k < j), \qquad m_j > m_i + 1.
+\end{equation}
+Then for $1 \leq i < j \leq n$,
+\[
+m_j \leq m_i+1 \qquad (1 \leq i < j \leq n).
+\]
+\end{lemma}
+\begin{proof}
+\leanok
+We prove the claim by induction on $j-i$.
+The base case $j-i=1$ is covered by the second part of \eqref{eq:sequence condition}.
+For the induction step, suppose by way of contradiction that $m_j> m_i+1$ for some $i,j$.
+Set $m := m_i + 1$.
+For $k = i+1, \dots, j-1$ we have $m_{k} \leq m_i+1$ and $m_j \leq m_{k}+1$ by the induction hypothesis;
+combining with $m_j \geq m_i + 2$ shows that both of these must be equalities
+and so $m_k = m, m_j = m+1$.
+Now $(m_i, \dots, m_j) = (m-1, m, \dots, m, m+1)$, which contradicts \eqref{eq:sequence condition}.
+\end{proof}
+
+\begin{lemma} \label{lem:sequence argument2}
+\lean{sequence_argument2}
+\leanok
+Let $n$ be a positive integer.
+Let $c$ be an integer with $0 \leq c < n$.
+Let $m_1,\dots,m_n$ be a sequence of integers satisfying the following conditions.
+\begin{enumerate}
+\item[(a)]
+We have $m_1 + \cdots + m_n = c$.
+\item[(b)]
+The sequence $m_1, \dots, m_n$ is nondecreasing.
+\item[(c)]
+For $1 \leq i < j \leq n$, $m_j \leq m_i+1$.
+\end{enumerate}
+Then 
+\[
+m_i = \begin{cases} 0 & 1 \leq i \leq n-c \\ 1 & n-c+1 \leq i \leq n. \end{cases}
+\]
+\end{lemma}
+\begin{proof}
+\leanok
+We proceed by induction on $n$, with trivial base case $n=0$.
+For $n > 0$, 
+we have by (b) and (c)
+\[
+nm_n - n + 1 \leq c \leq nm_n.
+\]
+If $c=0$ this forces $m_n = 0$; if $0 < c < m_n$ this forces $m_n = 1$.
+In either case, we apply the induction hypothesis to $m_1,\dots,m_{n-1}$ to finish.
+\end{proof}
+
+\begin{lemma} \label{lem:sequence argument3}
+\lean{partial_sums_of_monotone_sequence}
+Let $n$ be a positive integer.
+Let $(m_1,\dots,m_n)$ be a nondecreasing sequence of integers. Then for $i=0,\dots,n$,
+\[
+\sum_{j=1}^i m_i \leq \frac{i}{n} \sum_{j=1}^n m_n.
+\]
+\end{lemma}
+\begin{proof}
+We proceed by induction on $n$.
+The claim is vacuously true for $i=0$ and $i=n$, which in particular covers the base case $n=1$.
+When $0 < i < n$, we compute that 
+\[
+n m_n = \sum_{j=1}^n m_n \geq \sum_{j=1}^n m_i.
+\]
+Applying the induction hypothesis then gives
+\begin{align*}
+n(n-1) \sum_{j=1}^i m_i &\leq n i \sum_{j=1}^{n-1} m_n \\
+&= n i \sum_{j=1}^n m_n - n i m_n \\
+&= (n-1) i \sum_{j=1}^n m_n - i \left(n m_n - \sum_{j=1}^n m_n\right) \\
+&\leq (n-1) i \sum_{j=1}^n m_n
+\end{align*}
+and now dividing out $n-1$ gives what we want.
+\end{proof}
+
+\begin{lemma} \label{lem:sequence argument4}
+\lean{sequence_argument4}
+Let $n$ be a nonnegative integer.
+Let $c$ be an integer with $0 \leq c \leq n$.
+Let $S$ be a subset of $\Z^n$ satisfying the following conditions.
+\begin{enumerate}
+\item[(a)]
+The set $S$ is nonempty.
+\item[(b)]
+For every tuple $(m_1,\dots,m_n) \in S$, we have $m_1 + \cdots + m_n = c$.
+\item[(c)]
+For every tuple $(m_1,\dots,m_n) \in S$, the sequence $m_1,\dots,m_n$ is nondecreasing.
+\item[(d)]
+For every tuple $(m_1,\dots,m_n) \in S$,
+if there exist indices $1 \leq i < j \leq n$ such that
+\begin{equation} \label{eq:sequence condition3}
+m_k = m_i + 1 \quad (i < k < j), \qquad m_j \geq m_i + 2,
+\end{equation}
+then there exists another tuple $(m'_1,\dots,m'_n) \in S$ with
+\[
+m'_1 + \cdots + m'_i > m_1 + \cdots + m_i, \qquad
+m'_1 + \cdots + m'_k \geq m_1 + \cdots + m_k \quad (k \neq i).
+\]
+\end{enumerate}
+Then there exists a tuple $(m_1,\dots,m_n) \in S$ with
+\[
+m_i = \begin{cases} 0 & 1 \leq i \leq n-c \\ 1 & n-c+1 \leq i \leq n. \end{cases}
+\]
+\end{lemma}
+\begin{proof}
+Define the function $f\colon S \to \Z$ by
+\[
+f(m_1,\dots,m_n) = \sum_{i=1}^{n-1} \sum_{j=1}^i m_j;
+\]
+from conditions (b) and (c) and Lemma~\ref{lem:sequence argument3}, we see that $\sum_{j=1}^i m_i \leq \frac{ic}{n}$ for each $i$, so $f$ is bounded above.
+(We also have the simpler expression $f(m_1,\dots,m_n) = \sum_{i=1}^n (n-i) m_i$ but we will not need it.)
+
+Since $S$ is nonempty, we can choose a tuple $(m_1,\dots,m_n) \in S$ on which $f$ achieves its maximum.
+There then cannot exist indices $i,j$ satisfying \eqref{eq:sequence condition3}, as then the new sequence $(m'_1,\dots,m'_n)$ would have $\sum_{i=1}^{n-1} (n-i)m'_i > \sum_{i=1}^{n-1} (n-i)m_i$.
+Consequently, we can apply Lemma~\ref{lem:sequence argument1} to deduce that 
+$m_j \leq m_i + 1$ for $1 \leq i < j \leq n$, then Lemma~\ref{lem:sequence argument2} to deduce the desired formula.
+\end{proof}
+
 
 \section{Generalized projective lines}
 
@@ -100,104 +227,30 @@ and $m_i' + \cdots + m_k' \geq m_i + \cdots + m_k$ for $k=i+1,\dots,j$,
 again contradicting minimality.
 \end{proof}
 
-\begin{lemma} \label{lem:sequence argument1}
-\leanok
-Let $n$ be a positive integer.
-Let $m_1,\dots,m_n$ be a sequence of integers satisfying 
-the following conditions.
-\begin{enumerate}
-\item[(a)]
-For $i=1,\dots,n-1$, we have $m_{i+1} \leq m_{i}+1$.
-\item[(b)]
-There do not exist indices $1 \leq i < j \leq n$ such that for some $m \in \Z$,
-\[
-(m_i,\dots,m_j) = (m-1, m,\dots,m,m+1).
-\]
-\end{enumerate}
-Then for $1 \leq i < j \leq n$,
-\[
-m_j \leq m_i+1 \qquad (1 \leq i < j \leq n).
-\]
-\end{lemma}
-\begin{proof}
-\leanok
-We prove the claim by induction on $j-i$.
-The base case $j-i=1$ is covered by (a).
-For the induction step, suppose by way of contradiction that $m_j> m_i+1$ for some $i,j$.
-Set $m := m_i + 1$.
-For $k = i+1, \dots, j-1$ we have $m_{k} \leq m_i+1$ and $m_j \leq m_{k}+1$ by the induction hypothesis;
-combining with $m_j \geq m_i + 2$ shows that both of these must be equalities
-and so $m_k = m, m_j = m+1$.
-Now $(m_i, \dots, m_j) = (m-1, m, \dots, m, m+1)$, which contradicts (b).
-\end{proof}
-
-
-\begin{lemma} \label{lem:sequence argument2}
-\leanok
-Let $n$ be a positive integer.
-Let $m_1,\dots,m_n$ be a sequence of integers satisfying 
-the following conditions:
-\begin{align}
-m_1 +\cdots+m_n = 0 & \label{eq:bound2} \\
-m_1 + \cdots + m_i \leq 0 & \quad (i=1,\dots,n-1)  \label{eq:bound1}\\
-m_j \leq m_i+1 & \quad (1 \leq i < j \leq n). \label{eq:bound3}
-\end{align}
-Then $m_1 = \cdots = m_n = 0$.
-\end{lemma}
-\begin{proof}
-\leanok
-We proceed by induction on $n$, with trivial base case $n=1$.
-For $n > 1$, note that \eqref{eq:bound1} and \eqref{eq:bound2} together imply $m_n \geq 0$.
-On the other hand, \eqref{eq:bound1} implies $\min_{i<n} \{m_i\} \leq 0$, and then \eqref{eq:bound3}
-implies $m_n \leq 1$. Finally, if $m_n = 1$, then \eqref{eq:bound3} implies that $m_i \geq 0$ for $i=1,\dots,{n-1}$, but then $m_1 + \cdots + m_n \geq 1$ in violation of \eqref{eq:bound2}.
-We deduce that $m_n = 0$; now the induction hypothesis applies to $m_1,\dots,m_{n-1}$ to finish.
-\end{proof}
-
-\begin{proposition} \label{prop:semistable slope 0}
+\begin{lemma} \label{lem:one-step mod semistable}
 \uses{def:generalized projective line,def:semistable bundle}
-Every semistable bundle of degree $0$ on $X$ is trivial.
-\end{proposition}
-\begin{proof}
-\uses{lem:minimal filtration,lem:sequence argument1,lem:sequence argument2}
-Let $F$ be a semistable vector bundle of degree $0$ and rank $n$.
-Choose a complete flag as in Lemma~\ref{lem:minimal filtration}.
-By Lemma~\ref{lem:sequence argument1} and 
-Lemma~\ref{lem:sequence argument2}, the degree sequence must be identically $0$.
-Since $\Ext^1_X(\cO_X, \cO_X) = H^1(X, \cO_X)$ vanishes by condition (b) of Definition~\ref{def:generalized projective line}, it follows that $F$ is trivial.
-\end{proof}
-
-\begin{lemma} \label{lem:one-step modification induction}
-\uses{def:generalized projective line,def:HN filtration}
-Let $F$ be a vector bundle on $X$ of rank $n$ with all HN slopes in $[0,1)$.
-Let $x \in X$ be a closed point of degree $1$
-and let $j_x \colon x \to X$ the canonical inclusion.
-Then for $i=0,\dots,d$,
-there exist a coherent sheaf $G_i$ on $x$ and an exact sequence
-\begin{equation} \label{eq:modification}
-0 \to H_i \to F \to j_x^* G_i \to 0
-\end{equation}
-of coherent sheaves on $X$ in which $\deg(H_i) = d-i$ and the HN slopes of $H_i$ are all nonnegative.
-\end{lemma}
-\begin{proof}
-Each $i$-dimensional quotient $G_i$ of the fiber $F_x$ gives rise to an exact sequence as in \eqref{eq:modification} with $\deg(H_i) = d_i$. It thus suffices to enforce that $H_i$ has all HN slopesn nonnegative.
-As the base case $i=0$ is vacuously true, we proceed to the induction step. To construct $G_i$,
-let $K$ be the maximal submodule of $H_{i-1}$ of slope $0$; more precisely, $K$ is the first step of the HN filtration of $H_{i-1}$ if 0 occurs as an HN slope of $H_{i-1}$ and the zero subbundle otherwise. It then suffices to choose $G_i$ so that $K \subseteq H_i$, which is possible because $K \neq H_{i-1}$ (as otherwise $\deg(H_{i-1})=d-i+1$ would be zero).
-\end{proof}
-
-\begin{lemma} \label{lem:one-step modification}
-\uses{def:generalized projective line,def:HN filtration}
-Let $F$ be a vector bundle on $X$ with all HN slopes in $[0,1)$.
-Let $x \in X$ be a closed point of degree $1$.
-Then for $j_x \colon x \to X$ the canonical inclusion,
-there exist a coherent sheaf $G$ on $x$ and an exact sequence
+Let $F$ be a semistable vector bundle on $X$ with slope in $[0,1)$.
+Then there exists an exact sequence
 \[
-0 \to \cO_X^{\oplus \rank(F)} \to F \to j_x^* G \to 0
+0 \to G \to F \to H \to 0
 \]
-of coherent sheaves on $X$.
+of vector bundles on $X$ such that both $G$ and $H(-1)$ are trivial.
 \end{lemma}
 \begin{proof}
-\uses{prop:semistable slope 0,lem:one-step modification induction}
-Apply Lemma~\ref{lem:one-step modification induction} with $i = d :=\deg(F)$ to construct an exact sequence as in \eqref{eq:modification} in which $\deg(H_d) = 0$ and the HN slopes of $H_d$ are all nonnegative. Then $H_d$ is semistable of degree $0$, and hence trivial by Proposition~\ref{prop:semistable slope 0}.
+\uses{lem:minimal filtration,lem:sequence argument3}
+Set $n := \rank(F)$.
+Let $S$ be the set of nondecreasing sequences which occur as slope sequences of complete flags of $F$.
+We check that $S$ satisfies the conditions of Lemma~\ref{lem:sequence argument3} with $c := \deg(F)$.
+\begin{enumerate}
+\item[(a)] By Lemma~\ref{lem:minimal filtration}, there exists a complete flag.
+Since $H^1(X, \cO_X(n)) = 0$ for any $n > 0$, by splitting terms as needed we can ensure that the slopes occur in nondecreasing order.
+\item[(b)] We have $m_1 + \cdots + m_n = \deg(F)$.
+\item[(c)] See (a).
+\item[(d)] This follows from Lemma~\ref{lem:minimal filtration} (and then sorting the sequence).
+\end{enumerate}
+By Lemma~\ref{lem:sequence argument4}, we have a tuple $(m_1,\dots,m_n) \in S$
+consisting of 0s and 1s only (in nondecreasing order). 
+Using the assumption that $H^1_X(\cO_X, \cO_X) = 0$, we obtain the desired exact sequence.
 \end{proof}
 
 \begin{corollary} \label{cor:slopes to sections}
@@ -206,13 +259,22 @@ Let $F$ be a nonzero vector bundle on $X$ whose HN slopes are all nonnegative.
 Then $F$ is generated by global sections and $H^1(X, F) = 0$.
 \end{corollary}
 \begin{proof}
-\uses{lem:one-step modification}
-By replacing $F$ with the first step of its HN filtration, we may reduce to the case where $F$ is semistable. By twisting, we may further ensure that $\mu(F) \in [0,1)$. We then deduce both claims from Lemma~\ref{lem:one-step modification} and the assumption $H^1(X, \cO_X) = 0$ from Definition~\ref{def:generalized projective line}.
+\uses{lem:one-step mod semistable}
+By replacing $F$ with the first step of its HN filtration, we may reduce to the case where $F$ is semistable. By twisting, we may further ensure that $\mu(F) \in [0,1)$. We then deduce both claims from Lemma~\ref{lem:one-step mod semistable} and the assumption $H^1(X, \cO_X) = 0$ from Definition~\ref{def:generalized projective line}.
+\end{proof}
+
+\begin{proposition} \label{prop:semistable slope 0}
+\uses{def:generalized projective line,def:semistable bundle}
+Every semistable bundle of degree $0$ on $X$ is trivial.
+\end{proposition}
+\begin{proof}
+\uses{lem:one-step mod semistable}
+Apply Lemma~\ref{lem:one-step mod semistable} and note that $\deg(F) = \rank(H)$, so we must have $G = F$.
 \end{proof}
 
 \begin{lemma} \label{lem:end of semistable}
 \uses{def:generalized projective line,def:semistable bundle}
-For any semistable vector bundle $F$ on $X$, $F^\vee \otimes F$ is trivial.
+For every semistable vector bundle $F$ on $X$, $F^\vee \otimes F$ is trivial.
 \end{lemma}
 \begin{proof}
 \uses{cor:slopes to sections,lem:map of stable,prop:semistable slope 0}
@@ -279,14 +341,14 @@ Both assertions follow directly from Lemma~\ref{cor:split sequence in order}.
 \begin{lemma} \label{lem:construct stable degree 1}
 \uses{def:generalized projective line,def:stable bundle,cor:function field of curve}
 Let $E$ be the field $H^0(X, \cO_X)$ (Corollary~\ref{cor:function field of curve}).
-For $d$ a positive integer with $\dim_{E} H^0(X, \cO_X(1)) > d$,
+For every integer $d$ with $1 \leq d < \dim_{E} H^0(X, \cO_X(1))$,
 there exists a semistable vector bundle on $X$ of rank $d$ and degree $1$.
 \end{lemma}
 \begin{proof}
 Let $x$ be a closed point of $X$ of degree 1.
 Set $F := \cO_X^{\oplus d}$ and let $e_1,\dots,e_d$ be the images in $F_x$
 of the standard basis vectors of $H^0(X, F) \cong E^{d}$.
-The condition $\dim_{E} H^0(X, \cO_X(1)) > d$ is equivalent to $\dim_{E} \kappa_x \geq d$;
+The condition $d < \dim_{E} H^0(X, \cO_X(1))$ is equivalent to $d \leq \dim_{E} \kappa_x$;
 consequently, we can choose a one-dimensional quotient $V$ of $F_x$
 for which the composition $E^d \to F_x \to V$ is injective.
 Construct the subbundle $G$ of $F$
@@ -326,20 +388,12 @@ By Proposition~\ref{prop:tensor product of semistable}, $G_1 \otimes G_2$ is sem
 \]
 
 \item
-By Lemma~\ref{lem:construct stable degree 1} again, we can find a stable bundle $G_1'$ of rank $(d-b)d$ and degree $1$. By the induction hypothesis, we can find a stable bundle $G_2'$ of rank $d-b$ and degree $((d-b) c+1)/d$. 
-By Proposition~\ref{prop:tensor product of semistable}, $(G_1')^\vee \otimes G_2$ is semistable of rank $(d-b)^2 d$ and slope
-\[
--\frac{1}{(d-b)d} + \frac{((d-b)c+1)/d}{d-b} = \frac{c}{d}.
-\]
-By Proposition~\ref{prop:decompose as stables}, $(G_1')^\vee \otimes G_2$ decomposes as a sum of stable bundles  of slope $\frac{c}{d}$. Let $G'$ be one such bundle; by Lemma~\ref{cor:unique stable}, all of the other summands are isomorphic to $G'$. We deduce that $\rank(G')$ divides $(d-b)^2 d$.
-
-\item
-By Lemma~\ref{lem:construct stable degree 1} again, we can find a stable bundle $G''_1$ of rank $d$ and degree $1$. 
-By Proposition~\ref{prop:tensor product of semistable}, $(G''_1)^{\otimes c}$ is semistable of rank $d^c$ and slope $\frac{c}{d}$.
+By Lemma~\ref{lem:construct stable degree 1} again, we can find a stable bundle $G'_1$ of rank $d$ and degree $1$. 
+By Proposition~\ref{prop:tensor product of semistable}, $(G'_1)^{\otimes c}$ is semistable of rank $d^c$ and slope $\frac{c}{d}$.
 \end{itemize}
 We deduce that there exists a stable bundle $G$ of slope $\frac{c}{d}$ and degree dividing
 \[
-\gcd(b^2 d, (d-b)^2 d, d^c) = d \gcd(b^2, (d-b)^2, d^{c-1}) = d.
+\gcd(b^2 d, d^c) = d \gcd(b^2, d^{c-1}) = d.
 \]
 On the other hand, since $\deg(G) \in \Z$, $\rank(G)$ must be divisible by $d$.
 Hence $G$ is the desired stable bundle of rank $d$ and degree $c$.

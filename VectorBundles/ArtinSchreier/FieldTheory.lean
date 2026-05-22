@@ -27,8 +27,9 @@ public import VectorBundles.ArtinSchreier.Polynomials
 open IntermediateField
 open Polynomial
 
-lemma finite_extension_degree_one (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] :
+variable (F K : Type) [Field F] [Field K] [Algebra F K]
+
+lemma finite_extension_degree_one :
     Module.finrank F K > 1 → ¬ Function.Surjective (algebraMap F K) := by
     intro h
     by_contra
@@ -43,8 +44,7 @@ lemma finite_extension_degree_one (F : Type) (K : Type)
     have : Module.finrank F K ≤ 1 := Module.finrank_le_of_rank_le h2
     grind
 
-lemma fixed_field_of_cyclic_subgroup (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
+lemma fixed_field_of_cyclic_subgroup [FiniteDimensional F K]
     [IsGalois F K] (g : Gal(K/F)) : ∀ x : K, g x = x →
       x ∈ fixedField (Subgroup.zpowers g) := by
   intro x hg
@@ -71,18 +71,17 @@ lemma fixed_field_of_cyclic_subgroup (F : Type) (K : Type)
     exact h_pow n
   exact (mem_fixedField_iff (Subgroup.zpowers g) x).mpr h_sub
 
-lemma cyclic_char_p_as_artin_schreier (F : Type) (K : Type) (p : ℕ)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
+lemma cyclic_char_p_as_artin_schreier [FiniteDimensional F K]
     (hp: Nat.Prime p) (hrank: Module.finrank F K = p)
       (hsep: IsGalois F K) (hchar: ringChar F = p) : ∃ (a : F), ∃ (x : K),
          minpoly F x = X ^ p - X - C a := by
-  have hy : ∃ (y : K), Algebra.trace F K y = 1 := by
+  have hy : ∃ (y : K), Algebra.trace F K y = 1 :=
     have h : Function.Surjective (Algebra.trace F K) := Algebra.trace_surjective F K
-    exact Set.mem_range.mp (h 1)
+    Set.mem_range.mp (h 1)
   obtain ⟨y, hy⟩ := hy
-  have : CharP K p := by
+  have : CharP K p :=
     have h : CharP F p := ringChar.of_eq hchar
-    exact (Algebra.charP_iff F K p).mp h
+    (Algebra.charP_iff F K p).mp h
   have : ExpChar K p := ExpChar.prime hp
   let G := Gal(K/F)
   have h_ord : Nat.card G = p := by
@@ -171,7 +170,7 @@ lemma cyclic_char_p_as_artin_schreier (F : Type) (K : Type) (p : ℕ)
                 subst hrank
                 aesop
               _ = ((g^((i+1):ℕ)) y) * (i:K) := ?_
-            have : g * g^(i:ℕ) = g^((i+1):ℕ) := Eq.symm (pow_succ' g ↑i)
+            have : g * g^(i:ℕ) = g^((i+1):ℕ) := (pow_succ' g ↑i).symm
             have : g ((g^(i:ℕ)) y) = (g * (g^(i:ℕ))) y := AlgEquiv.congr_fun rfl ((g^(i:ℕ)) y)
             have : g ((g^(i:ℕ)) y) = (g^((i+1):ℕ)) y := by simp_all
             rw [this]
@@ -270,8 +269,7 @@ lemma cyclic_char_p_as_artin_schreier (F : Type) (K : Type) (p : ℕ)
   · rw [h_mpdeg]
     exact h_pdeg.symm
 
-lemma nonsquare_in_quadratic_extension (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
+lemma nonsquare_in_quadratic_extension [FiniteDimensional F K]
     (hrank: Module.finrank F K = 2) (hchar: ringChar F ≠ 2) :
       ∃ a : F, ¬ IsSquare a := by
   have h_char : ringChar F = ringChar K := Algebra.ringChar_eq F K
@@ -365,8 +363,7 @@ lemma nonsquare_in_quadratic_extension (F : Type) (K : Type)
     exact bot_eq_top_iff_finrank_eq_one.mp h1
   simp_all
 
-lemma trivial_absolute_galois_group (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [Algebra.IsSeparable F K] [IsAlgClosure F K]
+lemma trivial_absolute_galois_group [Algebra.IsSeparable F K] [IsAlgClosure F K]
     [FiniteDimensional F K] (h : Nat.card Gal(K/F) = 1) : IsAlgClosed F := by
   have : IsGalois F K := by
     (expose_names; exact { to_isSeparable := inst_3, to_normal := IsAlgClosure.normal F K })

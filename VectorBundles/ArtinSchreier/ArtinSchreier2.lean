@@ -25,14 +25,16 @@ public import VectorBundles.ArtinSchreier.ArtinSchreier
 open IntermediateField
 open Polynomial
 
-lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
+variable (F : Type) (K : Type) (p : ℕ) [Field F] [Field K]
+  [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
+
+lemma finite_algebraic_closure_cyclic_prime (p : ℕ)
     (hp: Nat.Prime p) (h: Module.finrank F K = p)
       (hsep: IsGalois F K): ¬ ringChar F = p := by
   by_contra
   let iota := algebraMap F K
   have ha : ∃ (a : F), ∃ (x : K), minpoly F x = X ^ p -  X - C a :=
-    cyclic_char_p_as_artin_schreier F K p hp h hsep this
+    cyclic_char_p_as_artin_schreier F K hp h hsep this
   obtain ⟨a, x, ha⟩ := ha
   have h_int : IsIntegral F x := Algebra.IsIntegral.isIntegral x
   let aspol := X ^ p -  X -  C a
@@ -156,8 +158,6 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
     have h_eval_at_power :  ∀ (f : Polynomial F), (aeval (pb.gen^p)) f =
       (aeval pb.gen) (f.comp (X ^ p)) := by
       intro f
-      have _ : aeval pb.gen (f.comp (X ^ p)) = aeval (aeval pb.gen (X ^ p)) f :=
-        aeval_comp pb.gen
       calc
         aeval (pb.gen ^ p) f
         _ = aeval (aeval pb.gen (X ^ p)) f := by
@@ -172,8 +172,6 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
     have h_eval_at_sum : ∀ (f : Polynomial F), (aeval (pb.gen + (algebraMap F F⟮x⟯) a)) f =
       (aeval pb.gen) (f.comp (X  +  C a)) := by
       intro f
-      have _ : aeval pb.gen (f.comp (X  +  C a)) = aeval (aeval pb.gen (X  +  C a)) f :=
-        aeval_comp pb.gen
       calc
         aeval (pb.gen + (algebraMap F F⟮x⟯) a) f
         _ = aeval (aeval pb.gen (X  +  C a)) f := by
@@ -181,12 +179,8 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
               calc
                 aeval pb.gen (X  +  C a)
                 = aeval pb.gen ( X : Polynomial F) + aeval pb.gen (C a) := aeval_add pb.gen
-                _ = pb.gen + aeval pb.gen (C a) := by
-                  refine (add_left_inj ((aeval pb.gen) (C a))).mpr ?_
-                  exact aeval_X pb.gen
-                _ = pb.gen + (algebraMap F F⟮x⟯) a := by
-                  refine add_left_cancel_iff.mpr ?_
-                  exact aeval_C pb.gen a
+                _ = pb.gen + aeval pb.gen (C a) := by rw [aeval_X pb.gen]
+                _ = pb.gen + (algebraMap F F⟮x⟯) a := by rw [aeval_C pb.gen a]
             rw [h]
         _ = (aeval pb.gen) (f.comp (X  +  C a)) := (aeval_comp pb.gen).symm
 
@@ -242,8 +236,8 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
           refine add_left_cancel_iff.mpr ?_
           unfold aeval
           unfold aevalEquiv
-          have _ : (algebraMap F ↥F⟮x⟯) a * pb.gen ^ (p - 1) = pb.gen ^ (p - 1) * (algebraMap F ↥F⟮x⟯) a := by
-            (expose_names; exact Algebra.commutes a (↑pb.gen ^ (p - 1)))
+          have _ : (algebraMap F ↥F⟮x⟯) a * pb.gen ^ (p - 1) = pb.gen ^ (p - 1) * (algebraMap F ↥F⟮x⟯) a :=
+            Algebra.commutes a (↑pb.gen ^ (p - 1))
           simp_all
           left
           rfl
@@ -266,9 +260,9 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
         refine natDegree_add_le_of_le ?_ ?_
         exact Nat.le_refl y0_rep.natDegree
         have h7 : (C a * X ^ (p - 1)).natDegree = (X ^ (p - 1) * C a).natDegree := by
-          refine Eq.symm (Monic.natDegree_mul_comm ?_ (C a))
+          refine (Monic.natDegree_mul_comm ?_ (C a)).symm
           exact monic_X_pow (p - 1)
-        exact Nat.le_of_eq (id (Eq.symm h7))
+        exact Nat.le_of_eq (id h7.symm)
       _ < p := by
         refine Nat.max_lt.mpr ?_
         constructor
@@ -277,7 +271,7 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
           exact Nat.zero_lt_of_lt h_y0rep1
           apply Polynomial.natDegree_C_mul_X_pow_le a (p-1)
       _ = (minpoly F x).natDegree :=
-        Nat.succ_inj.mp (congrArg Nat.succ (id (Eq.symm h_pbdim)))
+        Nat.succ_inj.mp (congrArg Nat.succ (id h_pbdim.symm))
     have h : y0p_rep = y1p_rep :=
       congruence_low_degree h3 h1 h2 (minpoly.monic h_int)
     exact ext_iff.mp h (p-1)
@@ -360,7 +354,7 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) (p : ℕ)
   have _ : 1 < 1 := by
     calc
       1 < p := Nat.Prime.one_lt hp
-      p = aspol.natDegree := Eq.symm h_natdeg
-      _ = (minpoly F x).natDegree := Eq.symm (natDegree_eq_of_degree_eq (congrArg degree ha))
+      p = aspol.natDegree := h_natdeg.symm
+      _ = (minpoly F x).natDegree := (natDegree_eq_of_degree_eq (congrArg degree ha)).symm
       _ ≤ 1 := h_deg1
   simp_all

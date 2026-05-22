@@ -33,9 +33,10 @@ public import VectorBundles.ArtinSchreier.FieldTheory2
 
 @[expose] public section
 
-lemma quadratic_algebraic_closure (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
-  (h : Module.finrank F K = 2) :
+variable (F : Type) (K : Type) [Field F] [Field K]
+  [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
+
+lemma quadratic_algebraic_closure (h : Module.finrank F K = 2) :
   ∀ (a b : F), IsSquare (a^2+b) ∨ IsSquare (-b) := by
   intro a b
   have h_ac: IsAlgClosed K := IsAlgClosure.isAlgClosed F
@@ -217,9 +218,7 @@ lemma quadratic_algebraic_closure (F : Type) (K : Type)
     use (f.coeff 0)
     grind
 
-lemma quadratic_algebraic_closure_no_i (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
-  (h : Module.finrank F K = 2) :
+lemma quadratic_algebraic_closure_no_i (h : Module.finrank F K = 2) :
   ∀ (a : F), IsSquare a ∨ IsSquare (-a) := by
   intro a
   have _ : IsSquare (0 ^ 2 + a) ∨ IsSquare (-a) := by

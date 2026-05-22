@@ -15,11 +15,12 @@ public import VectorBundles.ArtinSchreier.FieldTheory
 
 open Module
 
-lemma finite_inseparable_extension_data (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
-    [IsPurelyInseparable F K] (h: finrank F K > 1) :
-      Nat.Prime (ringChar F) ∧ ringChar F = ringExpChar F ∧
-        ∃ (n : ℕ), finrank F K = (ringChar F) ^ n := by
+variable (F K : Type) [Field F] [Field K] [Algebra F K]
+  [FiniteDimensional F K] [IsPurelyInseparable F K]
+
+lemma finite_inseparable_extension_data (h: finrank F K > 1) :
+  Nat.Prime (ringChar F) ∧ ringChar F = ringExpChar F ∧
+    ∃ (n : ℕ), finrank F K = (ringChar F) ^ n := by
 
   let p := ringChar F
   let q := ringExpChar F
@@ -46,10 +47,8 @@ lemma finite_inseparable_extension_data (F : Type) (K : Type)
     rw [← hp] at hn
     use n₁
 
-lemma finite_inseparable_extension_intermediate_small (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
-    [IsPurelyInseparable F K] (h: finrank F K > 1) :
-      ∃ E: IntermediateField F K, finrank F E = ringChar F := by
+lemma finite_inseparable_extension_intermediate_small (h: finrank F K > 1) :
+  ∃ E: IntermediateField F K, finrank F E = ringChar F := by
 
   let p := ringChar F
   have h : Nat.Prime p ∧ p = ringExpChar F ∧ ∃ (n : ℕ), finrank F K = p ^ n :=
@@ -61,11 +60,9 @@ lemma finite_inseparable_extension_intermediate_small (F : Type) (K : Type)
     not_forall.mp h1
   obtain ⟨x, hx⟩ := hx
   let e := IsPurelyInseparable.elemExponent F x
-  have he : e > 0 := by
-    have hexp : x ^ (ringExpChar F) ^ e ∈ (algebraMap F K).range := IsPurelyInseparable.elemExponent_def F x
+  have he1 : e ≠ 0 := by
     by_contra
-    push Not at this
-    have this : e = 0 := Nat.le_zero.mp this
+    have hexp : x ^ (ringExpChar F) ^ e ∈ (algebraMap F K).range := IsPurelyInseparable.elemExponent_def F x
     rw [this] at hexp
     grind
   let y := x^(p^(e-1))
@@ -74,34 +71,33 @@ lemma finite_inseparable_extension_intermediate_small (F : Type) (K : Type)
   have h_pol1 : minpoly F x = pol1 := by grind [IsPurelyInseparable.minpoly_eq F x]
   let pol := Polynomial.X ^ p - Polynomial.C z
   have hy_int : IsIntegral F y := Algebra.IsIntegral.isIntegral y
-  have hirr : Irreducible pol := by
-    have ha : ∀ (a : F), a^p ≠ z := by
-      have hx1 : IsIntegral F x := Algebra.IsIntegral.isIntegral x
-      have hirr1 : Irreducible (minpoly F x) := minpoly.irreducible hx1
-      rw [h_pol1] at hirr1
-      have hirr2 : ∀ {m : ℕ}, m ∣ p^e → m ≠ 1 → ∀ (b : F), b ^ m ≠ z :=
-        pow_ne_of_irreducible_X_pow_sub_C hirr1
-      apply hirr2
-      · simp
-        left
-        exact Nat.ne_zero_iff_zero_lt.mpr he
-      · exact CharP.ringChar_ne_one
-    exact (X_pow_sub_C_irreducible_iff_of_prime hpp).mpr ha
+  have ha : ∀ (a : F), a^p ≠ z := by
+    have hx1 : IsIntegral F x := Algebra.IsIntegral.isIntegral x
+    have hirr1 : Irreducible (minpoly F x) := minpoly.irreducible hx1
+    rw [h_pol1] at hirr1
+    have hirr2 : ∀ {m : ℕ}, m ∣ p^e → m ≠ 1 → ∀ (b : F), b ^ m ≠ z :=
+      pow_ne_of_irreducible_X_pow_sub_C hirr1
+    apply hirr2
+    · simp
+      left
+      push Not
+      exact he1
+    · exact CharP.ringChar_ne_one
+  have hirr : Irreducible pol := (X_pow_sub_C_irreducible_iff_of_prime hpp).mpr ha
   have h_pol : minpoly F y = pol := by
     have hy : pol.aeval y = 0 := by
       calc
-        pol.aeval y = pol1.aeval x := by
-          have h1 : ∃ (f : ℕ), e = f + 1 := Nat.exists_eq_add_of_le' he
-          obtain ⟨f, hf⟩ := h1
-          unfold Polynomial.aeval Polynomial.aevalEquiv
-          subst pol pol1 y
-          simp
-          rw [hf]
-          ring_nf
-          simp
-        _ = (Polynomial.aeval x) (minpoly F x) :=
-          AlgHom.congr_arg (Polynomial.aeval x) (id h_pol1.symm)
-        _ = 0 := minpoly.aeval F x
+      pol.aeval y = y ^ p - (algebraMap F K) z := by aesop
+      _ = x ^ (p ^ e) - (algebraMap F K) z := by
+        refine sub_left_inj.mpr ?_
+        subst y
+        ring_nf
+        have h: p * p^(e-1) = p^e := mul_pow_sub_one he1 p
+        rw [h]
+      _ = pol1.aeval x := by aesop
+      _ = 0 := by
+        rw [←h_pol1]
+        apply minpoly.aeval F x
     have hpol : minpoly F y ∣ pol := (minpoly.isIntegrallyClosed_dvd_iff hy_int pol).mp hy
     have hmon1 : pol.Monic := by
       refine Polynomial.monic_X_pow_sub_C z ?_
@@ -116,15 +112,15 @@ lemma finite_inseparable_extension_intermediate_small (F : Type) (K : Type)
   let E := IntermediateField.adjoin F {y}
   use E
   calc
-    finrank F E = (minpoly F y).natDegree := IntermediateField.adjoin.finrank hy_int
-    _ = pol.natDegree := by rw [h_pol]
-    _ = p := Polynomial.natDegree_X_pow_sub_C
+      finrank F E = (minpoly F y).natDegree := IntermediateField.adjoin.finrank hy_int
+      _ = pol.natDegree := by rw [h_pol]
+      _ = p := Polynomial.natDegree_X_pow_sub_C
 
 -- Note unusual hypothesis format, needed for induction tactic.
 lemma finite_inseparable_extension_intermediate_internal (n : ℕ) :
   ∀ (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
     [IsPurelyInseparable F K], finrank F K > 1 → finrank F K = (ringChar F)^n →
-       ∃ (E : IntermediateField F K), finrank E K = ringChar F := by
+      ∃ (E : IntermediateField F K), finrank E K = ringChar F := by
 
   induction n with
   | zero => -- This case cannot occur
@@ -137,13 +133,13 @@ lemma finite_inseparable_extension_intermediate_internal (n : ℕ) :
     obtain ⟨hpp, hp, _⟩ := h
     have : ExpChar F p := ringExpChar.eq_iff.mp (id hp.symm)
     have hp2 : p ≥ 2 := Nat.Prime.two_le hpp
+    have hE₀: ∃ E₀: IntermediateField F K, finrank F E₀ = p :=
+      finite_inseparable_extension_intermediate_small F K hr
+    obtain ⟨E₀, hE₀⟩ := hE₀
     by_cases hn1 : n = 0
     · use (⊥: IntermediateField F K)
-      simp_all
-    · have hE₀: ∃ E₀: IntermediateField F K, finrank F E₀ = p :=
-        finite_inseparable_extension_intermediate_small F K hr
-      obtain ⟨E₀, hE₀⟩ := hE₀
-      have hchar : ringChar E₀ = p := (Algebra.ringChar_eq F ↥E₀).symm
+      aesop
+    · have hchar : ringChar E₀ = p := (Algebra.ringChar_eq F ↥E₀).symm
       have hE : ∃ E: IntermediateField E₀ K, finrank E K = ringChar E₀ := by
         have hn2 : finrank E₀ K = p^n := by
           have h3 : p * finrank E₀ K = p * p^n  := by
@@ -160,21 +156,18 @@ lemma finite_inseparable_extension_intermediate_internal (n : ℕ) :
             _ > 1 := Nat.one_lt_pow hn1 hp2
         · rw [hchar]
           exact hn2
-      obtain ⟨E, hE⟩ := hE
+      obtain ⟨E, hE₁⟩ := hE
       let E₁ := IntermediateField.restrictScalars F E
       use E₁
       calc
-        finrank E₁ K = ringChar E₀ := hE
+        finrank E₁ K = ringChar E₀ := hE₁
         _ = p := hchar
 
-lemma finite_inseparable_extension_intermediate (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
-    [IsPurelyInseparable F K] (hr: finrank F K > 1) :
-      ∃ E : IntermediateField F K, finrank E K = ringChar F := by
+lemma finite_inseparable_extension_intermediate (h: finrank F K > 1) :
+  ∃ E : IntermediateField F K, finrank E K = ringChar F := by
 
-    let p := ringChar F
-    have h : Nat.Prime p ∧ p = ringExpChar F ∧
-      ∃ (n : ℕ), finrank F K = p ^ n :=
-      finite_inseparable_extension_data F K hr
-    obtain ⟨hpp, hp, n, hn⟩ := h
-    apply finite_inseparable_extension_intermediate_internal n F K hr hn
+  let p := ringChar F
+  have h : Nat.Prime p ∧ p = ringExpChar F ∧ ∃ (n : ℕ), finrank F K = p ^ n :=
+    finite_inseparable_extension_data F K h
+  obtain ⟨hpp, hp, n, hn⟩ := h
+  apply finite_inseparable_extension_intermediate_internal n F K h hn

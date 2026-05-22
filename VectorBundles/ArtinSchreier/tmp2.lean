@@ -19,7 +19,6 @@ public import Mathlib.FieldTheory.Minpoly.Basic
 public import Mathlib.FieldTheory.Minpoly.MinpolyDiv
 public import Mathlib.FieldTheory.Perfect
 public import Mathlib.FieldTheory.PurelyInseparable.Basic
-public import Mathlib.FieldTheory.PurelyInseparable.Exponent
 public import Mathlib.FieldTheory.PurelyInseparable.PerfectClosure
 public import Mathlib.FieldTheory.PurelyInseparable.Tower
 public import Mathlib.FieldTheory.SeparableClosure
@@ -36,10 +35,11 @@ public import VectorBundles.ArtinSchreier.ArtinSchreier2
 open IntermediateField
 open Module
 
-lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) (p : ℕ)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
-  (hp: Nat.Prime p) (hrank: finrank F K = p)
-  (hgal: IsGalois F K): p = 2 := by
+variable (F : Type) (K : Type) [Field F] [Field K]
+  [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
+
+lemma finite_algebraic_closure_cyclic_quadratic {p : ℕ}
+  (hp: Nat.Prime p) (hrank: finrank F K = p) (hgal: IsGalois F K): p = 2 := by
   have h_char : ¬ ringChar F = p :=
     finite_algebraic_closure_cyclic_prime F K p hp hrank hgal
   have hK : (primitiveRoots (finrank F K) F).Nonempty := by
@@ -116,7 +116,7 @@ lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) (p : ℕ)
       _ > p := Nat.lt_mul_self_iff.mpr h
   have h1 :
     ∃ (a : F), Irreducible (Polynomial.X ^ finrank F K - Polynomial.C a)
-      ∧ Polynomial.IsSplittingField F K (Polynomial.X ^ finrank F K - Polynomial.C a) := by
+          ∧ Polynomial.IsSplittingField F K (Polynomial.X ^ finrank F K - Polynomial.C a) := by
     apply (List.TFAE.out (isCyclic_tfae F K hK) 0 1).mp
     constructor
     exact hgal
@@ -174,12 +174,11 @@ lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) (p : ℕ)
         _ ≤ p := hp2
     exact (lt_self_iff_false p).mp h
 
-lemma finite_separable_algebraic_closure_with_i (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
-    [Algebra.IsSeparable F K] [IsAlgClosure F K]
+lemma finite_separable_algebraic_closure_with_i
+    [Algebra.IsSeparable F K]
       (h : ∃ (i : F), i^2 = -1) : IsAlgClosed F := by
   have _ : IsGalois F K := by
-    (expose_names; exact { to_isSeparable := inst_4, to_normal := IsAlgClosure.normal F K })
+    (expose_names; exact { to_isSeparable := inst_5, to_normal := IsAlgClosure.normal F K })
   let G := Gal(K/F)
   let d := Nat.card G
   have hG : d = 1 := by
@@ -205,7 +204,7 @@ lemma finite_separable_algebraic_closure_with_i (F : Type) (K : Type)
         isAlgebraic := IntermediateField.isAlgebraic_tower_top }
     have hgal: IsGalois E K := IsGalois.tower_top_intermediateField E
     have hp_is2 : p = 2 :=
-      finite_algebraic_closure_cyclic_quadratic E K p hp1 h_ekrank hgal
+      finite_algebraic_closure_cyclic_quadratic E K hp1 h_ekrank hgal
     rw [hp_is2] at hp1
     rw [hp_is2] at h_ekrank
     have h_char2 : ringChar E ≠ 2 :=
@@ -232,13 +231,91 @@ lemma finite_separable_algebraic_closure_with_i (F : Type) (K : Type)
     simp_all
   exact trivial_absolute_galois_group F K hG
 
-lemma finite_inseparable_algebraic_closure_with_i (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
-    [IsPurelyInseparable F K] [IsAlgClosure F K]
+lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K]
       (h : ∃ (i : F), i^2 = -1) : IsAlgClosed F := by
   let p := ringChar F
   have hp1 : Nat.Prime p ∨ p = 0 :=
     CharP.char_is_prime_or_zero F p
+  have hr : Field.finInsepDegree F K = 1 := by
+    cases hp1 with
+    | inl hp1 =>
+      by_contra
+      push Not at this
+      let h_insep := this
+      have h_E : ∃ (E : IntermediateField F K), finrank E K = ringChar F := by
+        apply finite_inseparable_extension_intermediate
+        have : Field.finSepDegree F K * Field.finInsepDegree F K = finrank F K :=
+          Field.finSepDegree_mul_finInsepDegree F K
+        have h_sep : Field.finSepDegree F K = 1 := by
+          (expose_names;
+            exact (isPurelyInseparable_iff_finSepDegree_eq_one F K).mp inst_5)
+        have : Field.finInsepDegree F K ≥ 1 := by exact NeZero.one_le
+        have : Field.finInsepDegree F K > 1 :=
+          Nat.lt_of_le_of_ne this (id h_insep.symm)
+        grind
+      obtain ⟨E, h_E⟩ := h_E
+      have : IsAlgClosure E K :=
+        { isAlgClosed := IsAlgClosure.isAlgClosed F,
+          isAlgebraic := isAlgebraic_tower_top }
+      have h_charE : ringChar E = ringChar F := (Algebra.ringChar_eq F ↥E).symm
+      have : ExpChar E p :=
+        have : CharP E p := by
+          refine ringChar.of_eq ?_
+          calc
+            ringChar E = ringChar F := h_charE
+            _ = p := by rfl
+        have : Fact (Nat.Prime p) := by exact fact_iff.mpr hp1
+        expChar_prime E p
+      have hx : ∃ x : K, x ∉ (algebraMap E K).range :=
+        have h1 : ¬ Function.Surjective (algebraMap E K) := by
+          apply finite_extension_degree_one E K
+          rw [h_E]
+          exact Nat.Prime.one_lt hp1
+        not_forall.mp h1
+      obtain ⟨x, hx⟩ := hx
+      let e := IsPurelyInseparable.elemExponent E x
+      let pol := minpoly E x
+      let z := IsPurelyInseparable.elemReduct E x
+      have hpol: pol = Polynomial.X ^ p ^ e - Polynomial.C z :=
+        IsPurelyInseparable.minpoly_eq' E p x
+      have hpoldeg : pol.natDegree ≤ finrank E K := minpoly.natDegree_le x
+      have he1: e = 1 := by
+        have hpe : p^e = pol.natDegree :=
+          (IsPurelyInseparable.minpoly_natDegree_eq' (↥E) p x).symm
+        have hpol1 : ¬ pol.natDegree = 1 := minpoly.natDegree_eq_one_iff.mp.mt hx
+        have hp2 : p > 1 := Nat.Prime.one_lt hp1
+        have he1b : e ≠ 0 := by
+          by_contra
+          have : pol.natDegree = 1 := by
+            calc
+            pol.natDegree = p ^ e := hpe.symm
+            _ = p ^ 0 := by rw [this]
+            _ = 1 := by simp
+          grind
+        have he1a : e ≤ 1 := by
+          have : p ^ e ≤ p := by
+            calc
+            p^e = pol.natDegree := hpe
+            _ ≤ finrank E K := minpoly.natDegree_le x
+            _ = p := h_E
+          have : 1 < p → 1 < e → p ^ 1 < p^e :=
+            pow_lt_pow_right₀
+          grind
+        grind
+      have :
+      sorry
+    | inr hp1 =>
+      have : CharZero F :=
+        (CharP.ringChar_zero_iff_CharZero F).mp hp1
+      have : ringExpChar F = 1 := ringExpChar.eq_one F
+      have hn : ∃ n : ℕ, Field.finInsepDegree F K = 1 ^ n := by
+        apply finInsepDegree_eq_pow
+      obtain ⟨n, hn⟩ := hn
+      grind
+  have : Algebra.IsSeparable F K :=
+    (isSeparable_iff_finInsepDegree_eq_one F K).mpr hr
+  exact finite_separable_algebraic_closure_with_i F K h
+
   have h_perf: PerfectField F := by
     cases hp1 with
     | inl hp1 =>
@@ -421,9 +498,9 @@ lemma finite_inseparable_algebraic_closure_with_i (F : Type) (K : Type)
   have _ : Algebra.IsSeparable F K := Algebra.IsAlgebraic.isSeparable_of_perfectField
   exact finite_separable_algebraic_closure_with_i F K h
 
-lemma finite_algebraic_closure_with_i (F : Type) (K : Type)
-  [Field F] [Field K] [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
-    (h : ∃ (i : F), i^2 = -1) : IsAlgClosed F := by
+lemma finite_algebraic_closure_with_i (F : Type) (K : Type) [Field F] [Field K]
+  [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K]
+  (h : ∃ (i : F), i^2 = -1) : IsAlgClosed F := by
   obtain ⟨i, hi⟩ := h
   let E := separableClosure F K
   have _ : IsPurelyInseparable E K := separableClosure.isPurelyInseparable F K
