@@ -1,11 +1,9 @@
 module
 
 public import Mathlib.Algebra.Order.BigOperators.Group.Finset
-public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
-public import Mathlib.Algebra.BigOperators.GroupWithZero.Action
-public import Mathlib.Algebra.BigOperators.Finprod
 public import Mathlib.Algebra.BigOperators.Ring.Finset
-public import Mathlib.Data.Finset.Defs
+public import Mathlib.Data.Int.ConditionallyCompleteOrder
+public import Mathlib.Order.ConditionallyCompleteLattice.Basic
 
 @[expose] public section
 
@@ -134,13 +132,13 @@ lemma sequence_argument2 (n: ℕ) (m : ℕ → ℤ) :
         grind
     grind
 
-lemma partial_sums_of_monotone_sequence (n : ℕ) (m : ℕ → ℤ)
+lemma sequence_argument3 (n : ℕ) (m : ℕ → ℤ)
   (h : ∀ (i j : ℕ), i < j → j < n → m i ≤ m j) :
     ∀ i : ℕ, i < n → ∑ a ∈ Finset.range i, m a
       ≤ i * (∑ a ∈ Finset.range n, m a) / n := by
   induction n with
   | zero =>
-    grind
+    simp
   | succ n hyp =>
     intro i hi
     have h1 : ∑ a ∈ Finset.range (n+1), m a ≤ (n+1) * m n :=
@@ -212,8 +210,8 @@ lemma sequence_argument4 (n: ℕ) (c: ℤ) (h0: 0 ≤ c ∧ c < n) (S : Set (ℕ
     (h3 : ∀ (m : ℕ → ℤ), m ∈ S → ∀ (i j : ℕ), i < j → j < n → m i ≤ m j)
       (h4: ∀ (m : ℕ → ℤ), m ∈ S → ∀ (i j : ℕ), i < j → j < n → m j > m i + 1 →
         (∀ (k : ℕ), i < k → k < j → m k = m i + 1) →
-          ∃ (m' : ℕ → ℤ), m' ∈ S ∧ ∑ a ∈ Finset.range i, m a > ∑ a ∈ Finset.range i, m' a
-            ∧ ∀ k : ℕ, k < n → k ≠ i → ∑ a ∈ Finset.range k, m a ≥ ∑ a ∈ Finset.range k, m' a) :
+          ∃ (m' : ℕ → ℤ), m' ∈ S ∧ ∑ a ∈ Finset.range i, m a < ∑ a ∈ Finset.range i, m' a
+            ∧ ∀ k : ℕ, k < n → k ≠ i → ∑ a ∈ Finset.range k, m a ≤ ∑ a ∈ Finset.range k, m' a) :
               ∃ (m : ℕ → ℤ), m ∈ S ∧ ∀ i : ℕ, i < n →
                 m i = if i < n-c then 0 else 1 := by
   have hn0: 0 < n := by grind
@@ -223,7 +221,7 @@ lemma sequence_argument4 (n: ℕ) (c: ℤ) (h0: 0 ≤ c ∧ c < n) (S : Set (ℕ
     intro m hm j hj1
     rw [← h2 m hm]
     have hj : j < n := List.mem_range.mp hj1
-    apply partial_sums_of_monotone_sequence n m (h3 m hm) j hj
+    apply sequence_argument3 n m (h3 m hm) j hj
   let f : (ℕ → ℤ) → ℤ := fun (m : ℕ → ℤ) ↦ ∑ i ∈ Finset.range n, f1 i m
   have hbd2 : ∀ m : ℕ → ℤ, m ∈ S → f m ≤ ∑ i ∈ Finset.range n, i * c / n := by
     intro m hm
@@ -231,7 +229,7 @@ lemma sequence_argument4 (n: ℕ) (c: ℤ) (h0: 0 ≤ c ∧ c < n) (S : Set (ℕ
   have hm: ∃ (m: ℕ → ℤ), m ∈ S ∧ ∀ (m': ℕ → ℤ), m' ∈ S → f m ≥ f m' := by
     let T := S.image f
     have hT: T.Nonempty := Set.image_nonempty.mpr h1
-    have : BddAbove T := by
+    have hbdd : BddAbove T := by
       refine bddAbove_def.mpr ?_
       use ∑ i ∈ Finset.range n, i * c / n
       intro t ht
@@ -240,7 +238,17 @@ lemma sequence_argument4 (n: ℕ) (c: ℤ) (h0: 0 ≤ c ∧ c < n) (S : Set (ℕ
       obtain ⟨m, hm1, hm2⟩ := hm
       rw [← hm2]
       apply hbd2 m hm1
-    sorry
+    let t := sSup T
+    have ht : t ∈ T := Int.csSup_mem hT hbdd
+    have hm : ∃ (m: ℕ → ℤ), m ∈ S ∧ f m = t := (Set.mem_image f S t).mp ht
+    obtain ⟨m, hm1, hm2⟩ := ht
+    use m
+    constructor
+    · exact hm1
+    · intro m' hm'
+      let t' := f m'
+      refine (csSup_le_iff hbdd hT).mp ?_ t' (Set.mem_image_of_mem f hm')
+      rw [hm2]
   obtain ⟨m, hm1, hm2⟩ := hm
   use m
   constructor
@@ -252,24 +260,35 @@ lemma sequence_argument4 (n: ℕ) (c: ℤ) (h0: 0 ≤ c ∧ c < n) (S : Set (ℕ
       specialize h4 m hm1 i j h01 h02 h03 h04
       obtain ⟨m', hm'1, hm'2, hm'3⟩ := h4
       have h : ∀ k ∈ Finset.range n, (if k = i then 1 else 0)
-        ≤ (∑ j ∈ Finset.range n with j ≤ k, m' j) - (∑ j ∈ Finset.range n with j ≤ k, m j) := by
+        ≤ (∑ j ∈ Finset.range k, m' j) - (∑ j ∈ Finset.range k, m j) := by
         intro k hk
-        by_cases hk: k = i
-        · sorry
-        · have hm'4 : k < n := by grind
-          specialize hm'3 k hm'4 hk
-
-          sorry
+        by_cases hk1: k = i
+        · rw [if_pos hk1, hk1]
+          refine Int.sub_one_lt_iff.mp ?_
+          simp
+          exact hm'2
+        · rw [if_neg hk1]
+          simp
+          exact hm'3 k (List.mem_range.mp hk) hk1
       have : 1 ≤ f m' - f m := by
+        let ind : ℕ → ℤ := fun (a : ℕ) ↦ if a = i then 1 else 0
         calc
-          1 = ∑ a ∈ Finset.range n, if a = i then 1 else 0 := by sorry
-          _ ≤ ∑ a ∈ Finset.range n, ((∑ j ∈ Finset.range n with j ≤ a, m' j) -
-          (∑ j ∈ Finset.range n with j ≤ a, m j)) := by
+          1 = ind i := by grind
+          _ = ind i + ∑ a ∈ (Finset.range n).erase i, 0 := by simp
+          _ = ind i + ∑ a ∈ (Finset.range n).erase i, ind a := by
+            simp
+            have _ : ∀ a ∈ (Finset.range n).erase i, ind a = 0 := by grind
+            aesop
+          _ = ∑ a ∈ Finset.range n, ind a := by
+            refine Finset.add_sum_erase (Finset.range n) ind ?_
+            refine Finset.mem_range.mpr ?_
+            exact Nat.lt_trans h01 h02
+          _ ≤ ∑ a ∈ Finset.range n, ((∑ j ∈ Finset.range a, m' j) -
+            (∑ j ∈ Finset.range a, m j)) := by
             apply Finset.sum_le_sum h
           _ = f m' - f m :=
-            sorry
---              (Finset.sum_sub_distrib (fun x => ∑ j ∈ Finset.range n with j ≤ x, m' j) fun x =>
---                ∑ j ∈ Finset.range n with j ≤ x, m j)
+              (Finset.sum_sub_distrib (fun x => ∑ j ∈ Finset.range x, m' j) fun x =>
+                ∑ j ∈ Finset.range x, m j)
       grind
   have h_end2 : ∀ (i j : ℕ), i < j → j < n → m j ≤ m i + 1 :=
     sequence_argument1 n m h_end1
