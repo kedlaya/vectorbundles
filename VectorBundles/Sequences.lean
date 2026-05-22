@@ -138,14 +138,37 @@ lemma partial_sums_of_monotone_sequence (n : ℕ) (m : ℕ → ℤ)
   (h : ∀ (i j : ℕ), i < j → j < n → m i ≤ m j) :
     ∀ i : ℕ, i < n → ∑ a ∈ Finset.range i, m a
       ≤ i * (∑ a ∈ Finset.range n, m a) / n := by
-  intro i
   induction n with
   | zero =>
-
-    sorry
-  | succ hyp =>
-    intro hi
-    sorry
+    grind
+  | succ n hyp =>
+    intro i hi
+    have h1 : ∑ a ∈ Finset.range n, m a ≤ n * m n :=
+      calc
+      ∑ a ∈ Finset.range n, m a ≤ ∑ a ∈ Finset.range n, m n := by
+        have h2 : ∀ i ∈ Finset.range n, m i ≤ m n := by
+          grind
+        exact Finset.sum_le_sum h2
+      _ = n * m n := by simp
+    by_cases hn: n = 0
+    · grind
+    · have : n * (n + 1) * ∑ a ∈ Finset.range i, m a ≤ n * i * ∑ a ∈ Finset.range (n+1), m a := by
+        sorry
+      have h3 : (n + 1) * ∑ a ∈ Finset.range i, m a ≤ i * ∑ a ∈ Finset.range (n+1), m a := by
+        have _ : n > 0 := by sorry
+        sorry
+      have hdiv : ∀ (a : ℕ), ∀ (b c : ℤ), 0 < a → a * b ≤ c → b ≤ c / a := by
+        intro a b c h1 h2
+        refine Int.le_ediv_of_mul_le ?_ ?_
+        exact Int.natCast_pos.mpr h1
+        grind
+      have : ∀ (a : ℕ), ∀ (c : ℤ), 0 < a → 0 ≤ a * c → 0 ≤ c := by
+        intro a c h1 h2
+        apply?
+        sorry
+      have h2 : 0 < n + 1 := by grind
+      exact hdiv (n+1) (∑ a ∈ Finset.range i, m a)
+        ((↑i * ∑ a ∈ Finset.range (n + 1), m a)) h2 h3
 
 lemma sequence_argument4 (n: ℕ) (c: ℤ) (h0: 0 ≤ c ∧ c < n) (S : Set (ℕ → ℤ))
   (h1 : S.Nonempty) (h2 : ∀ (m : ℕ → ℤ), m ∈ S → ∑ a ∈ Finset.range n, m a = c)
