@@ -7,13 +7,9 @@ public import Mathlib.FieldTheory.AlgebraicClosure
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 public import Mathlib.FieldTheory.IntermediateField.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
-public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 public import Mathlib.FieldTheory.IsRealClosed.Basic
-public import Mathlib.FieldTheory.Minpoly.Basic
 public import Mathlib.FieldTheory.Relrank
 
-public import VectorBundles.ArtinSchreier.Polynomials
-public import VectorBundles.ArtinSchreier.FieldTheory2
 public import VectorBundles.ArtinSchreier.ArtinSchreier
 
 @[expose] public section
@@ -55,7 +51,7 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type)
         have h_leq : i_pol.natDegree ≤ pol.natDegree := by
           apply natDegree_le_of_dvd h_div
           exact Monic.ne_zero h_mon
-        simp
+        simp only [ge_iff_le]
         exact le_of_le_of_eq h_leq h_poldeg
       have h_deg0 : 0 < i_pol.natDegree := minpoly.natDegree_pos h_int
       have h_degs : i_pol.natDegree = i_pol.degree :=
@@ -63,8 +59,7 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type)
       have _ : i_pol.natDegree ≠ 1 := by
         by_contra
         have hi : i ∈ iota.range := by
-          have h_deg : i_pol.degree = 1 := by
-            simp_all
+          have h_deg : i_pol.degree = 1 := by simp_all
           apply minpoly.mem_range_of_degree_eq_one
           exact h_deg
         have hj : ∃ j : F, iota j = i := Set.mem_range.mp hi
