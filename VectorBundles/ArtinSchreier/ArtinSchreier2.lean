@@ -35,19 +35,15 @@ lemma finite_algebraic_closure_cyclic_prime (p : ℕ) (hp: Nat.Prime p) (h: Modu
   let aspol := X ^ p -  X -  C a
   have h_minpoly : minpoly F x = aspol := by rw [ha]
   have h_irras : Irreducible aspol ∧ aspol.Monic ∧ aspol.natDegree = p ∧ aspol.degree = p := by
-    have h_natdeg : aspol.natDegree = p := by
-      rw [← h_minpoly, ha]
+    rw [← h_minpoly]
+    have h_natdeg : (minpoly F x).natDegree = p := by
+      rw [ha]
       simp only [natDegree_sub_C]
       apply FiniteField.X_pow_card_sub_X_natDegree_eq F
       exact Nat.Prime.one_lt hp
-    constructor
-    · rw [← h_minpoly]
-      exact minpoly.irreducible h_int
-    constructor
-    · rw [← h_minpoly]
-      exact minpoly.monic h_int
-    constructor
-    · exact h_natdeg
+    refine ⟨?_, ?_, h_natdeg, ?_⟩
+    · exact minpoly.irreducible h_int
+    · exact minpoly.monic h_int
     · refine (degree_eq_iff_natDegree_eq_of_pos ?_).mpr h_natdeg
       exact Nat.Prime.pos hp
   obtain ⟨h_irr, _, h_natdeg, h_deg⟩ := h_irras
@@ -60,6 +56,7 @@ lemma finite_algebraic_closure_cyclic_prime (p : ℕ) (hp: Nat.Prime p) (h: Modu
       _ = (minpoly F x).natDegree := Nat.succ_inj.mp (congrArg Nat.succ h_pb_dim)
       _ = aspol.natDegree := natDegree_eq_of_degree_eq (congrArg degree ha)
       _ = p := h_natdeg
+  have h1 : ↑((aeval pb.gen) (X : Polynomial F)) = aeval x (X : Polynomial F) := by aesop
   let pol :=  X ^ p -  X -  C (x ^ (p-1) * (iota a))
   have hy : ∃ y : K, aeval y pol = 0 := by
     have hpol : pol.natDegree = p ∧ pol.Monic := artin_schreier_poly (x ^ (p-1) * (iota a)) hp
@@ -72,11 +69,7 @@ lemma finite_algebraic_closure_cyclic_prime (p : ℕ) (hp: Nat.Prime p) (h: Modu
     rw [h_poldeg]
     exact Nat.cast_ne_zero.mpr (Nat.Prime.ne_zero hp)
   obtain ⟨y, hy⟩ := hy
-  have hy2 : y^p - y - x^(p-1) * iota a = 0 := by
-    unfold aeval at hy
-    unfold aevalEquiv at hy
-    subst pol
-    simp_all
+  have hy2 : y^p - y - x^(p-1) * iota a = 0 := by aesop
   have h_sub : ∀ (z : K), z ∈ F⟮x⟯ := by
     intro z
     have h_minpolydeg : (minpoly F x).degree = ↑(Module.finrank F K) := by
@@ -98,6 +91,7 @@ lemma finite_algebraic_closure_cyclic_prime (p : ℕ) (hp: Nat.Prime p) (h: Modu
   have hFp : CharP F p := ringChar.of_eq this
   have : ExpChar F p := ExpChar.prime hp
   let frob := frobenius F p
+  let m := map frob
   let iota₀ := algebraMap F F⟮x⟯
   have h_rwx : x^p = x + iota₀ a := by
     have h_evalx : aspol.aeval x = 0 := by
@@ -112,79 +106,75 @@ lemma finite_algebraic_closure_cyclic_prime (p : ℕ) (hp: Nat.Prime p) (h: Modu
     refine eq_add_of_sub_eq' ?_
     grind
   let lin := X + C a
-  have h_power: (aeval pb.gen) ((map frob y0_rep).comp lin) = y0 ^ p := by
-    have h_pow_by_frobexp : ∀ (f: Polynomial F), (aeval pb.gen) (map frob ((expand F p) f)) = (aeval pb.gen f) ^ p := by
-      intro f
-      calc
-      (aeval pb.gen) (map frob ((expand F p) f)) = (aeval pb.gen) (f ^ p) := by rw [map_frobenius_expand p f]
-      _ = (aeval pb.gen) f ^ p := map_pow (aeval pb.gen) f p
-    have h_eval_at_power :  ∀ (f : Polynomial F), (aeval (pb.gen^p)) f = (aeval pb.gen) (f.comp (X ^ p)) := by
-      intro f
-      calc
-        aeval (pb.gen ^ p) f = aeval (aeval pb.gen (X ^ p)) f := by
-          have h : aeval pb.gen ((X : Polynomial F) ^ p) = pb.gen ^ p := aeval_X_pow pb.gen
-          rw [h]
-        _ = (aeval pb.gen) (f.comp (X ^ p)) := (aeval_comp pb.gen).symm
-    have h_apply_frob_across_p : (map frob (y0_rep.comp (X ^ p))) = (map frob y0_rep).comp (X ^ p) := by
-      calc
-      (map frob (y0_rep.comp (X ^ p)))
-      = (map frob y0_rep).comp (map frob (X ^ p)) := map_comp frob y0_rep (X ^ p)
-      _ = (map frob y0_rep).comp (X ^ p) := by
-        have h1 : map frob (X ^ p) = X ^ p := by
-          calc
-          map frob (X ^ p) = (map frob X)^p := Polynomial.map_pow frob p
-          _ =  X ^ p := by rw [map_X frob]
-        rw [h1]
-    have h_rwx_bp : pb.gen ^ p = pb.gen + iota₀ a :=
-      SetLike.coe_eq_coe.mp h_rwx
-    have h_eval_at_sum : ∀ (f : Polynomial F), (aeval (pb.gen + iota₀ a)) f = (aeval pb.gen) (f.comp lin) := by
-      intro f
-      calc
-      aeval (pb.gen + iota₀ a) f = aeval (aeval pb.gen lin) f := by
-        have h : aeval pb.gen lin = pb.gen + iota₀ a := by
-          calc
-          aeval pb.gen lin = aeval pb.gen (X : Polynomial F) + aeval pb.gen (C a) := aeval_add pb.gen
-          _ = pb.gen + aeval pb.gen (C a) := by rw [aeval_X pb.gen]
-          _ = pb.gen + iota₀ a := by rw [aeval_C pb.gen a]
-        rw [h]
-      _ = (aeval pb.gen) (f.comp lin) := (aeval_comp pb.gen).symm
-    calc
-      (aeval pb.gen) ((map frob y0_rep).comp lin)
-      _ = (aeval (pb.gen + iota₀ a)) (map frob y0_rep) := by rw [h_eval_at_sum (map frob y0_rep)]
-      _ = (aeval (pb.gen^p)) (map frob y0_rep) := by rw [h_rwx_bp]
-      _ = (aeval pb.gen) ((map frob y0_rep).comp (X ^ p)) := by rw [← h_eval_at_power (map frob y0_rep)]
-      _ = (aeval pb.gen) ((expand F p) (map frob y0_rep)) := by rfl
-      _ = (aeval pb.gen) (map frob ((expand F p) y0_rep)) := by rw [map_expand]
-      _ = (aeval pb.gen y0_rep) ^ p := by rw [h_pow_by_frobexp y0_rep]
-      _ = y0 ^ p := by rw [h_pb_rep_y02]
-  let y0p_rep := (map frob y0_rep).comp lin
+  let y0p_rep := (m y0_rep).comp lin
   let c := y0_rep.coeff (p-1)
   have h_y0rep : y0p_rep.natDegree < p ∧ y0p_rep.coeff (p-1) = c ^ p :=
     have h_pb_rep_y03 : y0_rep.natDegree < p := by
       calc
       y0_rep.natDegree < pb.dim := h_pb_rep_y01
       _ = p := h_pbdim
-    linear_substitution F p p a y0_rep hp (Nat.Prime.one_lt hp) h_pb_rep_y03
+    linear_substitution a y0_rep hp (Nat.Prime.one_lt hp) h_pb_rep_y03
   obtain ⟨h_y0rep1, h_y0rep2⟩ := h_y0rep
   let y1p_rep := y0_rep + X ^ (p-1) *  C a
   have h_matchcoeff : y0p_rep.coeff (p-1) = y1p_rep.coeff (p-1) :=
     have h7 : ∀ f : Polynomial F, ((algebraMap F⟮x⟯ K) ∘ (aeval pb.gen)) f = aeval x f := by
       intro f
-      have h1 : ↑((aeval pb.gen) (X : Polynomial F)) = aeval x (X : Polynomial F) := by
-        unfold PowerBasis.gen
-        unfold aeval
-        unfold aevalEquiv
-        simp_all only [natDegree_sub_C, coe_aeval_eq_eval, Subtype.forall, forall_true_left,
-          Equiv.coe_fn_mk, eval₂AlgHom_apply, Algebra.toRingHom_ofId, eval₂_X]
-        apply exists_eq_subtype_mk_iff.mp
-        exact exists_apply_eq_apply (fun a => pb.1) (h_sub x)
       aesop
+    have h_power: (aeval pb.gen) ((m y0_rep).comp lin) = y0 ^ p := by
+      have h_pow_by_frobexp : ∀ (f: Polynomial F), (aeval pb.gen) (m ((expand F p) f)) = (aeval pb.gen f) ^ p := by
+        intro f
+        calc
+        (aeval pb.gen) (m ((expand F p) f)) = (aeval pb.gen) (f ^ p) := by
+          subst m
+          rw [map_frobenius_expand p f]
+        _ = (aeval pb.gen) f ^ p := map_pow (aeval pb.gen) f p
+      have h_eval_at_power : ∀ (f : Polynomial F), (aeval (pb.gen^p)) f = (aeval pb.gen) (f.comp (X ^ p)) := by
+        intro f
+        calc
+          aeval (pb.gen ^ p) f = aeval (aeval pb.gen (X ^ p)) f := by
+            have h : aeval pb.gen ((X : Polynomial F) ^ p) = pb.gen ^ p := aeval_X_pow pb.gen
+            rw [h]
+          _ = (aeval pb.gen) (f.comp (X ^ p)) := (aeval_comp pb.gen).symm
+      have h_apply_frob_across_p : (m (y0_rep.comp (X ^ p))) = (m y0_rep).comp (X ^ p) := by
+        calc
+        (m (y0_rep.comp (X ^ p))) = (m y0_rep).comp (m (X ^ p)) := map_comp frob y0_rep (X ^ p)
+        _ = (m y0_rep).comp (X ^ p) := by
+          have h1 : m (X ^ p) = X ^ p := by
+            calc
+            m (X ^ p) = (m X)^p := Polynomial.map_pow frob p
+            _ =  X ^ p := by
+              subst m
+              rw [map_X frob]
+          rw [h1]
+      have h_rwx_bp : pb.gen ^ p = pb.gen + iota₀ a := SetLike.coe_eq_coe.mp h_rwx
+      have h_eval_at_sum : ∀ (f : Polynomial F), (aeval (pb.gen + iota₀ a)) f = (aeval pb.gen) (f.comp lin) := by
+        intro f
+        calc
+        aeval (pb.gen + iota₀ a) f = aeval (aeval pb.gen lin) f := by
+          have h : aeval pb.gen lin = pb.gen + iota₀ a := by
+            calc
+            aeval pb.gen lin = aeval pb.gen (X : Polynomial F) + aeval pb.gen (C a) := aeval_add pb.gen
+            _ = pb.gen + aeval pb.gen (C a) := by rw [aeval_X pb.gen]
+            _ = pb.gen + iota₀ a := by rw [aeval_C pb.gen a]
+          rw [h]
+        _ = (aeval pb.gen) (f.comp lin) := (aeval_comp pb.gen).symm
+      calc
+        (aeval pb.gen) ((m y0_rep).comp lin)
+        _ = (aeval (pb.gen + iota₀ a)) (m y0_rep) := by rw [h_eval_at_sum (m y0_rep)]
+        _ = (aeval (pb.gen^p)) (m y0_rep) := by rw [h_rwx_bp]
+        _ = (aeval pb.gen) ((m y0_rep).comp (X ^ p)) := by rw [← h_eval_at_power (m y0_rep)]
+        _ = (aeval pb.gen) ((expand F p) (m y0_rep)) := by rfl
+        _ = (aeval pb.gen) (m ((expand F p) y0_rep)) := by
+          subst m
+          rw [map_expand]
+        _ = (aeval pb.gen y0_rep) ^ p := by rw [h_pow_by_frobexp y0_rep]
+        _ = y0 ^ p := by rw [h_pb_rep_y02]
     have h5 : aeval x y0p_rep = y0 ^ p := by
       calc
-        aeval x y0p_rep = aeval pb.gen y0p_rep := (h7 y0p_rep).symm
-        _ = y0^p := by
-          rw [h_power]
-          simp
+      aeval x y0p_rep = aeval pb.gen y0p_rep := (h7 y0p_rep).symm
+      _ = y0^p := by
+        rw [h_power]
+        simp
     have h4 : aeval x y1p_rep = y0 + x^(p-1) * iota a := by
       calc
         aeval x y1p_rep = aeval pb.gen y1p_rep := (h7 y1p_rep).symm
@@ -194,12 +184,8 @@ lemma finite_algebraic_closure_cyclic_prime (p : ℕ) (hp: Nat.Prime p) (h: Modu
         _ = y0 + aeval pb.gen (X^(p-1) * (C a)) := by rw [h_pb_rep_y02]
         _ = y0 + pb.gen ^ (p-1) * iota a := by
           refine add_left_cancel_iff.mpr ?_
-          unfold aeval
-          unfold aevalEquiv
-          have : (algebraMap F ↥F⟮x⟯) a * pb.gen ^ (p - 1) = pb.gen ^ (p - 1) * (algebraMap F ↥F⟮x⟯) a :=
-            Algebra.commutes a (↑pb.gen ^ (p - 1))
-          subst h hy3 h_pb_rep_y02
-          simp_all [pb, aspol, pol, iota, y0p_rep, frob, c]
+          simp_all only [aeval_X, coe_aeval_eq_eval, X_pow_mul_C, map_mul, aeval_C, map_pow]
+          exact Algebra.commutes a (x ^ (p - 1))
         _ = y0 + x^(p-1) * iota a := by rfl
     have h : y0p_rep = y1p_rep :=
       have h6 : aeval x (y0p_rep - y1p_rep) = 0 := by
@@ -220,8 +206,7 @@ lemma finite_algebraic_closure_cyclic_prime (p : ℕ) (hp: Nat.Prime p) (h: Modu
           apply natDegree_add_le_of_le
           · exact Nat.le_refl y0_rep.natDegree
           · apply Nat.le_of_eq
-            symm
-            refine (Monic.natDegree_mul_comm ?_ (C a)).symm
+            refine Monic.natDegree_mul_comm ?_ (C a)
             exact monic_X_pow (p - 1)
         _ < p := by
           refine Nat.max_lt.mpr ?_
@@ -264,8 +249,7 @@ lemma finite_algebraic_closure_cyclic_prime (p : ℕ) (hp: Nat.Prime p) (h: Modu
           _ = x + iota (c^p) - iota c - iota c ^ p := by
             have hsub : iota (c^p - c) = iota (c^p) - iota c := algebraMap.coe_sub (c ^ p) c
             rw [hsub]
-            apply sub_left_inj.mpr
-            exact add_sub x (iota (c ^ p)) (iota c)
+            ring
           _ = x + iota c ^ p - iota c - iota c ^ p := by simp
           _ = x1 := by ring
       have h_bot : x1 ∈ (⊥ : Subfield K) := (Subfield.mem_bot_iff_pow_eq_self K p).mpr fieldeq
@@ -275,7 +259,7 @@ lemma finite_algebraic_closure_cyclic_prime (p : ℕ) (hp: Nat.Prime p) (h: Modu
     have h : minpoly F x ∣ pol1 :=
       have h_evalpol1 : aeval x pol1 = 0 := by
         calc
-        aeval x pol1 = aeval x (X : Polynomial F) - aeval x ( C (n + c)) := aeval_sub x
+        aeval x pol1 = aeval x (X : Polynomial F) - aeval x (C (n + c)) := aeval_sub x
         _ = x - aeval x (C (n + c)) := by rw [aeval_X x]
         _ = x - iota (n + c) := by rw [aeval_C x (↑n + c)]
         _ = x1 + iota c - iota (n + c) := by rw [← sub_add_cancel x (iota c)]
@@ -284,7 +268,6 @@ lemma finite_algebraic_closure_cyclic_prime (p : ℕ) (hp: Nat.Prime p) (h: Modu
     calc
       (minpoly F x).natDegree ≤ pol1.natDegree := natDegree_le_of_dvd h (X_sub_C_ne_zero (↑n + c))
       _ = 1 := natDegree_X_sub_C (n+c)
-      _ ≤ 1 := NeZero.one_le
   have : 1 < 1 := by
     calc
       1 < p := Nat.Prime.one_lt hp
