@@ -15,8 +15,8 @@ public import VectorBundles.ArtinSchreier.FieldTheory
 
 open Module
 
-variable (F K : Type) [Field F] [Field K] [Algebra F K]
-  [FiniteDimensional F K] [IsPurelyInseparable F K]
+variable (F K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
+  [IsPurelyInseparable F K]
 
 lemma finite_inseparable_extension_data (h: 1 < finrank F K) :
   Nat.Prime (ringChar F) ∧ ringChar F = ringExpChar F ∧
