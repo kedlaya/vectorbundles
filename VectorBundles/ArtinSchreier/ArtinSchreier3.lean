@@ -1,8 +1,7 @@
 module
 
-public import Mathlib.Algebra.Group.Subgroup.ZPowers.Basic
 public import Mathlib.Data.Nat.Prime.Defs
-public import Mathlib.FieldTheory.Galois.Basic
+public import Mathlib.FieldTheory.Galois.IsGaloisGroup
 public import Mathlib.FieldTheory.IntermediateField.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
 

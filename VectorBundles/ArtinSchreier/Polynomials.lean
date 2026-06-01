@@ -2,10 +2,7 @@ module
 
 public import Mathlib.Algebra.CharP.Frobenius
 public import Mathlib.Algebra.Polynomial.Degree.Defs
-public import Mathlib.Algebra.Polynomial.Degree.Operations
-public import Mathlib.Algebra.Polynomial.Div
 public import Mathlib.RingTheory.Polynomial.UniqueFactorization
-public import Mathlib.RingTheory.UniqueFactorizationDomain.Defs
 
 @[expose] public section
 
