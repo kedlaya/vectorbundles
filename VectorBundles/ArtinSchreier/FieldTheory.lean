@@ -166,23 +166,22 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
     exact h_pdeg.symm
 
 lemma finite_inseparable_extension_data [IsPurelyInseparable F K] (h: 1 < finrank F K) :
-  Nat.Prime (ringChar F) ∧ ringChar F = ringExpChar F ∧
-    ∃ n : ℕ, finrank F K = (ringChar F) ^ n := by
+  Nat.Prime (ringChar F) ∧ ∃ n : ℕ, finrank F K = (ringChar F) ^ n := by
   let p := ringChar F
   let q := ringExpChar F
   have : ExpChar F q := ringExpChar.expChar F
-  have hn : ∃ n, finrank F K = q ^ n := IsPurelyInseparable.finrank_eq_pow F K q
-  obtain ⟨n, hn⟩ := hn
+  have : ∃ n, finrank F K = q ^ n := IsPurelyInseparable.finrank_eq_pow F K q
+  obtain ⟨n, hn⟩ := this
   have hpp : Nat.Prime p := by
-    have h : q ≠ 1 := by
+    have : q ≠ 1 := by
       by_contra
       rw [this] at hn
       grind
-    have : ¬ p = 0 := (expChar_one_iff_char_zero F p q).mpr.mt h
+    have : ¬ p = 0 := (expChar_one_iff_char_zero F p q).mpr.mt this
     have : Nat.Prime p ∨ p = 0 := CharP.char_is_prime_or_zero F p
     simp_all only [ne_eq, or_false]
   have hp : p = ringExpChar F := (char_eq_expChar_iff F p q).mpr hpp
-  refine ⟨hpp, hp, ?_⟩
+  refine ⟨hpp, ?_⟩
   subst q
   rw [← hp] at hn
   use n
@@ -207,10 +206,10 @@ lemma nonsquare_in_quadratic_extension (hrank: finrank F K = 2) (hchar: ringChar
     have : e ≠ 1 := by
       by_contra
       have : IsPurelyInseparable F K := (isPurelyInseparable_iff_finSepDegree_eq_one F K).mpr this
-      have h : 1 < 2 → Nat.Prime p ∧ p = ringExpChar F ∧ ∃ f : ℕ, 2 = p ^ f := by
+      have h : 1 < 2 → Nat.Prime p ∧ ∃ f : ℕ, 2 = p ^ f := by
         rw [←h_char, ← hrank]
         apply finite_inseparable_extension_data
-      obtain ⟨h1, _, _, h3⟩ := h Nat.one_lt_two
+      obtain ⟨h1, _, h3⟩ := h Nat.one_lt_two
       have : 2 = p := Nat.prime_eq_prime_of_dvd_pow Nat.prime_two h1 h3.dvd
       grind
     have : d = 1 := by

@@ -68,9 +68,9 @@ Let $F$ be a field containing a square root of $-1$ and admitting a finite separ
 \end{lemma}
 \begin{proof}
 \leanok
-\uses{lem:ac-quadratic,lem:squares in quadratic closure,lem:cyclic-p-nonzero,lem:nonsquare in quadratic extension,lem:trivial absolute Galois group}
+\uses{lem:ac-quadratic,lem:squares in quadratic closure,lem:cyclic-p-nonzero,lem:nonsquare in quadratic extension}
 The extension $K/F$ is normal, and by hypothesis it is separable, so it is Galois; let $G$ be the Galois group. 
-If $G$ is trivial, then $F$ is algebraically closed by Lemma~\ref{lem:trivial absolute Galois group}.
+If $G$ is trivial, then $F=K$ is algebraically closed.
 Otherwise, for any prime factor $p$ of $[L:K]$, by Cauchy's theorem 
 $G$ contains a nontrivial cyclic subgroup of prime order $p$, whose fixed field is a subfield $E$ of $K$ containing $F$.
 Applying Lemma~\ref{lem:ac-quadratic} to $K/E$ yields $p=2$.
@@ -88,19 +88,11 @@ Lemma~\ref{lem:squares in quadratic closure}.
 Let $F$ be a field containing a square root of $-1$ and admitting a finite purely inseparable extension $K$ which is algebraically closed. Then $F$ is algebraically closed.
 \end{lemma}
 \begin{proof}
-\uses{lem:p-power extensions,lem:finite inseparable tower step 2,lem:squares in quadratic closure}
 \leanok
-Let $p$ be the characteristic of $F$. If $p = 0$, then there are no nontrivial finite purely inseparable extensions of $F$, so we must have $F = K$.
-
-Suppose that $p > 2$. If $F$ is not perfect, we can find $a \in F$ which is not a $p$-th power.
-Choose a positive integer $n$ with $p^n > [K:F]$,
-then choose $b \in K$ with $b^{p^n} = a$.
-The polynomial $x^{p^n} - a$ is irreducible over $F$ by Lemma~\ref{lem:p-power extensions} and has $b$ as a root, so it is the minimal polynomial of $b$ over $F$.
-However, the degree of the minimal polynomial is at most $[K:F] < p^n$, a contradiction.
-
-Suppose that $p=2$. If $K \neq F$, then by Lemma~\ref{lem:finite inseparable tower step 2}
-there exists an intermediate field $E$ with $[K:E] = 2$. By Lemma~\ref{lem:squares in quadratic closure},
-every element of $E$ is a perfect square, so $E$ is perfect; however, this contradicts the existence of the nontrivial purely inseparable extension $K/E$.
+It will suffice to check that $F$ is perfect.
+Let $p$ be the characteristic of $F$. If $p = 0$, then $F$ is automatically perfect.
+If $p > 0$, then $[K:F] = p^n$ for some nonnegative integer $n$. For any $a \in F$, we can find $x \in K$ with $x^{p^{n+1}} = a$ because $K$ is algebraically closed. Since $K/E$ is purely inseparable, the minimal polynomial of $x$ over $F$ has the form $x^{p^e}-c$ for some $c \in F$ and some nonnegative integer $e$, which must be at most $n$ because the degree of the minimal polynomial is at most $[K:F] = p$.
+Now $c^{n-e}$ is a $p$-th root of $a \in E$; since $a$ was arbitrary we conclude that $F$ is perfect (in the ring-theoretic sense, and hence also in the field-theoretic sense).
 \end{proof}
 
 \begin{lemma} \label{lem:ac-finite-alg-closure-with-i}

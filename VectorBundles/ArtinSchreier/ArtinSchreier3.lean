@@ -4,9 +4,9 @@ public import Mathlib.Data.Nat.Prime.Defs
 public import Mathlib.FieldTheory.Galois.IsGaloisGroup
 public import Mathlib.FieldTheory.IntermediateField.Basic
 public import Mathlib.FieldTheory.IsAlgClosed.Basic
+public import Mathlib.FieldTheory.PurelyInseparable.Exponent
 
 public import VectorBundles.ArtinSchreier.FieldTheory
-public import VectorBundles.ArtinSchreier.FieldTheory2
 public import VectorBundles.ArtinSchreier.ArtinSchreier
 public import VectorBundles.ArtinSchreier.ArtinSchreier2
 
@@ -23,17 +23,17 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
     (expose_names; exact { to_isSeparable := inst_5, to_normal := IsAlgClosure.normal F K })
   have h_ac: IsAlgClosed K := IsAlgClosure.isAlgClosed F
   let G := Gal(K/F)
-  have hG : Nat.card G = 1 := by
+  have : Nat.card G = 1 := by
     by_contra
     let d := Nat.card G
-    have hp : ∃ p : ℕ, Nat.Prime p ∧ p ∣ d := Nat.exists_prime_and_dvd this
-    obtain ⟨p, hp1, hp1a⟩ := hp
-    have hg : ∃ g : G, orderOf g = p := by
-      have h : d = Fintype.card G := Nat.card_eq_fintype_card
-      rw [h] at hp1a
+    have : ∃ p : ℕ, Nat.Prime p ∧ p ∣ d := Nat.exists_prime_and_dvd this
+    obtain ⟨p, hp1, hp1a⟩ := this
+    have : ∃ g : G, orderOf g = p := by
+      have : d = Fintype.card G := Nat.card_eq_fintype_card
+      rw [this] at hp1a
       have : Fact (Nat.Prime p) := fact_iff.mpr hp1
       exact exists_prime_orderOf_dvd_card p hp1a
-    obtain ⟨g, hg⟩ := hg
+    obtain ⟨g, hg⟩ := this
     let H := Subgroup.zpowers g
     let E := fixedField H
     have h_ekrank : finrank E K = p := by
@@ -46,8 +46,8 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
     have hp_is2 : p = 2 := finite_algebraic_closure_cyclic_quadratic E K hp1 h_ekrank
     rw [hp_is2] at hp1 h_ekrank
     have : ∃ a : E, ¬ IsSquare a :=
-      have h_char2 : ringChar E ≠ 2 := finite_algebraic_closure_cyclic_prime E K hp1 h_ekrank
-      nonsquare_in_quadratic_extension E K h_ekrank h_char2
+      have : ringChar E ≠ 2 := finite_algebraic_closure_cyclic_prime E K hp1 h_ekrank
+      nonsquare_in_quadratic_extension E K h_ekrank this
     have : ∀ a : E, IsSquare a := by
       intro a
       have h_sq1 : IsSquare a ∨ IsSquare (-a) := quadratic_algebraic_closure_no_i E K h_ekrank a
@@ -66,102 +66,74 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
         have h_sq3 : IsSquare (-1 * -a) := IsSquare.mul h_sq2 ha
         simp_all only [neg_mul, one_mul, neg_neg]
     simp_all only [not_true_eq_false, exists_const]
-  have h_rank : finrank F K = 1 := by
+  have : finrank F K = 1 := by
     calc
     finrank F K = Nat.card G := (IsGaloisGroup.card_eq_finrank G F K).symm
-    _ = 1 := hG
-  have h : algebraicClosure F K = ⊥ := by
+    _ = 1 := this
+  have : algebraicClosure F K = ⊥ := by
     calc
     algebraicClosure F K = ⊤ := (algebraicClosure.eq_top_iff F K).mpr Algebra.IsIntegral.isAlgebraic
-    _ = ⊥ := (bot_eq_top_iff_finrank_eq_one.mpr h_rank).symm
-  exact (IsAlgClosed.algebraicClosure_eq_bot_iff F K).mp h
+    _ = ⊥ := (bot_eq_top_iff_finrank_eq_one.mpr this).symm
+  exact (IsAlgClosed.algebraicClosure_eq_bot_iff F K).mp this
 
 include h in
 lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : IsAlgClosed F := by
   let p := ringChar F
   have hp1 : Nat.Prime p ∨ p = 0 := CharP.char_is_prime_or_zero F p
-  have h_perf: Algebra.IsSeparable F K := by
+  have h_perf: PerfectField F := by
     cases hp1 with
     | inl hp1 =>
-      have : ExpChar F p := ExpChar.prime hp1
-      have h_rank : finrank F K ≤ 1 := by
-        by_contra
-        push Not at this
-        have h_E : ∃ (E : IntermediateField F K), finrank E K = ringChar F :=
-          finite_inseparable_extension_intermediate F K this
-        obtain ⟨E, h_E⟩ := h_E
-        have h_frobsurj : Function.Surjective (frobenius E p) := by
+        have : ExpChar F p := ExpChar.prime hp1
+        have h_frobsurj : Function.Surjective (frobenius F p) := by
           intro b
-          let iota := algebraMap E K
-          have hx : ∃ (x : K), x ^ p ^ 2 = iota b := by
+          let iota := algebraMap F K
+          have : ∃ n : ℕ, finrank F K = (ringChar F) ^ n := IsPurelyInseparable.finrank_eq_pow F K p
+          obtain ⟨n, hn⟩ := this
+          have : ∃ x : K, x ^ p ^ (n + 1) = iota b := by
             have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
             refine IsAlgClosed.exists_pow_nat_eq (iota b) ?_
-            exact expChar_pow_pos F p 2
-          obtain ⟨x, hx⟩ := hx
-          let e := elemExponent E x
-          let c := elemReduct E x
-          let a := c ^ p ^ (1-e)
-          have ha : x ^ p = iota a := by
-            have : x ^ p ^ e = iota c := (algebraMap_elemReduct_eq' E p x).symm
-            have : e ≤ 1 := by
-              have hp2 : ¬ (p ^ e > p ^ 1) := by
+            exact expChar_pow_pos F p (n + 1)
+          obtain ⟨x, hx⟩ := this
+          let e := elemExponent F x
+          let c := elemReduct F x
+          let a := c ^ p ^ (n-e)
+          have : x ^ p ^ n = iota a := by
+            have : x ^ p ^ e = iota c := (algebraMap_elemReduct_eq' F p x).symm
+            have : e ≤ n := by
+              have hp2 : ¬ (p ^ e > p ^ n) := by
                 push Not
                 calc
-                p ^ e = (minpoly E x).natDegree := (minpoly_natDegree_eq' E p x).symm
-                _ ≤ finrank E K := minpoly.natDegree_le x
-                _ = p := h_E
-                _ = p ^ 1 := by simp
-              have hp3 : ¬ (e > 1) := (pow_lt_pow_right₀ (Nat.Prime.one_lt hp1)).mt hp2
+                p ^ e = (minpoly F x).natDegree := (minpoly_natDegree_eq' F p x).symm
+                _ ≤ finrank F K := minpoly.natDegree_le x
+                _ = p^n := hn
+              have hp3 : ¬ (e > n) := (pow_lt_pow_right₀ (Nat.Prime.one_lt hp1)).mt hp2
               push Not at hp3
               exact hp3
-            have h : e + (1-e) = 1 := Nat.add_sub_of_le this
+            have h : e + (n-e) = n := by grind
             calc
-            x ^ p = x ^ (p ^ 1) := by simp
-            _ = x ^ p ^ (e + (1-e)) := by rw [h]
-            _ = x ^ (p ^ e * p ^ (1-e)) := by grind
-            _ = (x ^ p ^ e) ^ (p ^ (1-e)) := pow_mul x (p ^ e) (p ^ (1 - e))
+            x ^ p ^ n = x ^ p ^ (e + (n-e)) := by rw [h]
+            _ = x ^ (p ^ e * p ^ (n-e)) := by grind
+            _ = (x ^ p ^ e) ^ (p ^ (n-e)) := pow_mul x (p ^ e) (p ^ (n - e))
             _ = iota a := by grind
-          use a
-          have : iota a ^ p = iota b := by
+          have : iota (a ^ p) = iota b := by
             calc
-            iota a ^ p = (iota a) ^ p := by simp_all only [p, e, c, a]
-            _ = (x ^ p) ^ p := by simp [ha]
-            _ = x ^ (p * p) := by ring
-            _ = x ^ p ^ 2 := by grind
+            iota (a ^ p) = iota a ^ p := by simp_all only [map_pow]
+            _ = (x ^ p ^ n) ^ p := by simp [this]
+            _ = x ^ (p ^ n * p) := by ring
+            _ = x ^ p ^ (n + 1) := by grind
             _= iota b := hx
-          exact SetLike.coe_eq_coe.mp this
-        have : PerfectField E :=
-          have : ExpChar E p := expChar E p
-          have : PerfectRing E p := PerfectRing.ofSurjective E p h_frobsurj
-          PerfectRing.toPerfectField E p
-        have h2 : Field.finInsepDegree E K = 1 :=
-          have h_sep : Algebra.IsSeparable E K := Algebra.IsAlgebraic.isSeparable_of_perfectField
-          (isSeparable_iff_finInsepDegree_eq_one (↥E) K).mp h_sep
-        have h_E1 : finrank E K = 1 := by
-          have h1 : Field.finSepDegree E K = 1 :=
-            have h_insep : IsPurelyInseparable E K := isPurelyInseparable_tower_top F K E
-            (isPurelyInseparable_iff_finSepDegree_eq_one (↥E) K).mp h_insep
-          calc
-          finrank E K = Field.finSepDegree E K * Field.finInsepDegree E K :=
-            (Field.finSepDegree_mul_finInsepDegree E K).symm
-          _ = 1 * 1 := by rw [h1, h2]
-          _ = 1 := by simp
-        have : ringChar F = 1 := by rw [←h_E, h_E1]
-        simp_all only [ringChar.ringChar_eq_one, finrank_subsingleton, lt_self_iff_false]
-      have : Field.finSepDegree F K * Field.finInsepDegree F K = 1 := by
-        calc
-        Field.finSepDegree F K * Field.finInsepDegree F K = finrank F K :=
-          Field.finSepDegree_mul_finInsepDegree F K
-        _ = 1 :=
-          have : finrank F K > 0 := finrank_pos
-          (Nat.le_antisymm this h_rank).symm
-      have h_insep1 : Field.finInsepDegree F K = 1 := by simp_all
-      exact (isSeparable_iff_finInsepDegree_eq_one F K).mpr h_insep1
+          have : a ^ p = b := by
+            have h1 : Function.Injective iota := by exact FaithfulSMul.algebraMap_injective F K
+            apply (Function.Injective.eq_iff h1).mp this
+          use a
+          unfold frobenius
+          simp_all
+        have : PerfectRing F p := PerfectRing.ofSurjective F p h_frobsurj
+        exact PerfectRing.toPerfectField F p
     | inr hp1 =>
-      have : CharZero F := (CharP.ringChar_zero_iff_CharZero F).mp hp1
-      have : ringExpChar F = 1 := ringExpChar.eq_one F
-      have : PerfectField F := PerfectField.ofCharZero
-      exact Algebra.IsAlgebraic.isSeparable_of_perfectField
+        have : CharZero F := (CharP.ringChar_zero_iff_CharZero F).mp hp1
+        exact PerfectField.ofCharZero
+  have : Algebra.IsSeparable F K := Algebra.IsAlgebraic.isSeparable_of_perfectField
   exact finite_separable_algebraic_closure_with_i F K h
 
 include K h in

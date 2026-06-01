@@ -79,44 +79,8 @@ Then there exists $a \in F$ which is not a square.
 \end{lemma}
 \begin{proof}
 \leanok
-Apply Kummer theory to write $K \cong F[x]/(x^2-a)$ for some $a \in F$.
+Since $F$ is not of characteristic 2, $K/F$ is necessarily separable.
+We may thus apply Kummer theory to write $K \cong F[x]/(x^2-a)$ for some $a \in F$.
 This gives the desired element.
-\end{proof}
-
-\begin{lemma} \label{lem:trivial absolute Galois group}
-\lean{trivial_absolute_galois_group}
-\leanok
-Let $F$ be a field admitting an algebraic closure $F$ such that $F/K$ is separable with trivial Galois group. Then $F$ is algebraically closed.
-\end{lemma}
-\begin{proof}
-\leanok
-\end{proof}
-
-\begin{lemma} \label{lem:finite inseparable tower step 1}
-\lean{finite_inseparable_extension_intermediate_small}
-\leanok
-Let $K/F$ be a nontrivial finite purely inseparable extension of fields of characteristic $p$.
-Then there exists an intermediate field $E$ with $[E:F] = p$.
-\end{lemma}
-\begin{proof}
-\uses{lem:degree 1 extension}
-\leanok	
-For every $x \in K$, there exists a smallest nonnegative integer $e$ such that $x^{p^e} \in K$,
-which is zero if and only if $x \in F$. Since $K \neq F$, we can find $x$ for which $e > 0$.
-Set $a = x^{p^{e-1}}$ and $E := F(a)$; then $[E:F] = p$.
-\end{proof}
-
-\begin{lemma} \label{lem:finite inseparable tower step 2}
-\lean{finite_inseparable_extension_intermediate}
-\leanok
-Let $K/F$ be a nontrivial finite purely inseparable extension of fields of characteristic $p$.
-Then there exists an intermediate field $E$ with $[K:E] = p$.
-\end{lemma}
-\begin{proof}
-\uses{lem:finite inseparable tower step 1}
-\leanok
-We induct on the degree of $K/F$. If this degree is $p$ we take $E = F$.
-Otherwise, by Lemma~\ref{lem:finite inseparable tower step 1} we can find an intermediate field
-$F_1$ with $[F:F_1] = p$ and hence $[K:F_1] > 1$. By the induction hypothesis, there exists an intermediate field $E$ between $F_1$ and $K$ with $[K:E] = p$.
 \end{proof}
 

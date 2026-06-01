@@ -17,52 +17,45 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
   obtain ⟨i, h2a, h2b⟩ := h2
   have h_int : IsIntegral F i := Algebra.IsIntegral.isIntegral i
   let i_pol := minpoly F i
-  let iota := algebraMap F K
-  let pol := X ^ 2 + C (1 : F)
-  have h_poldeg : pol.natDegree = 2 := natDegree_X_pow_add_C
-  have h_pol : i_pol = pol := by
-    have h_eval : aeval i pol = 0 := by
-      calc
-      aeval i pol = aeval i ((X : Polynomial F) ^ 2) + aeval i (C (1 : F)) := aeval_add i
-      _ = i^2 + aeval i (C (1 : F)) := by rw [aeval_X_pow i]
-      _ = i^2 + 1 := by
-        refine (add_right_inj (i^2)).mpr ?_
-        simp_all only [ne_eq, map_one, pol]
-      _ = 0 := add_eq_zero_iff_eq_neg.mpr h2a
-    have h_div : i_pol ∣ pol := minpoly.dvd_iff.mpr h_eval
-    have h_mon : pol.Monic := by
-      refine monic_X_pow_add_C 1 ?_
-      simp
-    have : i_pol.natDegree = 2 := by
-      have : i_pol.natDegree ≤ 2 :=
-        have h_leq : i_pol.natDegree ≤ pol.natDegree := by
-          apply natDegree_le_of_dvd h_div
-          exact Monic.ne_zero h_mon
-        le_of_le_of_eq h_leq h_poldeg
-      have h_deg0 : 0 < i_pol.natDegree := minpoly.natDegree_pos h_int
-      have : i_pol.natDegree ≠ 1 := by
+  have hi_pol : i_pol.natDegree = 2 := by
+    have : i_pol.natDegree ≤ 2 :=
+      let pol := X ^ 2 + C (1 : F)
+      have h_eval : aeval i pol = 0 := by
+        calc
+        aeval i pol = aeval i ((X : Polynomial F) ^ 2) + aeval i (C (1 : F)) := aeval_add i
+        _ = i^2 + aeval i (C (1 : F)) := by rw [aeval_X_pow i]
+        _ = i^2 + 1 := by
+          refine (add_right_inj (i^2)).mpr ?_
+          simp only [map_one]
+        _ = 0 := add_eq_zero_iff_eq_neg.mpr h2a
+      have h_div : i_pol ∣ pol := minpoly.dvd_iff.mpr h_eval
+      have h_mon : pol.Monic := by
+        refine monic_X_pow_add_C 1 ?_
+        simp
+      have h_leq : i_pol.natDegree ≤ pol.natDegree := by
+        apply natDegree_le_of_dvd h_div
+        exact Monic.ne_zero h_mon
+      have h_poldeg : pol.natDegree = 2 := natDegree_X_pow_add_C
+      le_of_le_of_eq h_leq h_poldeg
+    have h_deg0 : 0 < i_pol.natDegree := minpoly.natDegree_pos h_int
+    have : i_pol.natDegree ≠ 1 :=
+      let iota := algebraMap F K
+      have hi : ¬ i ∈ iota.range := by
         by_contra
-        have hj : ∃ j : F, iota j = i := by
-          refine RingHom.mem_range.mp ?_
-          exact minpoly.natDegree_eq_one_iff.mp this
-        obtain ⟨j, hj⟩ := hj
+        obtain ⟨j, hj⟩ := this
         have : j^2 = -1 := by
-          have : iota j ^ 2 = iota (-1) := by grind
+          have : iota (j ^ 2) = iota (-1) := by grind
           have : Function.Injective iota := FaithfulSMul.algebraMap_injective F K
           grind
-        subst hj
         simp_all only
-      grind
-    refine monic_divisor_of_same_degree ?_ h_mon h_div ?_
-    · exact minpoly.monic h_int
-    · simp_all only
+      minpoly.natDegree_eq_one_iff.mp.mt hi
+    grind
   have h_rank2 : finrank F K = 2 := by
     have h_rel : relfinrank ⊥ F⟮i⟯ = 2 := by
       calc
       relfinrank ⊥ F⟮i⟯ = finrank F F⟮i⟯ := relfinrank_bot_left F⟮i⟯
-      _ = (minpoly F i).natDegree := adjoin.finrank h_int
-      _ = pol.natDegree := natDegree_eq_of_degree_eq (congrArg degree h_pol)
-      _ = 2 := h_poldeg
+      _ = i_pol.natDegree := adjoin.finrank h_int
+      _ = 2 := hi_pol
     calc
     finrank F K = finrank (⊥: IntermediateField F K) K := finrank_bot'.symm
     _ = relfinrank ⊥ F⟮i⟯ * finrank F⟮i⟯ K :=
@@ -75,7 +68,7 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
   have odd_deg : ∀ {f : Polynomial F}, Odd f.natDegree → ∃ x, f.IsRoot x := by
     have h_ftog : ∀ f : Polynomial F, Irreducible f → f.natDegree ≤ 2 := by
       intro f h_irr
-      have hg : ∃ (g : Polynomial F), g.Monic ∧ g.natDegree ∣ Module.finrank F K ∧ g ∣ f := by
+      have hg : ∃ (g : Polynomial F), g.Monic ∧ g.natDegree ∣ finrank F K ∧ g ∣ f := by
         apply divisor_by_finrank
         refine Nat.ne_zero_iff_zero_lt.mpr ?_
         exact Irreducible.natDegree_pos h_irr
