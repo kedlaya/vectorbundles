@@ -1,0 +1,99 @@
+\section{Integer sequences}
+
+\begin{lemma} \label{lem:sequence argument1}
+\lean{sequence_argument1}
+\leanok
+Let $n$ be a positive integer.
+Let $m_1,\dots,m_n$ be a sequence of integers.
+Suppose that there are no indices $1 \leq i < j \leq n$ such that
+\begin{equation} \label{eq:sequence condition}
+m_k = m_i + 1 \quad (i < k < j), \qquad m_j > m_i + 1.
+\end{equation}
+Then for $1 \leq i < j \leq n$,
+\[
+m_j \leq m_i+1 \qquad (1 \leq i < j \leq n).
+\]
+\end{lemma}
+\begin{proof}
+\leanok
+We prove the claim by induction on $j-i$.
+The base case $j-i=1$ is covered by the second part of \eqref{eq:sequence condition}.
+For the induction step, suppose by way of contradiction that $m_j> m_i+1$ for some $i,j$.
+Set $m := m_i + 1$.
+For $k = i+1, \dots, j-1$ we have $m_{k} \leq m_i+1$ and $m_j \leq m_{k}+1$ by the induction hypothesis;
+combining with $m_j \geq m_i + 2$ shows that both of these must be equalities
+and so $m_k = m, m_j = m+1$.
+Now $(m_i, \dots, m_j) = (m-1, m, \dots, m, m+1)$, which contradicts \eqref{eq:sequence condition}.
+\end{proof}
+
+\begin{lemma} \label{lem:sequence argument2}
+\lean{sequence_argument2}
+\leanok
+Let $n$ be a positive integer. Let $c$ be an integer.
+Let $m_1,\dots,m_n$ be a sequence of integers satisfying the following conditions.
+\begin{enumerate}
+\item[(a)]
+We have $m_1 + \cdots + m_n = c$.
+\item[(b)]
+For $1 \leq i < j \leq n$, $m_j \leq m_i+1$.
+\end{enumerate}
+Then $m_n \leq \lfloor \frac{c+n-1}{n} \rceil$ (i.e., $\lceil \frac{c}{n} \rceil$).
+\end{lemma}
+\begin{proof}
+\leanok
+For $n = 1$, note that (a) directly forces $m_1 = 0$.
+For $n > 1$, we have $m_n = (m_1 + \cdots + m_n) - (m_1 + \cdots + m_{n-1}) \geq 0$ by (a) and (b).
+Moreover, if $m_n \geq 1$, then by (c) we have $m_1,\dots,m_{n-1} \geq 0$ and hence
+$m_1 + \cdots + m_n \geq 1$, a contradiction. Hence $m_n \leq 0$ as claimed.
+By (b), we have 
+\[
+c = m_1 + \cdots + m_n \geq (n-1)(m_n - 1) + m_n = nm_n - n + 1.
+\]
+We thus have $m_n \leq \lfloor \frac{c+n-1}{n}\rfloor$.
+
+\end{proof}
+
+\begin{lemma} \label{lem:sequence argument3}
+\lean{sequence_argument3}
+\leanok
+Let $n$ be a nonnegative integer.
+Let $c$ be an integer.
+Let $S$ be a subset of $\Z^n$ satisfying the following conditions.
+\begin{enumerate}
+\item[(a)]
+The set $S$ is nonempty.
+\item[(b)]
+For every tuple $(m_1,\dots,m_n) \in S$, we have $m_1 + \cdots + m_n = c$.
+\item[(c)]
+For $i=1,\dots,n-1$, there exists a constant $c_i \in \Z$ such that
+for every tuple $(m_1,\dots,m_n) \in S$, $m_1 + \cdots + m_i \leq c_i$.
+\item[(d)]
+For every tuple $(m_1,\dots,m_n) \in S$,
+if there exist indices $1 \leq i < j \leq n$ such that
+\begin{equation} \label{eq:sequence condition3}
+m_k = m_i + 1 \quad (i < k < j), \qquad m_j \geq m_i + 2,
+\end{equation}
+then there exists another tuple $(m'_1,\dots,m'_n) \in S$ with
+\[
+m'_1 + \cdots + m'_i > m_1 + \cdots + m_i, \qquad
+m'_1 + \cdots + m'_k \geq m_1 + \cdots + m_k \quad (k \neq i).
+\]
+\end{enumerate}
+Then there exists a tuple $(m_1,\dots,m_n) \in S$ with $m_n \leq \lfloor \frac{c+n-1}{n} \rceil$.
+\end{lemma}
+\begin{proof}
+\leanok
+\uses{lem:sequence argument1,lem:sequence argument2}
+Define the function $f\colon S \to \Z$ by
+\[
+f(m_1,\dots,m_n) = \sum_{i=1}^{n-1} \sum_{j=1}^i m_j;
+\]
+from conditions (b) and (c), we see that $\sum_{j=1}^i m_i \leq c_i$ for each $i$, so $f$ is bounded above by $\sum_{i=1}^{n-1} c_i$.
+(We also have the simpler expression $f(m_1,\dots,m_n) = \sum_{i=1}^n (n-i) m_i$ but we will not need it.)
+
+Since $S$ is nonempty, we can choose a tuple $(m_1,\dots,m_n) \in S$ on which $f$ achieves its maximum.
+There then cannot exist indices $i,j$ satisfying \eqref{eq:sequence condition3}, as then the new sequence $(m'_1,\dots,m'_n)$ would have $\sum_{i=1}^{n-1} (n-i)m'_i > \sum_{i=1}^{n-1} (n-i)m_i$.
+Consequently, we can apply Lemma~\ref{lem:sequence argument1} to deduce that 
+$m_j \leq m_i + 1$ for $1 \leq i < j \leq n$, then Lemma~\ref{lem:sequence argument2} to conclude.
+\end{proof}
+

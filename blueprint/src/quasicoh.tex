@@ -1,0 +1,46 @@
+\section{Coherent sheaves and vector bundles}
+
+Tag numbers refer to the Stacks Project.
+
+\begin{definition}
+\label{def:quasicoherent}
+\mathlibok
+(tag 01BE)
+Let $X$ be a scheme. Let $F$ be a sheaf of $\cO_X$-modules.
+We say that $F$ is \emph{quasicoherent} if for every $x \in X$,
+there exist an open neighborhood $U$ of $x$ such that $\calF|_U$ is isomorphic to the kernel
+of some morphism of $\cO_U$-modules of the form
+\[
+\bigoplus_{j \in J} \cO_U \to \bigoplus_{i \in I} \cO_U.
+\]
+\end{definition}
+
+\begin{lemma} \label{lem:quasicoherent on affine}
+\uses{def:quasicoherent}
+Let $X$ be a scheme. Let $F$ be a sheaf of $\cO_X$-modules.
+Then $F$ is quasicoherent if and only if 
+\[
+i^* F \to \tilde{M}, \qquad M := \Gamma(U, i^* F)
+\]
+of the tilde-Gamma adjunction is an isomorphism.
+(Here $M$ is a module over the ring $R = \Gamma(X, \cO)$, and $X \cong \Spec R$.)
+\end{lemma}
+\begin{proof}
+To be added to Mathlib.
+\end{proof}
+
+\begin{definition} \label{def:finitely generated}
+\uses{def:quasicoherent}
+Let $X$ be a scheme. Let $F$ be a sheaf of $\cO_X$-modules.
+We say that $F$ is \emph{finitely generated} if $F$ is quasicoherent and,
+for every ring $R$ and every morphism 
+$i \colon U \to X$ with $U$ affine, the module $\Gamma(U, i^*F)$ over the ring $\Gamma(U, \cO)$ is finitely generated.
+\end{definition}
+
+\begin{definition} \label{def:vector bundles}
+\uses{def:quasicoherent,def:finitely generated}
+A \emph{vector bundle} on a scheme $X$ is a quasicoherent sheaf $F$ such that for every morphism 
+$i \colon \Spec R \to X$, $\Gamma(X, i^* F)$ is a finite projective $R$-module. 
+\end{definition}
+
+
