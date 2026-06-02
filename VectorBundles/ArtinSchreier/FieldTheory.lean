@@ -22,7 +22,7 @@ lemma finite_extension_degree_one : finrank F K > 1 → ¬ Function.Surjective (
   calc
   Module.rank F K ≤ Module.rank F K + Module.rank F (Algebra.linearMap F K).ker := by
     apply le_add_of_nonneg_right
-    exact Cardinal.zero_le (Module.rank F ↥(Algebra.linearMap F K).ker)
+    apply Cardinal.zero_le
   _ = Module.rank F F := (LinearMap.rank_eq_of_surjective h).symm
   _ = 1 := CommSemiring.rank_self F
 
@@ -35,16 +35,14 @@ lemma fixed_field_of_cyclic_subgroup (g : Gal(K/F)) : ∀ x : K, g x = x →
     MulAction.mem_fixedBy_zpowers_iff_mem_fixedBy.mpr h1
   have h_sub : ∀ h : Gal(K/F), h ∈ Subgroup.zpowers g → h x = x := by
     intro h h1
-    have h2 : ∃ n : ℤ, g ^ n = h := Subgroup.mem_zpowers_iff.mp h1
-    obtain ⟨n, h2⟩ := h2
+    obtain ⟨n, h2⟩ := Subgroup.mem_zpowers_iff.mp h1
     subst h
     simp_all
   exact (mem_fixedField_iff (Subgroup.zpowers g) x).mpr h_sub
 
 lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p) (hrank: finrank F K = p)
   (hchar: ringChar F = p) : ∃ a : F, ∃ x : K, minpoly F x = X ^ p - X - C a := by
-  have hy : ∃ y : K, Algebra.trace F K y = 1 := Set.mem_range.mp (Algebra.trace_surjective F K 1)
-  obtain ⟨y, hy⟩ := hy
+  obtain ⟨y, hy⟩ := Set.mem_range.mp (Algebra.trace_surjective F K 1)
   have : CharP K p := (Algebra.charP_iff F K p).mp (ringChar.of_eq hchar)
   let G := Gal(K/F)
   have h_ord : Nat.card G = p := by
@@ -53,8 +51,7 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
     _  = p := hrank
   have : Fact (Nat.Prime p) := fact_iff.mpr hp
   have : IsCyclic G := isCyclic_of_prime_card h_ord
-  have h_gen : ∃ g : G, Subgroup.zpowers g = ⊤ := isCyclic_iff_exists_zpowers_eq_top.mp this
-  obtain ⟨g, h_gen⟩ := h_gen
+  obtain ⟨g, h_gen⟩ := isCyclic_iff_exists_zpowers_eq_top.mp this
   have h_ordg : orderOf g = p := by
     calc
     orderOf g = Nat.card G := orderOf_eq_card_of_zpowers_eq_top h_gen
@@ -64,14 +61,12 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
   let iota := algebraMap F K
   have : g z = z - 1 := by
     calc
-    g z = g (∑ i : range, (g^(i:ℕ)) y * i) := by rfl
-    _ = ∑ i : range, g ((g^(i:ℕ)) y * i) := by apply map_finset_sum
+    g z = ∑ i : range, g ((g^(i:ℕ)) y * i) := by apply map_finset_sum
     _ = ∑ i : range, ((g^(i+1:ℕ)) y * (i+1) - (g^(i+1:ℕ)) y) := by
       have : ∀ i : range, g ((g^(i:ℕ)) y * i) = (g^(i+1:ℕ)) y * (i+1) - (g^(i+1:ℕ)) y := by
         intro i
         calc
-        g ((g^(i:ℕ)) y * i) = g ((g^(i:ℕ)) y) * i := by aesop
-        _ = (g * (g^(i:ℕ))) y * i := by rfl
+        g ((g^(i:ℕ)) y * i) = (g * (g^(i:ℕ))) y * i := by aesop
         _ = (g^(i+1:ℕ)) y * i := by rw [pow_succ' g ↑i]
         _ = (g^(i+1:ℕ)) y * (i+1) - (g^(i+1:ℕ)) y := by ring
       apply Finset.sum_congr rfl
@@ -83,11 +78,9 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
       have h1 : z = ∑ i : range, (g^(i+1:ℕ)) y * (i+1) := by
         have hp1 : p-1 + 1 = p := Nat.succ_pred_prime hp
         let f (i : ℕ) : K := (g^i) y * i
-        let f1 := fun i => f (i+1)
+        let f1 := fun i ↦ f (i+1)
         calc
-        z = ∑ i ∈ range, f i := by
-          refine (Finset.sum_subtype (range) ?_ f).symm
-          exact fun x => Iff.of_eq rfl
+        z = ∑ i ∈ range, f i := (Finset.sum_subtype (range) (fun x ↦ Iff.of_eq rfl) f).symm
         _ = ∑ i ∈ Finset.range (p-1+1), f i := by rw [hp1]
         _ = ∑ i ∈ Finset.range (p-1), f (i+1) + f 0 := Finset.sum_range_succ' f (p-1)
         _ = ∑ i ∈ Finset.range (p-1), f (i+1) := by aesop
@@ -105,12 +98,14 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
             constructor
             · intro b
               have : DecidableEq G := Classical.typeDecidableEq G
-              have hb1 : g ^ (-1:ℤ) * b ∈ Finset.image (fun x => g ^ x) (Finset.range (orderOf g)) := by
+              have : g ^ (-1:ℤ) * b ∈ Finset.image (fun x ↦ g ^ x) range := by
+                subst range
+                rw [←h_ordg]
                 have hb : g ^ (-1:ℤ) * b ∈ Subgroup.zpowers g := by simp_all only [Subgroup.mem_top]
                 refine (IsOfFinOrder.mem_zpowers_iff_mem_range_orderOf ?_).mp hb
                 exact isOfFinOrder_of_finite g
               simp_all only [Finset.mem_image, Subtype.exists]
-              obtain ⟨i, hb1, hb2⟩ := hb1
+              obtain ⟨i, hb1, hb2⟩ := this
               use i, hb1
               calc
                 g ^ (i+1:ℕ) = g * (g ^ (i:ℕ)) := pow_succ' g i
@@ -121,13 +116,13 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
                 _ = p := Finset.card_range p
                 _ = Nat.card G := h_ord.symm
           apply Finset.sum_bijective f h_bij
-          · aesop
-          · aesop
+          · simp
+          · simp [f]
         _ = iota (Algebra.trace F K y) := (trace_eq_sum_automorphisms y).symm
         _ = iota 1 := by rw [hy]
         _ = 1 := algebraMap.coe_one
       rw [h1, h2]
-  have ha : ∃ a : F, iota a = z^p - z := by
+  obtain ⟨a, ha⟩ : ∃ a : F, iota a = z^p - z := by
     let b := z^p - z
     have hb : g b = b := by
       calc
@@ -140,23 +135,20 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
         _ = b := sub_sub_sub_cancel_right (z ^ p) z 1
     have : b ∈ fixedField (Subgroup.zpowers g) := fixed_field_of_cyclic_subgroup F K g b hb
     aesop
-  obtain ⟨a, ha⟩ := ha
   use a, z
   let pol := X ^ p - X - C a
-  have h_pol : pol.natDegree = p ∧ pol.Monic := artin_schreier_poly a hp
-  obtain ⟨h_pdeg, h_mon⟩ := h_pol
+  obtain ⟨h_pdeg, h_mon⟩ := artin_schreier_poly a hp
   have h_eval : aeval z pol = 0 := by aesop
   have h_int: IsIntegral F z := Algebra.IsIntegral.isIntegral z
   have h_mpdeg : (minpoly F z).natDegree = p := by
     have h : (minpoly F z).natDegree ∣ finrank F K := minpoly.degree_dvd h_int
     have : (minpoly F z).natDegree = 1 ∨ (minpoly F z).natDegree = p := by
-      refine (Nat.dvd_prime hp).mp ?_
       rw [hrank] at h
-      exact h
+      exact (Nat.dvd_prime hp).mp h
     by_contra
     have : (minpoly F z).natDegree = 1 := by aesop
     have h_tmp1 : z ∈ iota.range := minpoly.natDegree_eq_one_iff.mp this
-    have h_gz : g z = z := (IsGalois.mem_range_algebraMap_iff_fixed z).mp h_tmp1 g
+    have : g z = z := (IsGalois.mem_range_algebraMap_iff_fixed z).mp h_tmp1 g
     grind
   apply monic_divisor_of_same_degree
   · exact minpoly.monic h_int
@@ -170,24 +162,22 @@ lemma finite_inseparable_extension_data [IsPurelyInseparable F K] (h: 1 < finran
   let p := ringChar F
   let q := ringExpChar F
   have : ExpChar F q := ringExpChar.expChar F
-  have : ∃ n, finrank F K = q ^ n := IsPurelyInseparable.finrank_eq_pow F K q
-  obtain ⟨n, hn⟩ := this
+  obtain ⟨n, hn⟩ := IsPurelyInseparable.finrank_eq_pow F K q
   have hpp : Nat.Prime p := by
     have : q ≠ 1 := by
       by_contra
       rw [this] at hn
       grind
-    have : ¬ p = 0 := (expChar_one_iff_char_zero F p q).mpr.mt this
+    have h : ¬ p = 0 := (expChar_one_iff_char_zero F p q).mpr.mt this
     have : Nat.Prime p ∨ p = 0 := CharP.char_is_prime_or_zero F p
     simp_all only [ne_eq, or_false]
-  have hp : p = ringExpChar F := (char_eq_expChar_iff F p q).mpr hpp
+  have : p = q := (char_eq_expChar_iff F p q).mpr hpp
+  rw [← this] at hn
   refine ⟨hpp, ?_⟩
-  subst q
-  rw [← hp] at hn
   use n
 
 lemma nonsquare_in_quadratic_extension (hrank: finrank F K = 2) (hchar: ringChar F ≠ 2) :
-    ∃ a : F, ¬ IsSquare a := by
+  ∃ a : F, ¬ IsSquare a := by
   let p := ringChar K
   have h_char : ringChar F = p := Algebra.ringChar_eq F K
   let rk := finrank F K
@@ -221,17 +211,15 @@ lemma nonsquare_in_quadratic_extension (hrank: finrank F K = 2) (hchar: ringChar
       grind
     (isSeparable_iff_finInsepDegree_eq_one F K).mpr this
   let iota := algebraMap F K
-  have hb : ∃ b : K, b ^ rk ∈ Set.range iota ∧ F⟮b⟯ = ⊤ :=
+  obtain ⟨b, hb1, hb2⟩ : ∃ b : K, b ^ rk ∈ Set.range iota ∧ F⟮b⟯ = ⊤ :=
     have : Algebra.IsQuadraticExtension F K :=
       { toFree := free_of_finite_type_torsion_free', finrank_eq_two' := hrank }
     have : IsCyclic Gal(K/F) := Algebra.IsQuadraticExtension.isCyclic F K
     exists_root_adjoin_eq_top_of_isCyclic F K prim
-  obtain ⟨b, hb1, hb2⟩ := hb
-  have ha : ∃ a : F, b ^ 2 = iota a := by
+  obtain ⟨a, ha⟩ : ∃ a : F, b ^ 2 = iota a := by
     obtain ⟨a, hb1⟩ := hb1
     use a
     simp_all only [ne_eq, adjoin_eq_top_iff, rk]
-  obtain ⟨a, ha⟩ := ha
   use a
   by_contra
   obtain ⟨c, this⟩ := this

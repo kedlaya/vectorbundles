@@ -26,14 +26,12 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
   have : Nat.card G = 1 := by
     by_contra
     let d := Nat.card G
-    have : ∃ p : ℕ, Nat.Prime p ∧ p ∣ d := Nat.exists_prime_and_dvd this
-    obtain ⟨p, hp1, hp1a⟩ := this
-    have : ∃ g : G, orderOf g = p := by
+    obtain ⟨p, hp1, hp1a⟩ : ∃ p : ℕ, Nat.Prime p ∧ p ∣ d := Nat.exists_prime_and_dvd this
+    obtain ⟨g, hg⟩ : ∃ g : G, orderOf g = p := by
       have : d = Fintype.card G := Nat.card_eq_fintype_card
       rw [this] at hp1a
       have : Fact (Nat.Prime p) := fact_iff.mpr hp1
       exact exists_prime_orderOf_dvd_card p hp1a
-    obtain ⟨g, hg⟩ := this
     let H := Subgroup.zpowers g
     let E := fixedField H
     have h_ekrank : finrank E K = p := by
@@ -78,61 +76,58 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
 
 include h in
 lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : IsAlgClosed F := by
-  let p := ringChar F
-  have hp1 : Nat.Prime p ∨ p = 0 := CharP.char_is_prime_or_zero F p
   have h_perf: PerfectField F := by
+    let p := ringChar F
+    have hp1 : Nat.Prime p ∨ p = 0 := CharP.char_is_prime_or_zero F p
     cases hp1 with
     | inl hp1 =>
-        have : ExpChar F p := ExpChar.prime hp1
-        have h_frobsurj : Function.Surjective (frobenius F p) := by
-          intro b
-          let iota := algebraMap F K
-          have : ∃ n : ℕ, finrank F K = (ringChar F) ^ n := IsPurelyInseparable.finrank_eq_pow F K p
-          obtain ⟨n, hn⟩ := this
-          have : ∃ x : K, x ^ p ^ (n + 1) = iota b := by
-            have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
-            refine IsAlgClosed.exists_pow_nat_eq (iota b) ?_
-            exact expChar_pow_pos F p (n + 1)
-          obtain ⟨x, hx⟩ := this
-          let e := elemExponent F x
-          let c := elemReduct F x
-          let a := c ^ p ^ (n-e)
-          have : x ^ p ^ n = iota a := by
-            have : x ^ p ^ e = iota c := (algebraMap_elemReduct_eq' F p x).symm
-            have : e ≤ n := by
-              have hp2 : ¬ (p ^ e > p ^ n) := by
-                push Not
-                calc
-                p ^ e = (minpoly F x).natDegree := (minpoly_natDegree_eq' F p x).symm
-                _ ≤ finrank F K := minpoly.natDegree_le x
-                _ = p^n := hn
-              have hp3 : ¬ (e > n) := (pow_lt_pow_right₀ (Nat.Prime.one_lt hp1)).mt hp2
-              push Not at hp3
-              exact hp3
-            have h : e + (n-e) = n := by grind
+      have : ExpChar F p := ExpChar.prime hp1
+      have h_frobsurj : Function.Surjective (frobenius F p) := by
+        intro b
+        let iota := algebraMap F K
+        obtain ⟨n, hn⟩ := IsPurelyInseparable.finrank_eq_pow F K p
+        obtain ⟨x, hx⟩ : ∃ x : K, x ^ p ^ (n + 1) = iota b := by
+          have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
+          refine IsAlgClosed.exists_pow_nat_eq (iota b) ?_
+          exact expChar_pow_pos F p (n + 1)
+        let e := elemExponent F x
+        let c := elemReduct F x
+        let a := c ^ p ^ (n-e)
+        have : x ^ p ^ n = iota a := by
+          have hp2 : p ^ e ≤ p ^ n := by
             calc
-            x ^ p ^ n = x ^ p ^ (e + (n-e)) := by rw [h]
-            _ = x ^ (p ^ e * p ^ (n-e)) := by grind
-            _ = (x ^ p ^ e) ^ (p ^ (n-e)) := pow_mul x (p ^ e) (p ^ (n - e))
-            _ = iota a := by grind
-          have : iota (a ^ p) = iota b := by
-            calc
-            iota (a ^ p) = iota a ^ p := by simp_all only [map_pow]
-            _ = (x ^ p ^ n) ^ p := by simp [this]
-            _ = x ^ (p ^ n * p) := by ring
-            _ = x ^ p ^ (n + 1) := by grind
-            _= iota b := hx
-          have : a ^ p = b := by
-            have h1 : Function.Injective iota := by exact FaithfulSMul.algebraMap_injective F K
-            apply (Function.Injective.eq_iff h1).mp this
-          use a
-          unfold frobenius
-          simp_all
-        have : PerfectRing F p := PerfectRing.ofSurjective F p h_frobsurj
-        exact PerfectRing.toPerfectField F p
+            p ^ e = (minpoly F x).natDegree := (minpoly_natDegree_eq' F p x).symm
+            _ ≤ finrank F K := minpoly.natDegree_le x
+            _ = p^n := hn
+          have hp3 : ¬ (e > n) := by
+            apply (pow_lt_pow_right₀ (Nat.Prime.one_lt hp1)).mt
+            push Not
+            exact hp2
+          have h : e + (n-e) = n := by grind
+          calc
+          x ^ p ^ n = x ^ p ^ (e + (n-e)) := by rw [h]
+          _ = x ^ (p ^ e * p ^ (n-e)) := by grind
+          _ = (x ^ p ^ e) ^ (p ^ (n-e)) := pow_mul x (p ^ e) (p ^ (n - e))
+          _ = (iota c) ^ (p ^ (n-e)) := by rw [← algebraMap_elemReduct_eq' F p x]
+          _ = iota a := by grind
+        have : iota (a ^ p) = iota b := by
+          calc
+          iota (a ^ p) = iota a ^ p := by simp_all only [map_pow]
+          _ = (x ^ p ^ n) ^ p := by simp [this]
+          _ = x ^ (p ^ n * p) := by ring
+          _ = x ^ p ^ (n + 1) := by grind
+          _= iota b := hx
+        have : a ^ p = b := by
+          have h1 : Function.Injective iota := by exact FaithfulSMul.algebraMap_injective F K
+          apply (Function.Injective.eq_iff h1).mp this
+        use a
+        unfold frobenius
+        simp_all
+      have : PerfectRing F p := PerfectRing.ofSurjective F p h_frobsurj
+      exact PerfectRing.toPerfectField F p
     | inr hp1 =>
-        have : CharZero F := (CharP.ringChar_zero_iff_CharZero F).mp hp1
-        exact PerfectField.ofCharZero
+      have : CharZero F := (CharP.ringChar_zero_iff_CharZero F).mp hp1
+      exact PerfectField.ofCharZero
   have : Algebra.IsSeparable F K := Algebra.IsAlgebraic.isSeparable_of_perfectField
   exact finite_separable_algebraic_closure_with_i F K h
 

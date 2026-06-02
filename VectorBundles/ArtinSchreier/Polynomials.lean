@@ -22,7 +22,7 @@ lemma monic_division (h1: f.Monic) (h2 : f ∣ g) : (g /ₘ f) * f = g := by
 
 lemma polynomial_monic_divisor (h1 : f.Monic) (h2 : g.Monic) (h3 : f ∣ g):
     ∃ (e : Polynomial F), e * f = g ∧ e.Monic ∧
-      e.natDegree + f.natDegree = g.natDegree ∧ e.degree = e.natDegree := by
+      e.natDegree + f.natDegree = g.natDegree := by
   let e := g /ₘ f
   use e
   have h4 : e * f = g := monic_division h1 h3
@@ -31,14 +31,11 @@ lemma polynomial_monic_divisor (h1 : f.Monic) (h2 : g.Monic) (h3 : f ∣ g):
     calc
     e.leadingCoeff = g.leadingCoeff := by
       refine leadingCoeff_divByMonic_of_monic h1 ?_
-      apply degree_le_of_dvd h3
-      exact Monic.ne_zero h2
+      exact degree_le_of_dvd h3 (Monic.ne_zero h2)
     _ = 1 := Monic.def.mp h2
-  refine ⟨h4, h5, ?_, ?_⟩
-  · rw [← h4]
-    exact (Monic.natDegree_mul h5 h1).symm
-  · refine degree_eq_natDegree ?_
-    exact Monic.ne_zero h5
+  refine ⟨h4, h5, ?_⟩
+  rw [← h4]
+  exact (Monic.natDegree_mul h5 h1).symm
 
 lemma congruence_low_degree (h1 : h ∣ (f-g)) (h2 : f.natDegree < h.natDegree)
   (h3 : g.natDegree < h.natDegree) (h4: h.Monic) : f = g := by
@@ -90,59 +87,37 @@ lemma artin_schreier_poly {p : ℕ} (c : F) (hp : Nat.Prime p):
 
 lemma monic_divisor_of_same_degree (h1: f.Monic) (h2 : g.Monic)
   (hdiv: f ∣ g) (hdeg: f.natDegree = g.natDegree) : f = g := by
-  have : ∃ (e : Polynomial F), e * f = g ∧ e.Monic ∧ e.natDegree + f.natDegree = g.natDegree
-    ∧ e.degree = e.natDegree :=
-    polynomial_monic_divisor h1 h2 hdiv
-  obtain ⟨e, h3, _, _⟩ := this
+  obtain ⟨e, h3, _, _⟩ := polynomial_monic_divisor h1 h2 hdiv
   subst h3
   simp_all only [dvd_mul_left, Nat.add_eq_right, Monic.natDegree_eq_zero, one_mul]
 
 lemma divisor_of_irreducible_poly (hdiv: f ∣ g) (hirr: Irreducible g) :
   f.natDegree = 0 ∨ f.natDegree = g.natDegree := by
   have hg0 : g ≠ 0 := Irreducible.ne_zero hirr
+  have hg1 : g.leadingCoeff ≠ 0 := leadingCoeff_ne_zero.mpr hg0
   let g0 := g * C (1 / g.leadingCoeff)
-  have h_gmon : g0.Monic := by
-    refine monic_mul_C_of_leadingCoeff_mul_eq_one ?_
-    simp_all
-  have : f ≠ 0 := ne_zero_of_dvd_ne_zero hg0 hdiv
+  have h_g0deg : g0.natDegree = g.natDegree := natDegree_mul_C (one_div_ne_zero hg1)
+  have hf0 : f ≠ 0 := ne_zero_of_dvd_ne_zero hg0 hdiv
+  have hf1 : f.leadingCoeff ≠ 0 := leadingCoeff_ne_zero.mpr hf0
   let f0 := f * C (1 / f.leadingCoeff)
-  have h_fmon : f0.Monic := by
-    apply monic_mul_C_of_leadingCoeff_mul_eq_one
-    simp_all
-  have h_div : f0 ∣ g0 := by
-    apply mul_dvd_mul hdiv
-    simp_all
-  have : ∃ (e : Polynomial F), e * f0 = g0 ∧ e.Monic ∧
-    e.natDegree + f0.natDegree = g0.natDegree ∧ e.degree = e.natDegree :=
-    polynomial_monic_divisor h_fmon h_gmon h_div
-  obtain ⟨e, h_mul, h_resmonic, h_degs, _⟩ := this
-  have h_g0_irr : Irreducible g0 :=
-    have : IsUnit (C (1 / g.leadingCoeff)) := by
-      refine isUnit_C.mpr ?_
-      simp_all
-    (irreducible_mul_isUnit this).mpr hirr
-  have h_f0deg : f0.natDegree = f.natDegree := by
-    apply natDegree_mul_C
-    simp_all only [ne_eq, one_div, inv_eq_zero, leadingCoeff_eq_zero, not_false_eq_true]
-  have h_g0deg : g0.natDegree = g.natDegree := by
-    apply natDegree_mul_C
-    simp_all only [ne_eq, one_div, inv_eq_zero, leadingCoeff_eq_zero, not_false_eq_true]
-  have : IsUnit e ∨ IsUnit f0 :=
-    h_g0_irr.isUnit_or_isUnit h_mul.symm
+  have h_f0deg : f0.natDegree = f.natDegree := natDegree_mul_C (one_div_ne_zero hf1)
+  rw [←h_f0deg, ←h_g0deg]
+  have h_gmon : g0.Monic := monic_mul_C_of_leadingCoeff_mul_eq_one (mul_one_div_cancel hg1)
+  have h_fmon : f0.Monic := monic_mul_C_of_leadingCoeff_mul_eq_one (mul_one_div_cancel hf1)
+  have h_div : f0 ∣ g0 := by aesop
+  obtain ⟨e, h_mul, h_resmonic, h_degs⟩ := polynomial_monic_divisor h_fmon h_gmon h_div
+  have h_g0_irr : Irreducible g0 := by aesop
+  have : IsUnit e ∨ IsUnit f0 := h_g0_irr.isUnit_or_isUnit h_mul.symm
   cases this with
   | inl h_isunit =>
     right
     calc
-      f.natDegree = f0.natDegree := h_f0deg.symm
-      _ = 0 + f0.natDegree := (Nat.zero_add f0.natDegree).symm
-      _ = e.natDegree + f0.natDegree := by
-        refine ((fun {m k n} => Nat.add_right_cancel_iff.mpr) ?_).symm
-        exact natDegree_eq_zero_of_isUnit h_isunit
+      f0.natDegree = 0 + f0.natDegree := (Nat.zero_add f0.natDegree).symm
+      _ = e.natDegree + f0.natDegree :=
+        Nat.add_left_inj.mpr (natDegree_eq_zero_of_isUnit h_isunit).symm
       _ = g0.natDegree := h_degs
-      _ = g.natDegree := h_g0deg
   | inr h_isunit =>
     left
-    rw [← h_f0deg]
     exact natDegree_eq_zero_of_isUnit h_isunit
 
 lemma odd_irreducible_factor (h : Odd f.natDegree) :
@@ -177,8 +152,7 @@ lemma odd_irreducible_factor (h : Odd f.natDegree) :
       push Not at this
       obtain ⟨t, ht1, ht2⟩ := this
       unfold Multiset.map at T
-      have : ∃ g ∈ S, g.natDegree = t := Multiset.mem_map.mp ht1
-      obtain ⟨_, _⟩ := this
+      obtain ⟨_, _⟩ := Multiset.mem_map.mp ht1
       grind
     have : 2 ∣ T.sum := by
       apply Multiset.dvd_sum
@@ -193,11 +167,12 @@ lemma odd_irreducible_factor (h : Odd f.natDegree) :
   · exact UniqueFactorizationMonoid.dvd_of_mem_factors hg1
 
 lemma linear_substitution {p : ℕ} [ExpChar F p] {d : ℕ} (a : F) (hd: 1 < d) (hdeg: f.natDegree < d) :
-    let fp := (map (frobenius F p) f).comp (X + C a);
-      fp.natDegree < d ∧ fp.coeff (d-1) = (f.coeff (d-1)) ^ p := by
+  let fp := (map (frobenius F p) f).comp (X + C a);
+    fp.natDegree < d ∧ fp.coeff (d-1) = (f.coeff (d-1)) ^ p := by
   let frob := frobenius F p
   let m := map frob
-  let f_high := (monomial (d-1)) (f.coeff (d-1))
+  let c := f.coeff (d-1)
+  let f_high := monomial (d-1) c
   let f_low := f.erase (d-1)
   have h_sum: f_high + f_low = f := monomial_add_erase f (d-1)
   have h_deg1 : f.natDegree ≤ d-1 := Nat.le_sub_one_of_lt hdeg
@@ -218,24 +193,20 @@ lemma linear_substitution {p : ℕ} [ExpChar F p] {d : ℕ} (a : F) (hd: 1 < d) 
   let fp_high := (m f_high).comp lin
   let fp_low := (m f_low).comp lin
   have h_add : fp = fp_high + fp_low := by
-    have : m f = m f_high + m f_low := by
-      calc
+    have : m f = m f_high + m f_low := by calc
       m f = m (f_high + f_low) := by rw [← h_sum]
       _ = m f_high + m f_low := Polynomial.map_add frob
     calc
     fp = (m f).comp lin := by rfl
     _ = (m f_high + m f_low).comp lin := by rw [this]
     _ = fp_high + fp_low := add_comp
-  let c := f.coeff (d-1)
   have h_highcoeff : fp_high.coeff (d-1) = c^p := by
-    have : fp_high = C (c^p) * lin ^ (d-1) := by
-      calc
-      fp_high = (m (monomial (d-1) (f.coeff (d-1)))).comp lin := by rfl
+    have : fp_high = C (c^p) * lin ^ (d-1) := by calc
+      fp_high = (m (monomial (d-1) c)).comp lin := by rfl
       _ = (monomial (d-1) (frob c)).comp lin := by aesop
       _ = (monomial (d-1) (c^p)).comp lin := ext (congrFun rfl)
-      _ = (C (c^p)) * lin ^ (d-1) := monomial_comp (d-1)
-    have : (lin ^ (d-1)).coeff (d-1) = 1 := by
-      calc
+      _ = C (c^p) * lin ^ (d-1) := monomial_comp (d-1)
+    have : (lin ^ (d-1)).coeff (d-1) = 1 := by calc
       (lin ^ (d-1)).coeff (d-1) = a^(d-1-(d-1)) * ((d-1).choose (d-1) : F) :=
         coeff_X_add_C_pow a (d-1) (d-1)
       _ = (1 : F) := by simp
@@ -245,29 +216,27 @@ lemma linear_substitution {p : ℕ} [ExpChar F p] {d : ℕ} (a : F) (hd: 1 < d) 
     _ = c^p * (lin ^ (d-1)).coeff (d-1) := coeff_C_mul (lin ^ (d-1))
     _ = c^p := by aesop
   calc
-    fp.coeff (d-1) = (fp_high + fp_low).coeff (d-1) := by aesop
-    _ = fp_high.coeff (d-1) + fp_low.coeff (d-1) := coeff_add fp_high fp_low (d-1)
-    _ = fp_high.coeff (d-1) + 0 := by
-      refine add_left_cancel_iff.mpr ?_
-      refine coeff_eq_zero_of_natDegree_lt ?_
-      have h_deg : f_low.natDegree ≤ d-2 := by
-        refine natDegree_le_iff_coeff_eq_zero.mpr ?_
-        intro N hN
-        if h : N = d - 1 then
-          subst N
-          exact erase_same f (d-1)
-        else
+  fp.coeff (d-1) = (fp_high + fp_low).coeff (d-1) := by aesop
+  _ = fp_high.coeff (d-1) + fp_low.coeff (d-1) := coeff_add fp_high fp_low (d-1)
+  _ = fp_high.coeff (d-1) + 0 := by
+    refine add_left_cancel_iff.mpr (coeff_eq_zero_of_natDegree_lt ?_)
+    have h_deg : f_low.natDegree ≤ d-2 := by
+      refine natDegree_le_iff_coeff_eq_zero.mpr ?_
+      intro N hN
+      if h : N = d - 1 then
+        subst N
+        exact erase_same f (d-1)
+      else
+        calc
+        f_low.coeff N = f.coeff N := erase_ne f (d-1) N h
+        _ = 0 := by
+          refine coeff_eq_zero_of_natDegree_lt ?_
           calc
-          f_low.coeff N = f.coeff N := erase_ne f (d-1) N h
-          _ = 0 := by
-            refine coeff_eq_zero_of_natDegree_lt ?_
-            calc
-            f.natDegree ≤ d-1 := h_deg1
-            _ < N := by grind
-      have h_deglow : fp_low.natDegree ≤ d-2 := by calc
-        fp_low.natDegree ≤ f_low.natDegree := h_deg2 f_low
-        _ ≤ d-2 := h_deg
-      refine (Nat.le_pred_iff_lt ?_).mp h_deglow
-      exact Nat.zero_lt_sub_of_lt hd
-    _ = fp_high.coeff (d-1) := by simp
-    _ = c^p := h_highcoeff
+          f.natDegree ≤ d-1 := h_deg1
+          _ < N := by grind
+    calc
+    fp_low.natDegree ≤ f_low.natDegree := h_deg2 f_low
+    _ ≤ d-2 := h_deg
+    _ < d-1 := Nat.sub_succ_lt_self d 1 hd
+  _ = fp_high.coeff (d-1) := by simp
+  _ = c^p := h_highcoeff

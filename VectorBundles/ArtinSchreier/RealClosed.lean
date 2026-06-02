@@ -20,15 +20,15 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
   have hi_pol : i_pol.natDegree = 2 := by
     have : i_pol.natDegree ≤ 2 :=
       let pol := X ^ 2 + C (1 : F)
-      have h_eval : aeval i pol = 0 := by
+      have : aeval i pol = 0 := by
         calc
         aeval i pol = aeval i ((X : Polynomial F) ^ 2) + aeval i (C (1 : F)) := aeval_add i
         _ = i^2 + aeval i (C (1 : F)) := by rw [aeval_X_pow i]
         _ = i^2 + 1 := by
-          refine (add_right_inj (i^2)).mpr ?_
+          apply (add_right_inj (i^2)).mpr
           simp only [map_one]
         _ = 0 := add_eq_zero_iff_eq_neg.mpr h2a
-      have h_div : i_pol ∣ pol := minpoly.dvd_iff.mpr h_eval
+      have h_div : i_pol ∣ pol := minpoly.dvd_iff.mpr this
       have h_mon : pol.Monic := by
         refine monic_X_pow_add_C 1 ?_
         simp
@@ -37,7 +37,7 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
         exact Monic.ne_zero h_mon
       have h_poldeg : pol.natDegree = 2 := natDegree_X_pow_add_C
       le_of_le_of_eq h_leq h_poldeg
-    have h_deg0 : 0 < i_pol.natDegree := minpoly.natDegree_pos h_int
+    have : 0 < i_pol.natDegree := minpoly.natDegree_pos h_int
     have : i_pol.natDegree ≠ 1 :=
       let iota := algebraMap F K
       have hi : ¬ i ∈ iota.range := by
@@ -66,36 +66,27 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
   have issquare: ∀ (x : F), IsSquare x ∨ IsSquare (-x) :=
     quadratic_algebraic_closure_no_i F K h_rank2
   have odd_deg : ∀ {f : Polynomial F}, Odd f.natDegree → ∃ x, f.IsRoot x := by
-    have h_ftog : ∀ f : Polynomial F, Irreducible f → f.natDegree ≤ 2 := by
-      intro f h_irr
-      have hg : ∃ (g : Polynomial F), g.Monic ∧ g.natDegree ∣ finrank F K ∧ g ∣ f := by
-        apply divisor_by_finrank
-        refine Nat.ne_zero_iff_zero_lt.mpr ?_
-        exact Irreducible.natDegree_pos h_irr
-      obtain ⟨g, _, h_gdeg, hdiv⟩ := hg
-      have : g.natDegree ≤ 2 := by
-        calc
-        g.natDegree ≤ finrank F K := Nat.le_of_dvd finrank_pos h_gdeg
-        _ = 2 := h_rank2
-      rw [h_rank2] at h_gdeg
-      have hg1 : g.natDegree = 0 ∨ g.natDegree = f.natDegree :=
-        divisor_of_irreducible_poly hdiv h_irr
-      cases hg1
-      · aesop
-      · simp_all
     intro f h_odd
-    have hg : ∃ g : Polynomial F, Irreducible g ∧ g ∣ f ∧ Odd g.natDegree :=
-      odd_irreducible_factor h_odd
-    obtain ⟨g, hg, h_div, h_oddg⟩ := hg
-    have h_x : ∃ x : F, g.IsRoot x := by
+    obtain ⟨g, hg, h_div, h_oddg⟩ := odd_irreducible_factor h_odd
+    obtain ⟨x, h_x⟩ : ∃ x : F, g.IsRoot x := by
       refine exists_root_of_degree_eq_one ?_
       have h_natgdeg : g.natDegree = 1 := by
-        have : g.natDegree ≤ 2 := h_ftog g hg
+        have : g.natDegree ≤ 2 := by
+          obtain ⟨h, _, h_gdeg, hdiv⟩ : ∃ (h : Polynomial F), h.Monic
+            ∧ h.natDegree ∣ finrank F K ∧ h ∣ g := by
+            apply divisor_by_finrank
+            refine Nat.ne_zero_iff_zero_lt.mpr ?_
+            exact Irreducible.natDegree_pos hg
+          cases divisor_of_irreducible_poly hdiv hg with
+          | inl => aesop
+          | inr h1 => calc
+            g.natDegree = h.natDegree := h1.symm
+            _ ≤ finrank F K := Nat.le_of_dvd finrank_pos h_gdeg
+            _ = 2 := h_rank2
         grind
       calc
       g.degree = g.natDegree := degree_eq_natDegree (Irreducible.ne_zero hg)
       _ = 1 := Nat.cast_eq_one.mpr h_natgdeg
-    obtain ⟨x, h_x⟩ := h_x
     use x
     exact IsRoot.dvd h_x h_div
   have semi: IsSemireal F := by
@@ -106,14 +97,14 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
       unfold IsSquare at hssq
       cases hssq with
       | inl hssq =>
-        obtain ⟨z, hssq⟩ := hssq
+        obtain ⟨z, _⟩ := hssq
         use z
         grind
       | inr hssq =>
         by_cases y = 0
         · use x
           grind
-        · obtain ⟨r, hssq⟩ := hssq
+        · obtain ⟨r, _⟩ := hssq
           specialize h1 (r/y)
           grind
     have hssq: ∀ x : F, IsSumSq x → IsSquare x := by
@@ -134,7 +125,7 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
     by_contra
     have h2 : IsSquare (-1 : F) := hssq (-1) this
     unfold IsSquare at h2
-    obtain ⟨r, h2⟩ := h2
+    obtain ⟨r, _⟩ := h2
     specialize h1 r
     grind
   refine
