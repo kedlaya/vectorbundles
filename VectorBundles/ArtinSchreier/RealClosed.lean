@@ -20,23 +20,12 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
   have hi_pol : i_pol.natDegree = 2 := by
     have : i_pol.natDegree ≤ 2 :=
       let pol := X ^ 2 + C (1 : F)
-      have : aeval i pol = 0 := by
-        calc
-        aeval i pol = aeval i ((X : Polynomial F) ^ 2) + aeval i (C (1 : F)) := aeval_add i
-        _ = i^2 + aeval i (C (1 : F)) := by rw [aeval_X_pow i]
-        _ = i^2 + 1 := by
-          apply (add_right_inj (i^2)).mpr
-          simp only [map_one]
-        _ = 0 := add_eq_zero_iff_eq_neg.mpr h2a
+      have : aeval i pol = 0 := by aesop
       have h_div : i_pol ∣ pol := minpoly.dvd_iff.mpr this
-      have h_mon : pol.Monic := by
-        refine monic_X_pow_add_C 1 ?_
-        simp
-      have h_leq : i_pol.natDegree ≤ pol.natDegree := by
-        apply natDegree_le_of_dvd h_div
-        exact Monic.ne_zero h_mon
-      have h_poldeg : pol.natDegree = 2 := natDegree_X_pow_add_C
-      le_of_le_of_eq h_leq h_poldeg
+      calc
+      i_pol.natDegree ≤ pol.natDegree :=
+        natDegree_le_of_dvd h_div (X_pow_add_C_ne_zero Nat.two_pos 1)
+      _ = 2 := natDegree_X_pow_add_C
     have : 0 < i_pol.natDegree := minpoly.natDegree_pos h_int
     have : i_pol.natDegree ≠ 1 :=
       let iota := algebraMap F K
@@ -51,8 +40,7 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
       minpoly.natDegree_eq_one_iff.mp.mt hi
     grind
   have h_rank2 : finrank F K = 2 := by
-    have h_rel : relfinrank ⊥ F⟮i⟯ = 2 := by
-      calc
+    have h_rel : relfinrank ⊥ F⟮i⟯ = 2 := by calc
       relfinrank ⊥ F⟮i⟯ = finrank F F⟮i⟯ := relfinrank_bot_left F⟮i⟯
       _ = i_pol.natDegree := adjoin.finrank h_int
       _ = 2 := hi_pol
@@ -63,13 +51,13 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
     _ = 2 * finrank F⟮i⟯ K := by rw [h_rel]
     _ = 2 * 1 := by rw [finrank_eq_one_iff_eq_top.mpr h2b]
     _ = 2 := by simp
-  have issquare: ∀ (x : F), IsSquare x ∨ IsSquare (-x) :=
+  have issquare: ∀ x : F, IsSquare x ∨ IsSquare (-x) :=
     quadratic_algebraic_closure_no_i F K h_rank2
   have odd_deg : ∀ {f : Polynomial F}, Odd f.natDegree → ∃ x, f.IsRoot x := by
     intro f h_odd
     obtain ⟨g, hg, h_div, h_oddg⟩ := odd_irreducible_factor h_odd
     obtain ⟨x, h_x⟩ : ∃ x : F, g.IsRoot x := by
-      refine exists_root_of_degree_eq_one ?_
+      apply exists_root_of_degree_eq_one
       have h_natgdeg : g.natDegree = 1 := by
         have : g.natDegree ≤ 2 := by
           obtain ⟨h, _, h_gdeg, hdiv⟩ : ∃ (h : Polynomial F), h.Monic
@@ -90,9 +78,9 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
     use x
     exact IsRoot.dvd h_x h_div
   have semi: IsSemireal F := by
-    have hs: ∀ (x y: F), ∃ z : F, x^2 + y^2 = z^2 := by
+    have hs: ∀ x y: F, ∃ z : F, x^2 + y^2 = z^2 := by
       intro x y
-      have hssq : IsSquare (x ^ 2 + y^2) ∨ IsSquare (-y^2) :=
+      have hssq : IsSquare (x^2 + y^2) ∨ IsSquare (-y^2) :=
         quadratic_algebraic_closure F K h_rank2 x (y^2)
       unfold IsSquare at hssq
       cases hssq with

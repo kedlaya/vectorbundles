@@ -85,12 +85,6 @@ lemma artin_schreier_poly {p : ℕ} (c : F) (hp : Nat.Prime p):
     · exact ne_zero_of_eq_one h4
   · exact monic_of_natDegree_le_of_coeff_eq_one p h2 h4
 
-lemma monic_divisor_of_same_degree (h1: f.Monic) (h2 : g.Monic)
-  (hdiv: f ∣ g) (hdeg: f.natDegree = g.natDegree) : f = g := by
-  obtain ⟨e, h3, _, _⟩ := polynomial_monic_divisor h1 h2 hdiv
-  subst h3
-  simp_all only [dvd_mul_left, Nat.add_eq_right, Monic.natDegree_eq_zero, one_mul]
-
 lemma divisor_of_irreducible_poly (hdiv: f ∣ g) (hirr: Irreducible g) :
   f.natDegree = 0 ∨ f.natDegree = g.natDegree := by
   have hg0 : g ≠ 0 := Irreducible.ne_zero hirr
@@ -192,8 +186,8 @@ lemma linear_substitution {p : ℕ} [ExpChar F p] {d : ℕ} (a : F) (hd: 1 < d) 
     _ < d := Nat.sub_one_lt_of_lt hdeg
   let fp_high := (m f_high).comp lin
   let fp_low := (m f_low).comp lin
-  have h_add : fp = fp_high + fp_low := by
-    have : m f = m f_high + m f_low := by calc
+  have h_add : fp = fp_high + fp_low :=
+    have : m f = m f_high + m f_low := calc
       m f = m (f_high + f_low) := by rw [← h_sum]
       _ = m f_high + m f_low := Polynomial.map_add frob
     calc
@@ -201,12 +195,12 @@ lemma linear_substitution {p : ℕ} [ExpChar F p] {d : ℕ} (a : F) (hd: 1 < d) 
     _ = (m f_high + m f_low).comp lin := by rw [this]
     _ = fp_high + fp_low := add_comp
   have h_highcoeff : fp_high.coeff (d-1) = c^p := by
-    have : fp_high = C (c^p) * lin ^ (d-1) := by calc
+    have : fp_high = C (c^p) * lin ^ (d-1) := calc
       fp_high = (m (monomial (d-1) c)).comp lin := by rfl
       _ = (monomial (d-1) (frob c)).comp lin := by aesop
       _ = (monomial (d-1) (c^p)).comp lin := ext (congrFun rfl)
       _ = C (c^p) * lin ^ (d-1) := monomial_comp (d-1)
-    have : (lin ^ (d-1)).coeff (d-1) = 1 := by calc
+    have : (lin ^ (d-1)).coeff (d-1) = 1 := calc
       (lin ^ (d-1)).coeff (d-1) = a^(d-1-(d-1)) * ((d-1).choose (d-1) : F) :=
         coeff_X_add_C_pow a (d-1) (d-1)
       _ = (1 : F) := by simp

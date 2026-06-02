@@ -15,7 +15,7 @@ public import VectorBundles.ArtinSchreier.ArtinSchreier2
 open IntermediateField IsPurelyInseparable Module Polynomial
 
 variable (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
-  [IsAlgClosure F K] (h : ∃ (i : F), i^2 = -1)
+  [IsAlgClosure F K] (h : ∃ i : F, i^2 = -1)
 
 include h in
 lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAlgClosed F := by
@@ -23,22 +23,19 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
     (expose_names; exact { to_isSeparable := inst_5, to_normal := IsAlgClosure.normal F K })
   have h_ac: IsAlgClosed K := IsAlgClosure.isAlgClosed F
   let G := Gal(K/F)
-  have : Nat.card G = 1 := by
+  have : Fintype.card G = 1 := by
     by_contra
-    let d := Nat.card G
+    let d := Fintype.card G
     obtain ⟨p, hp1, hp1a⟩ : ∃ p : ℕ, Nat.Prime p ∧ p ∣ d := Nat.exists_prime_and_dvd this
-    obtain ⟨g, hg⟩ : ∃ g : G, orderOf g = p := by
-      have : d = Fintype.card G := Nat.card_eq_fintype_card
-      rw [this] at hp1a
+    obtain ⟨g, hg⟩ : ∃ g : G, orderOf g = p :=
       have : Fact (Nat.Prime p) := fact_iff.mpr hp1
-      exact exists_prime_orderOf_dvd_card p hp1a
+      exists_prime_orderOf_dvd_card p hp1a
     let H := Subgroup.zpowers g
     let E := fixedField H
-    have h_ekrank : finrank E K = p := by
-      calc
-        finrank E K = Nat.card H := finrank_fixedField_eq_card H
-        _ = orderOf g := Nat.card_zpowers g
-        _ = p := hg
+    have h_ekrank : finrank E K = p := by calc
+      finrank E K = Nat.card H := finrank_fixedField_eq_card H
+      _ = orderOf g := Nat.card_zpowers g
+      _ = p := hg
     have : IsAlgClosure E K := { isAlgClosed := h_ac, isAlgebraic := isAlgebraic_tower_top }
     have : IsGalois E K := IsGalois.tower_top_intermediateField E
     have hp_is2 : p = 2 := finite_algebraic_closure_cyclic_quadratic E K hp1 h_ekrank
@@ -50,26 +47,24 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
       intro a
       have h_sq1 : IsSquare a ∨ IsSquare (-a) := quadratic_algebraic_closure_no_i E K h_ekrank a
       cases h_sq1 with
-      | inl ha =>
-        exact ha
+      | inl ha => exact ha
       | inr ha =>
         have h_sq2 : IsSquare (-1 : E) := by
           have h1 : (algebraMap F E) (-1 : F) = (-1 : E) := by simp
           rw [← h1]
-          refine IsSquare.map (algebraMap F ↥E) ?_
-          refine (isSquare_iff_exists_sq (-1)).mpr ?_
+          apply IsSquare.map (algebraMap F ↥E)
+          apply (isSquare_iff_exists_sq (-1)).mpr
           obtain ⟨i, hi⟩ := h
           use i
           exact hi.symm
-        have h_sq3 : IsSquare (-1 * -a) := IsSquare.mul h_sq2 ha
+        have : IsSquare (-1 * -a) := IsSquare.mul h_sq2 ha
         simp_all only [neg_mul, one_mul, neg_neg]
     simp_all only [not_true_eq_false, exists_const]
-  have : finrank F K = 1 := by
-    calc
+  have : finrank F K = 1 := by calc
     finrank F K = Nat.card G := (IsGaloisGroup.card_eq_finrank G F K).symm
+    _ = Fintype.card G := Nat.card_eq_fintype_card
     _ = 1 := this
-  have : algebraicClosure F K = ⊥ := by
-    calc
+  have : algebraicClosure F K = ⊥ := by calc
     algebraicClosure F K = ⊤ := (algebraicClosure.eq_top_iff F K).mpr Algebra.IsIntegral.isAlgebraic
     _ = ⊥ := (bot_eq_top_iff_finrank_eq_one.mpr this).symm
   exact (IsAlgClosed.algebraicClosure_eq_bot_iff F K).mp this

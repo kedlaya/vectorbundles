@@ -14,21 +14,8 @@ open IntermediateField Module Polynomial
 variable (F K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
 
 omit [FiniteDimensional F K] in
-lemma finite_extension_degree_one : finrank F K > 1 → ¬ Function.Surjective (algebraMap F K) := by
-  contrapose
-  intro h
-  push Not
-  apply finrank_le_of_rank_le
-  calc
-  Module.rank F K ≤ Module.rank F K + Module.rank F (Algebra.linearMap F K).ker := by
-    apply le_add_of_nonneg_right
-    apply Cardinal.zero_le
-  _ = Module.rank F F := (LinearMap.rank_eq_of_surjective h).symm
-  _ = 1 := CommSemiring.rank_self F
-
-omit [FiniteDimensional F K] in
-lemma fixed_field_of_cyclic_subgroup (g : Gal(K/F)) : ∀ x : K, g x = x →
-  x ∈ fixedField (Subgroup.zpowers g) := by
+lemma fixed_field_of_cyclic_subgroup (g : Gal(K/F)) : ∀ x : K,
+  g x = x → x ∈ fixedField (Subgroup.zpowers g) := by
   intro x hg
   have h1: x ∈ MulAction.fixedBy K g := MulAction.mem_fixedBy.mpr hg
   have h2: ∀ j : ℤ, x ∈ MulAction.fixedBy K (g ^ j) :=
@@ -40,8 +27,9 @@ lemma fixed_field_of_cyclic_subgroup (g : Gal(K/F)) : ∀ x : K, g x = x →
     simp_all
   exact (mem_fixedField_iff (Subgroup.zpowers g) x).mpr h_sub
 
-lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p) (hrank: finrank F K = p)
-  (hchar: ringChar F = p) : ∃ a : F, ∃ x : K, minpoly F x = X ^ p - X - C a := by
+lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
+  (hrank: finrank F K = p) (hchar: ringChar F = p) : ∃ a : F,
+    ∃ x : K, minpoly F x = X ^ p - X - C a := by
   obtain ⟨y, hy⟩ := Set.mem_range.mp (Algebra.trace_surjective F K 1)
   have : CharP K p := (Algebra.charP_iff F K p).mp (ringChar.of_eq hchar)
   let G := Gal(K/F)
@@ -59,8 +47,7 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
   let range := Finset.range p
   let z := ∑ i : range, (g^(i:ℕ)) y * i
   let iota := algebraMap F K
-  have : g z = z - 1 := by
-    calc
+  have : g z = z - 1 := calc
     g z = ∑ i : range, g ((g^(i:ℕ)) y * i) := by apply map_finset_sum
     _ = ∑ i : range, ((g^(i+1:ℕ)) y * (i+1) - (g^(i+1:ℕ)) y) := by
       have : ∀ i : range, g ((g^(i:ℕ)) y * i) = (g^(i+1:ℕ)) y * (i+1) - (g^(i+1:ℕ)) y := by
@@ -72,8 +59,8 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
       apply Finset.sum_congr rfl
       intro x a
       apply this
-    _ = ∑ i : range, (g^(i+1:ℕ)) y * (i+1) - ∑ i : range, (g^(i+1:ℕ)) y :=
-      by apply Finset.sum_sub_distrib
+    _ = ∑ i : range, (g^(i+1:ℕ)) y * (i+1) - ∑ i : range, (g^(i+1:ℕ)) y := by
+      apply Finset.sum_sub_distrib
     _ = z - 1 := by
       have h1 : z = ∑ i : range, (g^(i+1:ℕ)) y * (i+1) := by
         have hp1 : p-1 + 1 = p := Nat.succ_pred_prime hp
@@ -89,8 +76,7 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
         _ = ∑ i ∈ range, f (i+1) := by rw [hp1]
         _ = ∑ i : range, f (i+1) := Finset.sum_subtype (range) (fun x => Iff.of_eq rfl) f1
         _ = ∑ i : range, (g^(i+1:ℕ)) y * (i+1) := by simp [f]
-      have h2 : ∑ i : range, (g^(i+1:ℕ)) y = 1 := by
-        calc
+      have h2 : ∑ i : range, (g^(i+1:ℕ)) y = 1 := calc
         ∑ i : range, (g^(i+1:ℕ)) y = ∑ σ : G, σ y := by
           let f : range → G := fun i => g ^ (i+1:ℕ)
           have h_bij: Function.Bijective f := by
@@ -108,13 +94,13 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
               obtain ⟨i, hb1, hb2⟩ := this
               use i, hb1
               calc
-                g ^ (i+1:ℕ) = g * (g ^ (i:ℕ)) := pow_succ' g i
-                _ = g * (g ^ (-1:ℤ) * b) := by rw [hb2]
-                _ = b := by simp
+              g ^ (i+1:ℕ) = g * (g ^ (i:ℕ)) := pow_succ' g i
+              _ = g * (g ^ (-1:ℤ) * b) := by rw [hb2]
+              _ = b := by simp
             · calc
-                Nat.card ↥range = Finset.card range := Nat.card_eq_finsetCard range
-                _ = p := Finset.card_range p
-                _ = Nat.card G := h_ord.symm
+              Nat.card ↥range = Finset.card range := Nat.card_eq_finsetCard range
+              _ = p := Finset.card_range p
+              _ = Nat.card G := h_ord.symm
           apply Finset.sum_bijective f h_bij
           · simp
           · simp [f]
@@ -122,24 +108,23 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
         _ = iota 1 := by rw [hy]
         _ = 1 := algebraMap.coe_one
       rw [h1, h2]
-  obtain ⟨a, ha⟩ : ∃ a : F, iota a = z^p - z := by
-    let b := z^p - z
-    have hb : g b = b := by
-      calc
-        g b = g (z^p - z) := AlgEquiv.congr_fun rfl b
-        _ = g (z^p) - g z := map_sub g (z ^ p) z
-        _ = (g z) ^ p - g z := sub_left_inj.mpr (map_pow g z p)
-        _ = (z - 1)^p - (z - 1) := by rw [this]
-        _ = z^p - 1^p - (z - 1) := sub_left_inj.mpr (sub_pow_char z 1)
-        _ = z^p - 1 - (z - 1) := by simp
-        _ = b := sub_sub_sub_cancel_right (z ^ p) z 1
+  let b := z^p - z
+  obtain ⟨a, ha⟩ : ∃ a : F, iota a = b := by
+    have hb : g b = b := calc
+      g b = g (z^p - z) := AlgEquiv.congr_fun rfl b
+      _ = g (z^p) - g z := map_sub g (z ^ p) z
+      _ = (g z) ^ p - g z := sub_left_inj.mpr (map_pow g z p)
+      _ = (z - 1)^p - (z - 1) := by rw [this]
+      _ = z^p - 1^p - (z - 1) := sub_left_inj.mpr (sub_pow_char z 1)
+      _ = z^p - 1 - (z - 1) := by simp
+      _ = b := sub_sub_sub_cancel_right (z ^ p) z 1
     have : b ∈ fixedField (Subgroup.zpowers g) := fixed_field_of_cyclic_subgroup F K g b hb
     aesop
   use a, z
   let pol := X ^ p - X - C a
   obtain ⟨h_pdeg, h_mon⟩ := artin_schreier_poly a hp
   have h_eval : aeval z pol = 0 := by aesop
-  have h_int: IsIntegral F z := Algebra.IsIntegral.isIntegral z
+  have h_int : IsIntegral F z := Algebra.IsIntegral.isIntegral z
   have h_mpdeg : (minpoly F z).natDegree = p := by
     have h : (minpoly F z).natDegree ∣ finrank F K := minpoly.degree_dvd h_int
     have : (minpoly F z).natDegree = 1 ∨ (minpoly F z).natDegree = p := by
@@ -150,12 +135,9 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
     have h_tmp1 : z ∈ iota.range := minpoly.natDegree_eq_one_iff.mp this
     have : g z = z := (IsGalois.mem_range_algebraMap_iff_fixed z).mp h_tmp1 g
     grind
-  apply monic_divisor_of_same_degree
-  · exact minpoly.monic h_int
-  · apply h_mon
-  · exact minpoly.dvd_iff.mpr h_eval
-  · rw [h_mpdeg]
-    exact h_pdeg.symm
+  have h := polynomial_monic_divisor (minpoly.monic h_int) h_mon (minpoly.dvd_iff.mpr h_eval)
+  obtain ⟨e, h, _⟩ := h
+  aesop
 
 lemma finite_inseparable_extension_data [IsPurelyInseparable F K] (h: 1 < finrank F K) :
   Nat.Prime (ringChar F) ∧ ∃ n : ℕ, finrank F K = (ringChar F) ^ n := by
@@ -186,10 +168,8 @@ lemma nonsquare_in_quadratic_extension (hrank: finrank F K = 2) (hchar: ringChar
     use -1
     subst rk
     rw [hrank]
-    refine (mem_primitiveRoots ?_).mpr ?_
-    constructor
-    · exact Nat.le.refl
-    · exact IsPrimitiveRoot.neg_one (ringChar F) hchar
+    apply (mem_primitiveRoots Nat.two_pos).mpr
+    exact IsPrimitiveRoot.neg_one (ringChar F) hchar
   have : Algebra.IsSeparable F K :=
     let d := Field.finInsepDegree F K
     let e := Field.finSepDegree F K
