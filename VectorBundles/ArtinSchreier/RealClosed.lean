@@ -21,7 +21,7 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
     have : i_pol.natDegree ≤ 2 :=
       let pol := X ^ 2 + C (1 : F)
       have : aeval i pol = 0 := by aesop
-      have h_div : i_pol ∣ pol := minpoly.dvd_iff.mpr this
+      have h_div := minpoly.dvd_iff.mpr this
       calc
       i_pol.natDegree ≤ pol.natDegree :=
         natDegree_le_of_dvd h_div (X_pow_add_C_ne_zero Nat.two_pos 1)
@@ -33,14 +33,14 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
         by_contra
         obtain ⟨j, hj⟩ := this
         have : j^2 = -1 := by
-          have : iota (j ^ 2) = iota (-1) := by grind
+          have : iota (j ^ 2) = iota (-1) := by grind only [= map_pow, = map_neg, = map_one]
           have : Function.Injective iota := FaithfulSMul.algebraMap_injective F K
-          grind
+          grind only
         simp_all only
       minpoly.natDegree_eq_one_iff.mp.mt hi
-    grind
-  have h_rank2 : finrank F K = 2 := by
-    have h_rel : relfinrank ⊥ F⟮i⟯ = 2 := by calc
+    grind only
+  have h_rank2 :=
+    have h_rel := calc
       relfinrank ⊥ F⟮i⟯ = finrank F F⟮i⟯ := relfinrank_bot_left F⟮i⟯
       _ = i_pol.natDegree := adjoin.finrank h_int
       _ = 2 := hi_pol
@@ -48,11 +48,9 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
     finrank F K = finrank (⊥: IntermediateField F K) K := finrank_bot'.symm
     _ = relfinrank ⊥ F⟮i⟯ * finrank F⟮i⟯ K :=
       (relfinrank_mul_finrank_top (OrderBot.bot_le F⟮i⟯)).symm
-    _ = 2 * finrank F⟮i⟯ K := by rw [h_rel]
-    _ = 2 * 1 := by rw [finrank_eq_one_iff_eq_top.mpr h2b]
+    _ = 2 * 1 := by rw [h_rel, finrank_eq_one_iff_eq_top.mpr h2b]
     _ = 2 := by simp
-  have issquare: ∀ x : F, IsSquare x ∨ IsSquare (-x) :=
-    quadratic_algebraic_closure_no_i F K h_rank2
+  have issquare := quadratic_algebraic_closure_no_i F K h_rank2
   have odd_deg : ∀ {f : Polynomial F}, Odd f.natDegree → ∃ x, f.IsRoot x := by
     intro f h_odd
     obtain ⟨g, hg, h_div, h_oddg⟩ := odd_irreducible_factor h_odd
@@ -60,41 +58,37 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
       apply exists_root_of_degree_eq_one
       have h_natgdeg : g.natDegree = 1 := by
         have : g.natDegree ≤ 2 := by
-          obtain ⟨h, _, h_gdeg, hdiv⟩ : ∃ (h : Polynomial F), h.Monic
+          obtain ⟨h, _, h_gdeg, hdiv⟩ : ∃ h : Polynomial F, h.Monic
             ∧ h.natDegree ∣ finrank F K ∧ h ∣ g := by
             apply divisor_by_finrank
-            refine Nat.ne_zero_iff_zero_lt.mpr ?_
-            exact Irreducible.natDegree_pos hg
+            exact Nat.ne_zero_iff_zero_lt.mpr (Irreducible.natDegree_pos hg)
           cases divisor_of_irreducible_poly hdiv hg with
           | inl => aesop
           | inr h1 => calc
             g.natDegree = h.natDegree := h1.symm
             _ ≤ finrank F K := Nat.le_of_dvd finrank_pos h_gdeg
             _ = 2 := h_rank2
-        grind
-      calc
-      g.degree = g.natDegree := degree_eq_natDegree (Irreducible.ne_zero hg)
-      _ = 1 := Nat.cast_eq_one.mpr h_natgdeg
+        grind only [= Nat.odd_iff]
+      exact (Polynomial.degree_eq_iff_natDegree_eq_of_pos (Nat.zero_lt_succ 0)).mpr h_natgdeg
     use x
     exact IsRoot.dvd h_x h_div
   have semi: IsSemireal F := by
     have hs: ∀ x y: F, ∃ z : F, x^2 + y^2 = z^2 := by
       intro x y
-      have hssq : IsSquare (x^2 + y^2) ∨ IsSquare (-y^2) :=
-        quadratic_algebraic_closure F K h_rank2 x (y^2)
+      have hssq := quadratic_algebraic_closure F K h_rank2 x (y^2)
       unfold IsSquare at hssq
       cases hssq with
       | inl hssq =>
         obtain ⟨z, _⟩ := hssq
         use z
-        grind
+        grind only
       | inr hssq =>
         by_cases y = 0
         · use x
-          grind
+          grind only
         · obtain ⟨r, _⟩ := hssq
           specialize h1 (r/y)
-          grind
+          grind => ring
     have hssq: ∀ x : F, IsSumSq x → IsSquare x := by
       intro x hx
       unfold IsSquare
@@ -111,11 +105,11 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
           exact hr
     rw [isSemireal_iff_not_isSumSq_neg_one]
     by_contra
-    have h2 : IsSquare (-1 : F) := hssq (-1) this
+    have h2 := hssq (-1) this
     unfold IsSquare at h2
     obtain ⟨r, _⟩ := h2
     specialize h1 r
-    grind
+    grind only
   refine
     { toIsSemireal := semi, isSquare_or_isSquare_neg := issquare,
        exists_isRoot_of_odd_natDegree := odd_deg }

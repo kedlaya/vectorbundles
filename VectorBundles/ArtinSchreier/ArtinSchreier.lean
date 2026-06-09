@@ -21,10 +21,7 @@ lemma divisor_by_finrank {f : Polynomial F} (hf : f.natDegree ≠ 0) :
     exact FaithfulSMul.algebraMap_injective F K
   use minpoly F c
   have h_int : IsIntegral F c := Algebra.IsIntegral.isIntegral c
-  refine ⟨?_, ?_, ?_⟩
-  · exact minpoly.monic h_int
-  · exact minpoly.degree_dvd h_int
-  · exact minpoly.dvd_iff.mpr hc
+  open minpoly in exact ⟨monic h_int, degree_dvd h_int, dvd_iff.mpr hc⟩
 
 include h in
 lemma quadratic_algebraic_closure : ∀ (a b : F), IsSquare (a^2+b) ∨ IsSquare (-b) := by
@@ -60,7 +57,7 @@ lemma quadratic_algebraic_closure : ∀ (a b : F), IsSquare (a^2+b) ∨ IsSquare
       intro h h0
       obtain ⟨f, _, _, _⟩ := divisor_by_finrank F K h0
       have h_fdeg : f.natDegree = 1 ∨ f.natDegree = 2 :=
-        have : f.natDegree ∣ 2 := by grind
+        have : f.natDegree ∣ 2 := by grind only
         (Nat.dvd_prime Nat.prime_two).mp this
       use f
     obtain ⟨f, h_fmon, h_fdeg, h_div⟩ := h_divh g hg0
@@ -102,7 +99,7 @@ lemma quadratic_algebraic_closure : ∀ (a b : F), IsSquare (a^2+b) ∨ IsSquare
   have : f.coeff 0 + e.coeff 1 * f.coeff 1 + e.coeff 0 = -2*a := by
     specialize h_prod 2
     simp [Finset.antidiagonal] at h_prod
-    grind
+    grind only
   have : e.coeff 1 + f.coeff 1 = 0 := by
     specialize h_prod 3
     simp [Finset.antidiagonal] at h_prod
@@ -111,13 +108,13 @@ lemma quadratic_algebraic_closure : ∀ (a b : F), IsSquare (a^2+b) ∨ IsSquare
   if f.coeff 1 = 0 then
     right
     use f.coeff 0 + a
-    have : e.coeff 0 = - f.coeff 0 - 2*a := by grind
+    have : e.coeff 0 = - f.coeff 0 - 2*a := by grind => ring
     simp_all
-    grind
+    grind => ring
   else
     left
     use f.coeff 0
-    grind
+    grind => ring
 
 include h in
 lemma quadratic_algebraic_closure_no_i : ∀ (a : F), IsSquare a ∨ IsSquare (-a) := by

@@ -15,37 +15,31 @@ theorem artin_schreier_thm (F : Type) (K : Type)
   [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
     [IsAlgClosure F K] : IsAlgClosed F ∨ IsRealClosed F := by
   have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
-  let iota := algebraMap F K
-  obtain ⟨i, hi⟩: ∃ i : K, i^2 = -1 := by
-    apply IsAlgClosed.exists_pow_nat_eq
-    simp -- to prove 0 < 2
-  let F₁ := F⟮i⟯
-  have : IsAlgClosure F₁ K := by apply IsAlgClosure.ofAlgebraic F₁ K
-  have : IsAlgClosed F₁ := by
-    apply finite_algebraic_closure_with_i F₁ K
-    have : i ∈ F₁ := mem_adjoin_simple_self F i
-    let iota₁ := algebraMap F₁ K
-    obtain ⟨j, hj⟩ : ∃ j : F₁, iota₁ j = i := CanLift.prf i this
-    use j
-    apply FaithfulSMul.algebraMap_injective (↥F₁) K
-    aesop
   if hF : ∃ j : F, j^2 = -1 then
     left
     apply finite_algebraic_closure_with_i F K hF
   else
     right
-    apply RealClosed_from_quadratic F K
-    · push Not at hF
-      exact hF
-    · use i
-      refine ⟨hi, (ext ?_).symm⟩
-      intro x
-      constructor
-      · intro hx
-        have : (minpoly F₁ x).degree = 1 :=
-          have hirr : Irreducible (minpoly F₁ x) := minpoly.irreducible (Algebra.IsIntegral.isIntegral x)
-          IsAlgClosed.degree_eq_one_of_irreducible (↥F₁) hirr
-        refine IsIntegral.mem_intermediateField_of_minpoly_splits ?_ ?_
-        · exact Algebra.IsIntegral.isIntegral x
-        · exact IsAlgClosed.splits (Polynomial.map (algebraMap F ↥F⟮i⟯) (minpoly F x))
-      · exact fun a ↦ mem_top
+    push Not at hF
+    let iota := algebraMap F K
+    obtain ⟨i, hi⟩: ∃ i : K, i^2 = -1 := by
+      apply IsAlgClosed.exists_pow_nat_eq
+      simp -- to prove 0 < 2
+    apply RealClosed_from_quadratic F K hF
+    use i
+    refine ⟨hi, (ext ?_).symm⟩
+    intro x
+    constructor
+    · intro hx
+      let F₁ := F⟮i⟯
+      have : IsAlgClosure F₁ K := by apply IsAlgClosure.ofAlgebraic F₁ K
+      have : IsAlgClosed F₁ := by
+        apply finite_algebraic_closure_with_i F₁ K
+        aesop
+      have : (minpoly F₁ x).degree = 1 :=
+        have hirr : Irreducible (minpoly F₁ x) := minpoly.irreducible (Algebra.IsIntegral.isIntegral x)
+        IsAlgClosed.degree_eq_one_of_irreducible (↥F₁) hirr
+      refine IsIntegral.mem_intermediateField_of_minpoly_splits ?_ ?_
+      · exact Algebra.IsIntegral.isIntegral x
+      · exact IsAlgClosed.splits (Polynomial.map (algebraMap F ↥F⟮i⟯) (minpoly F x))
+    · exact fun a ↦ mem_top
