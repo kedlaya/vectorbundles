@@ -10,42 +10,18 @@ open Polynomial
 
 variable {F : Type} [Field F] {f g h: Polynomial F}
 
-lemma monic_division (h1: f.Monic) (h2 : f ∣ g) : (g /ₘ f) * f = g :=
-  let e := g /ₘ f
-  calc
-    e * f = f * e := CommMonoid.mul_comm e f
-    _ = 0 + f * e := Eq.symm (AddZeroClass.zero_add (f * e))
-    _ = g %ₘ f + f * e := by rw [(modByMonic_eq_zero_iff_dvd h1).mpr h2]
-    _ = g := modByMonic_add_div g f
-
 lemma polynomial_monic_divisor (h1 : f.Monic) (h2 : g.Monic) (h3 : f ∣ g):
   ∃ (e : Polynomial F), e * f = g ∧ e.Monic ∧ e.natDegree + f.natDegree = g.natDegree := by
-  let e := g /ₘ f
+  obtain ⟨e, h3⟩ := exists_eq_mul_left_of_dvd h3
   use e
-  have h4 := monic_division h1 h3
-  have h5 : e.Monic := by
-    apply Monic.def.mpr
-    calc
-    e.leadingCoeff = g.leadingCoeff :=
-      leadingCoeff_divByMonic_of_monic h1 (degree_le_of_dvd h3 (Monic.ne_zero h2))
+  have := calc
+    e.leadingCoeff = (e * f).leadingCoeff := (leadingCoeff_mul_monic h1).symm
+    _ = g.leadingCoeff := by rw [h3]
     _ = 1 := Monic.def.mp h2
-  refine ⟨h4, h5, ?_⟩
-  rw [← h4]
-  exact (Monic.natDegree_mul h5 h1).symm
-
-lemma congruence_low_degree (h1 : h ∣ (f-g)) (h2 : f.natDegree < h.natDegree)
-  (h3 : g.natDegree < h.natDegree) (h4: h.Monic) : f = g := by
-  have := calc
-    (f-g).natDegree ≤ max f.natDegree g.natDegree := natDegree_sub_le f g
-    _ < h.natDegree := max_lt_iff.mpr ⟨h2, h3⟩
-  have := degree_lt_degree this
-  have h5 := (divByMonic_eq_zero_iff h4).mpr this
-  have h6 := (modByMonic_eq_zero_iff_dvd h4).mpr h1
-  have := calc
-    f - g = (f-g) %ₘ h + h * ((f-g) /ₘ h) := (modByMonic_add_div (f-g) h).symm
-    _ = 0 + h * 0 := by rw [h6, h5]
-    _ = 0 := by ring
-  grind only
+  have h4 : e.Monic := Monic.def.mpr this
+  refine ⟨h3.symm, h4, ?_⟩
+  rw [h3]
+  exact (Monic.natDegree_mul h4 h1).symm
 
 lemma artin_schreier_poly {p : ℕ} (c : F) (hp : Nat.Prime p):
   (X ^ p - X - C c).natDegree = p ∧ (X ^ p - X - C c).Monic := by
@@ -69,41 +45,34 @@ lemma artin_schreier_poly {p : ℕ} (c : F) (hp : Nat.Prime p):
 
 lemma divisor_of_irreducible_poly (hdiv: f ∣ g) (hirr: Irreducible g) :
   f.natDegree = 0 ∨ f.natDegree = g.natDegree := by
-  have hg0 : g ≠ 0 := Irreducible.ne_zero hirr
-  have hg1 : g.leadingCoeff ≠ 0 := leadingCoeff_ne_zero.mpr hg0
-  let g0 := g * C (1 / g.leadingCoeff)
-  have h_g0deg : g0.natDegree = g.natDegree := natDegree_mul_C (one_div_ne_zero hg1)
-  have hf0 : f ≠ 0 := ne_zero_of_dvd_ne_zero hg0 hdiv
-  have hf1 : f.leadingCoeff ≠ 0 := leadingCoeff_ne_zero.mpr hf0
-  let f0 := f * C (1 / f.leadingCoeff)
-  have h_f0deg : f0.natDegree = f.natDegree := natDegree_mul_C (one_div_ne_zero hf1)
-  rw [←h_f0deg, ←h_g0deg]
-  have h_gmon : g0.Monic := monic_mul_C_of_leadingCoeff_mul_eq_one (mul_one_div_cancel hg1)
-  have h_fmon : f0.Monic := monic_mul_C_of_leadingCoeff_mul_eq_one (mul_one_div_cancel hf1)
-  have h_div : f0 ∣ g0 := by aesop
-  obtain ⟨e, h_mul, h_resmonic, h_degs⟩ := polynomial_monic_divisor h_fmon h_gmon h_div
-  have h_g0_irr : Irreducible g0 := by aesop
-  have : IsUnit e ∨ IsUnit f0 := h_g0_irr.isUnit_or_isUnit h_mul.symm
+  obtain ⟨e, h3⟩ := exists_eq_mul_left_of_dvd hdiv
+  have := Irreducible.isUnit_or_isUnit hirr h3
   cases this with
   | inl h_isunit =>
     right
+    have : e * f ≠ 0 := by
+      rw [← h3]
+      exact Irreducible.ne_zero hirr
+    have := mul_ne_zero_iff.mp this
     calc
-      f0.natDegree = 0 + f0.natDegree := (Nat.zero_add f0.natDegree).symm
-      _ = e.natDegree + f0.natDegree :=
+      f.natDegree = 0 + f.natDegree := (Nat.zero_add f.natDegree).symm
+      _ = e.natDegree + f.natDegree :=
         Nat.add_left_inj.mpr (natDegree_eq_zero_of_isUnit h_isunit).symm
-      _ = g0.natDegree := h_degs
+      _ = (e * f).natDegree := (natDegree_mul this.1 this.2).symm
+      _ = g.natDegree := by rw [h3]
   | inr h_isunit =>
     left
     exact natDegree_eq_zero_of_isUnit h_isunit
 
 lemma odd_irreducible_factor (h : Odd f.natDegree) :
   ∃ (g : Polynomial F), Irreducible g ∧ g ∣ f ∧ Odd g.natDegree := by
+  open UniqueFactorizationMonoid in
   have : f ≠ 0 := by
     obtain ⟨_, _⟩ := h
     have : f.natDegree > 0 := by linarith
     exact ne_zero_of_natDegree_gt this
-  let S := UniqueFactorizationMonoid.factors f
-  have h_prod : Associated f S.prod := Associated.symm (UniqueFactorizationMonoid.factors_prod this)
+  let S := factors f
+  have h_prod : Associated f S.prod := Associated.symm (factors_prod this)
   have h0S : 0 ∉ S := by
     by_contra
     rw [Multiset.prod_eq_zero this] at h_prod
@@ -126,8 +95,7 @@ lemma odd_irreducible_factor (h : Odd f.natDegree) :
     grind only [= Nat.odd_iff]
   obtain ⟨g, hg1, hg2⟩ := this
   use g
-  open UniqueFactorizationMonoid in
-    exact ⟨irreducible_of_factor g hg1, dvd_of_mem_factors hg1, hg2⟩
+  exact ⟨irreducible_of_factor g hg1, dvd_of_mem_factors hg1, hg2⟩
 
 lemma linear_substitution {p : ℕ} [ExpChar F p] {d : ℕ} (a : F) (hd: 1 < d) (hdeg: f.natDegree < d) :
   let fp := (map (frobenius F p) f).comp (X + C a);
@@ -156,7 +124,7 @@ lemma linear_substitution {p : ℕ} [ExpChar F p] {d : ℕ} (a : F) (hd: 1 < d) 
   let fp_high := (m f_high).comp lin
   let fp_low := (m f_low).comp lin
   have h_add :=
-    have : m f = m f_high + m f_low := calc
+    have := calc
       m f = m (f_high + f_low) := by rw [← h_sum]
       _ = m f_high + m f_low := Polynomial.map_add frob
     calc

@@ -17,16 +17,14 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
   obtain ⟨i, h2a, h2b⟩ := h2
   have h_int : IsIntegral F i := Algebra.IsIntegral.isIntegral i
   let i_pol := minpoly F i
-  have hi_pol : i_pol.natDegree = 2 := by
-    have : i_pol.natDegree ≤ 2 :=
-      let pol := X ^ 2 + C (1 : F)
-      have : aeval i pol = 0 := by aesop
-      have h_div := minpoly.dvd_iff.mpr this
+  have hi_pol : i_pol.natDegree = 2 := by open minpoly in
+    have :=
+      have : aeval i (X ^ 2 + C (1 : F)) = 0 := by aesop
       calc
-      i_pol.natDegree ≤ pol.natDegree :=
-        natDegree_le_of_dvd h_div (X_pow_add_C_ne_zero Nat.two_pos 1)
+      i_pol.natDegree ≤ (X ^ 2 + C (1 : F)).natDegree :=
+        natDegree_le_of_dvd (dvd_iff.mpr this) (X_pow_add_C_ne_zero Nat.two_pos 1)
       _ = 2 := natDegree_X_pow_add_C
-    have : 0 < i_pol.natDegree := minpoly.natDegree_pos h_int
+    have : 0 < i_pol.natDegree := natDegree_pos h_int
     have : i_pol.natDegree ≠ 1 :=
       let iota := algebraMap F K
       have hi : ¬ i ∈ iota.range := by
@@ -34,34 +32,27 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
         obtain ⟨j, hj⟩ := this
         have : j^2 = -1 := by
           have : iota (j ^ 2) = iota (-1) := by grind only [= map_pow, = map_neg, = map_one]
-          have : Function.Injective iota := FaithfulSMul.algebraMap_injective F K
+          have := FaithfulSMul.algebraMap_injective F K
           grind only
         simp_all only
-      minpoly.natDegree_eq_one_iff.mp.mt hi
+      natDegree_eq_one_iff.mp.mt hi
     grind only
-  have h_rank2 :=
-    have h_rel := calc
-      relfinrank ⊥ F⟮i⟯ = finrank F F⟮i⟯ := relfinrank_bot_left F⟮i⟯
-      _ = i_pol.natDegree := adjoin.finrank h_int
-      _ = 2 := hi_pol
-    calc
+  have h_rank2 := calc
     finrank F K = finrank (⊥: IntermediateField F K) K := finrank_bot'.symm
     _ = relfinrank ⊥ F⟮i⟯ * finrank F⟮i⟯ K :=
       (relfinrank_mul_finrank_top (OrderBot.bot_le F⟮i⟯)).symm
-    _ = 2 * 1 := by rw [h_rel, finrank_eq_one_iff_eq_top.mpr h2b]
+    _ = 2 * 1 := by rw [relfinrank_bot_left F⟮i⟯, adjoin.finrank h_int, hi_pol,
+      finrank_eq_one_iff_eq_top.mpr h2b]
     _ = 2 := by simp
   have issquare := quadratic_algebraic_closure_no_i F K h_rank2
   have odd_deg : ∀ {f : Polynomial F}, Odd f.natDegree → ∃ x, f.IsRoot x := by
     intro f h_odd
     obtain ⟨g, hg, h_div, h_oddg⟩ := odd_irreducible_factor h_odd
-    obtain ⟨x, h_x⟩ : ∃ x : F, g.IsRoot x := by
-      apply exists_root_of_degree_eq_one
+    obtain ⟨x, h_x⟩ :=
       have h_natgdeg : g.natDegree = 1 := by
         have : g.natDegree ≤ 2 := by
-          obtain ⟨h, _, h_gdeg, hdiv⟩ : ∃ h : Polynomial F, h.Monic
-            ∧ h.natDegree ∣ finrank F K ∧ h ∣ g := by
-            apply divisor_by_finrank
-            exact Nat.ne_zero_iff_zero_lt.mpr (Irreducible.natDegree_pos hg)
+          obtain ⟨h, _, h_gdeg, hdiv⟩ :=
+            divisor_by_finrank F K (Nat.ne_zero_iff_zero_lt.mpr (Irreducible.natDegree_pos hg))
           cases divisor_of_irreducible_poly hdiv hg with
           | inl => aesop
           | inr h1 => calc
@@ -69,19 +60,17 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
             _ ≤ finrank F K := Nat.le_of_dvd finrank_pos h_gdeg
             _ = 2 := h_rank2
         grind only [= Nat.odd_iff]
-      exact (Polynomial.degree_eq_iff_natDegree_eq_of_pos (Nat.zero_lt_succ 0)).mpr h_natgdeg
+      have := (Polynomial.degree_eq_iff_natDegree_eq_of_pos (Nat.zero_lt_succ 0)).mpr h_natgdeg
+      exists_root_of_degree_eq_one this
     use x
     exact IsRoot.dvd h_x h_div
-  have semi: IsSemireal F := by
-    have hs: ∀ x y: F, ∃ z : F, x^2 + y^2 = z^2 := by
+  have semi : IsSemireal F := by
+    have hs: ∀ x y: F, ∃ z : F, x * x + y * y = z * z := by
       intro x y
-      have hssq := quadratic_algebraic_closure F K h_rank2 x (y^2)
+      have hssq := quadratic_algebraic_closure F K h_rank2 x (y * y)
       unfold IsSquare at hssq
       cases hssq with
-      | inl hssq =>
-        obtain ⟨z, _⟩ := hssq
-        use z
-        grind only
+      | inl hssq => exact hssq
       | inr hssq =>
         by_cases y = 0
         · use x
@@ -99,17 +88,12 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
       | sq_add y _ hz =>
           rcases hz with ⟨z, hz⟩
           subst hz
-          obtain ⟨r, hr⟩ := hs y z
-          use r
-          ring_nf
-          exact hr
+          exact hs y z
     rw [isSemireal_iff_not_isSumSq_neg_one]
     by_contra
-    have h2 := hssq (-1) this
-    unfold IsSquare at h2
-    obtain ⟨r, _⟩ := h2
+    obtain ⟨r, _⟩ := hssq (-1) this
     specialize h1 r
     grind only
   refine
     { toIsSemireal := semi, isSquare_or_isSquare_neg := issquare,
-       exists_isRoot_of_odd_natDegree := odd_deg }
+      exists_isRoot_of_odd_natDegree := odd_deg }
