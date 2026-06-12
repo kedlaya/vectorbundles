@@ -4,7 +4,6 @@ public import Mathlib.FieldTheory.KummerExtension
 public import Mathlib.LinearAlgebra.FreeModule.PID
 public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 public import Mathlib.RingTheory.Trace.Basic
-public import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 
 public import VectorBundles.ArtinSchreier.Polynomials
 
@@ -17,25 +16,22 @@ variable (F K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
 lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
   (hrank: finrank F K = p) (hchar: ringChar F = p) : ∃ a : F,
     ∃ x : K, minpoly F x = X ^ p - X - C a := by
-  open minpoly in
-  obtain ⟨y, hy⟩ := Set.mem_range.mp (Algebra.trace_surjective F K 1)
   have := (Algebra.charP_iff F K p).mp (ringChar.of_eq hchar)
   let G := Gal(K/F)
-  have h_ord := calc
-    Nat.card G = finrank F K := IsGalois.card_aut_eq_finrank F K
-    _  = p := hrank
+  have h_ord := IsGalois.card_aut_eq_finrank F K
+  rw [hrank] at h_ord
   have := fact_iff.mpr hp
   have := isCyclic_of_prime_card h_ord
   obtain ⟨g, h_gen⟩ := isCyclic_iff_exists_zpowers_eq_top.mp this
-  have h_ordg := calc
-    orderOf g = Nat.card G := orderOf_eq_card_of_zpowers_eq_top h_gen
-    _ = p := h_ord
+  have h_ordg := orderOf_eq_card_of_zpowers_eq_top h_gen
+  rw [h_ord] at h_ordg
   let range := Finset.range p
+  obtain ⟨y, hy⟩ := Set.mem_range.mp (Algebra.trace_surjective F K 1)
   let z := ∑ i : range, (g^(i:ℕ)) y * i
   have : g z = z - 1 := calc
     g z = ∑ i : range, g ((g^(i:ℕ)) y * i) := by apply map_finset_sum
     _ = ∑ i : range, (g * (g^(i:ℕ))) y * i := by
-      simp_all only [map_mul, map_natCast, AlgEquiv.mul_apply, G]
+      simp_all only [map_mul, map_natCast, AlgEquiv.mul_apply]
     _ = ∑ i : range, (g^(i+1:ℕ)) y * i := by
       apply Finset.sum_congr rfl
       intro i _
@@ -46,7 +42,7 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
     _ = z - ∑ i : range, (g^(i+1:ℕ)) y := by
       apply sub_left_inj.mpr
       have hp1 : p - 1 + 1 = p := Nat.succ_pred_prime hp
-      let f (i : ℕ) : K := (g^i) y * i
+      let f := fun (i : ℕ) ↦ (g^i) y * i
       let f1 := fun i ↦ f (i+1)
       calc
       ∑ i : range, (g^(i+1:ℕ)) y * (i+1) = ∑ i : range, f (i+1) := by simp [f]
@@ -63,7 +59,7 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
       calc
       ∑ i : range, (g^(i+1:ℕ)) y = ∑ σ : G, σ y := by
         let f : range → G := fun i ↦ g ^ (i+1:ℕ)
-        have h_bij : Function.Bijective f := by
+        have : Function.Bijective f := by
           apply (Nat.bijective_iff_surjective_and_card f).mpr
           constructor
           · intro b
@@ -78,13 +74,11 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
             obtain ⟨i, hb1, hb2⟩ := this
             use i, hb1
             simp [pow_succ' g i, hb2]
-          · calc
-            Nat.card ↥range = Finset.card range := Nat.card_eq_finsetCard range
-            _ = p := Finset.card_range p
-            _ = Nat.card G := h_ord.symm
-        apply Finset.sum_bijective f h_bij
+          · rw [Nat.card_eq_finsetCard range, Finset.card_range p, ←h_ord]
+        apply Finset.sum_bijective f this
         · simp
-        · simp [f]
+        · intro i _
+          rfl
       _ = (algebraMap F K) (Algebra.trace F K y) := (trace_eq_sum_automorphisms y).symm
       _ = (algebraMap F K) 1 := by rw [hy]
       _ = 1 := algebraMap.coe_one
@@ -96,8 +90,7 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
       _ = z^p - 1^p - (z - 1) := by rw [map_pow g z p, this, sub_pow_char z 1]
       _ = z^p - 1 - (z - 1) := by simp
       _ = b := sub_sub_sub_cancel_right (z ^ p) z 1
-    have := mem_fixedBy.mpr this
-    have := mem_fixedBy_zpowers_iff_mem_fixedBy.mpr this
+    have := mem_fixedBy_zpowers_iff_mem_fixedBy.mpr (mem_fixedBy.mpr this)
     have : ∀ h : G, h b = b := by
       intro h
       have h1 := (Subgroup.ext_iff.mp h_gen.symm h).mp (Subgroup.mem_top h)
@@ -110,6 +103,7 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
   obtain ⟨_, h_mon⟩ := artin_schreier_poly a hp
   have h_eval : aeval z (X ^ p - X - C a) = 0 := by aesop
   have h_int : IsIntegral F z := Algebra.IsIntegral.isIntegral z
+  open minpoly in
   have := polynomial_monic_divisor (monic h_int) h_mon (dvd_iff.mpr h_eval)
   have : (minpoly F z).natDegree = p := by
     have h : (minpoly F z).natDegree ∣ finrank F K := degree_dvd h_int
@@ -126,7 +120,6 @@ lemma finite_inseparable_extension_data [IsPurelyInseparable F K] (h: 1 < finran
   Nat.Prime (ringChar F) ∧ ∃ n : ℕ, finrank F K = (ringChar F) ^ n := by
   let p := ringChar F
   let q := ringExpChar F
-  have : ExpChar F q := ringExpChar.expChar F
   obtain ⟨n, hn⟩ := IsPurelyInseparable.finrank_eq_pow F K q
   have hpp : Nat.Prime p := by
     have : q ≠ 1 := by
@@ -138,7 +131,7 @@ lemma finite_inseparable_extension_data [IsPurelyInseparable F K] (h: 1 < finran
     simp_all only [ne_eq, or_false]
   refine ⟨hpp, ?_⟩
   have : p = q := (char_eq_expChar_iff F p q).mpr hpp
-  rw [← this] at hn
+  rw [←this] at hn
   use n
 
 lemma nonsquare_in_quadratic_extension (hrank: finrank F K = 2) (hchar: ringChar F ≠ 2) :
@@ -152,22 +145,18 @@ lemma nonsquare_in_quadratic_extension (hrank: finrank F K = 2) (hchar: ringChar
       rw [hrank] at this
       obtain ⟨h1, n, h3⟩ := this Nat.one_lt_two
       have := Nat.prime_eq_prime_of_dvd_pow Nat.prime_two h1 h3.dvd
-      grind only
-    let d := Field.finInsepDegree F K
-    have : d = 1 := by
+      exact (iff_false_intro hchar).mp this.symm
+    have : Field.finInsepDegree F K = 1 := by
       have := Field.finSepDegree_mul_finInsepDegree F K
       rw [hrank] at this
-      have : e ∣ 2 := dvd_of_mul_right_eq d this
-      have : e = 1 ∨ e = 2 := (Nat.dvd_prime Nat.prime_two).mp this
+      have := dvd_of_mul_right_eq (Field.finInsepDegree F K) this
+      have := (Nat.dvd_prime Nat.prime_two).mp this
       grind only
     (isSeparable_iff_finInsepDegree_eq_one F K).mpr this
-  let iota := algebraMap F K
   have prim : (primitiveRoots (finrank F K) F).Nonempty := by
-    refine Finset.nonempty_def.mpr ?_
     use -1
     rw [hrank]
-    apply (mem_primitiveRoots Nat.two_pos).mpr
-    exact IsPrimitiveRoot.neg_one (ringChar F) hchar
+    exact (mem_primitiveRoots Nat.two_pos).mpr (IsPrimitiveRoot.neg_one (ringChar F) hchar)
   obtain ⟨b, hb1, hb2⟩ :=
     have : Algebra.IsQuadraticExtension F K :=
       { toFree := free_of_finite_type_torsion_free', finrank_eq_two' := hrank }
@@ -178,14 +167,15 @@ lemma nonsquare_in_quadratic_extension (hrank: finrank F K = 2) (hchar: ringChar
   by_contra
   obtain ⟨c, this⟩ := this
   rw [hrank] at hb1
+  let iota := algebraMap F K
   have hb4 : b ∈ iota.range := by
-    refine RingHom.mem_range.mpr ?_
+    apply RingHom.mem_range.mpr
     have hb3 : iota c = b ∨ iota (-c) = b := by grind only [= map_mul, = map_neg]
     cases hb3
     · use c
     · use -c
   have : finrank F K = 1 := by
-    have h := adjoin_simple_eq_bot_iff.mpr hb4
-    rw [h] at hb2
+    rw [adjoin_simple_eq_bot_iff.mpr hb4] at hb2
     exact bot_eq_top_iff_finrank_eq_one.mp hb2
-  simp_all only [OfNat.one_ne_ofNat]
+  rw [hrank] at this
+  simp_all only [ne_eq, OfNat.ofNat_ne_one]

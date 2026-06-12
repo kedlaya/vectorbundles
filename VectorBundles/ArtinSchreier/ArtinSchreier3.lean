@@ -15,10 +15,10 @@ public import VectorBundles.ArtinSchreier.ArtinSchreier2
 open IntermediateField Module
 
 variable (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
-  [IsAlgClosure F K] (h : ∃ i : F, i^2 = -1)
+  [IsAlgClosure F K] (h : ∃ i : F, -1 = i^2)
 
 include h in
-lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAlgClosed F := by
+lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAlgClosed F :=
   have : IsGalois F K := by
     (expose_names; exact { to_isSeparable := inst_5, to_normal := IsAlgClosure.normal F K })
   have h_ac : IsAlgClosed K := IsAlgClosure.isAlgClosed F
@@ -41,8 +41,8 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
     rw [this] at hp1 h_ekrank
     have : ringChar E ≠ 2 := finite_algebraic_closure_cyclic_prime E K hp1 h_ekrank
     obtain ⟨a, ha⟩ := nonsquare_in_quadratic_extension E K h_ekrank this
-    cases (quadratic_algebraic_closure_no_i E K h_ekrank a) with
-    | inl ha => simp_all only [not_true_eq_false]
+    cases (quadratic_algebraic_closure E K h_ekrank 0 a) with
+    | inl ha => simp_all only [ne_eq, mul_zero, zero_add]
     | inr ha =>
       have h_sq2 : IsSquare (-1 : E) := by
         have h1 : (algebraMap F E) (-1 : F) = (-1 : E) := by simp
@@ -51,7 +51,6 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
         apply (isSquare_iff_exists_sq (-1)).mpr
         obtain ⟨i, hi⟩ := h
         use i
-        exact hi.symm
       have : IsSquare (-1 * -a) := IsSquare.mul h_sq2 ha
       simp_all only [mul_neg, neg_mul, one_mul, neg_neg]
   have := calc
@@ -61,7 +60,7 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
   have := calc
     algebraicClosure F K = ⊤ := (algebraicClosure.eq_top_iff F K).mpr Algebra.IsIntegral.isAlgebraic
     _ = ⊥ := (bot_eq_top_iff_finrank_eq_one.mpr this).symm
-  exact (IsAlgClosed.algebraicClosure_eq_bot_iff F K).mp this
+  (IsAlgClosed.algebraicClosure_eq_bot_iff F K).mp this
 
 include h in
 lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : IsAlgClosed F :=

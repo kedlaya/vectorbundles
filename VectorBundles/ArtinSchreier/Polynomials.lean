@@ -1,7 +1,6 @@
 module
 
 public import Mathlib.Algebra.CharP.Frobenius
-public import Mathlib.Algebra.Polynomial.Degree.Defs
 public import Mathlib.RingTheory.Polynomial.UniqueFactorization
 
 @[expose] public section
@@ -11,17 +10,17 @@ open Polynomial
 variable {F : Type} [Field F] {f g h: Polynomial F}
 
 lemma polynomial_monic_divisor (h1 : f.Monic) (h2 : g.Monic) (h3 : f ∣ g):
-  ∃ (e : Polynomial F), e * f = g ∧ e.Monic ∧ e.natDegree + f.natDegree = g.natDegree := by
+  ∃ e : Polynomial F, e * f = g ∧ e.Monic ∧ e.natDegree + f.natDegree = g.natDegree := by
   obtain ⟨e, h3⟩ := exists_eq_mul_left_of_dvd h3
   use e
   have := calc
     e.leadingCoeff = (e * f).leadingCoeff := (leadingCoeff_mul_monic h1).symm
     _ = g.leadingCoeff := by rw [h3]
     _ = 1 := Monic.def.mp h2
-  have h4 : e.Monic := Monic.def.mpr this
+  have h4 := Monic.def.mpr this
   refine ⟨h3.symm, h4, ?_⟩
   rw [h3]
-  exact (Monic.natDegree_mul h4 h1).symm
+  exact (Monic.natDegree_mul' h4 (Monic.ne_zero h1)).symm
 
 lemma artin_schreier_poly {p : ℕ} (c : F) (hp : Nat.Prime p):
   (X ^ p - X - C c).natDegree = p ∧ (X ^ p - X - C c).Monic := by
@@ -32,16 +31,13 @@ lemma artin_schreier_poly {p : ℕ} (c : F) (hp : Nat.Prime p):
       · exact natDegree_neg_le_of_le natDegree_X_le
       · simp only [natDegree_C, zero_le]
     _ < p := Nat.Prime.one_lt hp
-  have h2 :=
-    natDegree_add_le_of_degree_le (natDegree_X_pow_le p) (Nat.le_of_succ_le h)
-  have h4 : (X ^ p + lin).coeff p = 1 := by
-    have : lin.coeff p = 0 := coeff_eq_zero_of_natDegree_lt h
-    aesop
+  have h2 := natDegree_add_le_of_degree_le (natDegree_X_pow_le p) (Nat.le_of_succ_le h)
+  have h3 : (X ^ p + lin).coeff p = 1 := by aesop
   have : X ^ p + lin = X^p - X - C c := by grind only
   rw [← this]
   constructor
-  · exact natDegree_eq_of_le_of_coeff_ne_zero h2 (ne_zero_of_eq_one h4)
-  · exact monic_of_natDegree_le_of_coeff_eq_one p h2 h4
+  · exact natDegree_eq_of_le_of_coeff_ne_zero h2 (ne_zero_of_eq_one h3)
+  · exact monic_of_natDegree_le_of_coeff_eq_one p h2 h3
 
 lemma divisor_of_irreducible_poly (hdiv: f ∣ g) (hirr: Irreducible g) :
   f.natDegree = 0 ∨ f.natDegree = g.natDegree := by
@@ -50,27 +46,25 @@ lemma divisor_of_irreducible_poly (hdiv: f ∣ g) (hirr: Irreducible g) :
   cases this with
   | inl h_isunit =>
     right
-    have : e * f ≠ 0 := by
-      rw [← h3]
-      exact Irreducible.ne_zero hirr
+    rw [h3]
+    have : e * f ≠ 0 := by aesop
     have := mul_ne_zero_iff.mp this
     calc
       f.natDegree = 0 + f.natDegree := (Nat.zero_add f.natDegree).symm
       _ = e.natDegree + f.natDegree :=
         Nat.add_left_inj.mpr (natDegree_eq_zero_of_isUnit h_isunit).symm
       _ = (e * f).natDegree := (natDegree_mul this.1 this.2).symm
-      _ = g.natDegree := by rw [h3]
   | inr h_isunit =>
     left
     exact natDegree_eq_zero_of_isUnit h_isunit
 
 lemma odd_irreducible_factor (h : Odd f.natDegree) :
-  ∃ (g : Polynomial F), Irreducible g ∧ g ∣ f ∧ Odd g.natDegree := by
-  open UniqueFactorizationMonoid in
+  ∃ g : Polynomial F, Irreducible g ∧ g ∣ f ∧ Odd g.natDegree := by
   have : f ≠ 0 := by
     obtain ⟨_, _⟩ := h
     have : f.natDegree > 0 := by linarith
     exact ne_zero_of_natDegree_gt this
+  open UniqueFactorizationMonoid in
   let S := factors f
   have h_prod : Associated f S.prod := Associated.symm (factors_prod this)
   have h0S : 0 ∉ S := by
@@ -87,10 +81,10 @@ lemma odd_irreducible_factor (h : Odd f.natDegree) :
       fun g a => (fun {n} => Nat.not_odd_iff_even.mp) (this g a)
     let T := S.map natDegree
     have : S.prod.natDegree = T.sum := natDegree_multiset_prod S h0S
-    have : ∀ t : ℕ, t ∈ T → Even t := by aesop
     have : 2 ∣ T.sum := by
       apply Multiset.dvd_sum
       intro x hx
+      have : ∀ t : ℕ, t ∈ T → Even t := by aesop
       exact Even.two_dvd (this x hx)
     grind only [= Nat.odd_iff]
   obtain ⟨g, hg1, hg2⟩ := this
@@ -123,13 +117,10 @@ lemma linear_substitution {p : ℕ} [ExpChar F p] {d : ℕ} (a : F) (hd: 1 < d) 
     _ < d := Nat.sub_one_lt_of_lt hdeg
   let fp_high := (m f_high).comp lin
   let fp_low := (m f_low).comp lin
-  have h_add :=
-    have := calc
-      m f = m (f_high + f_low) := by rw [← h_sum]
-      _ = m f_high + m f_low := Polynomial.map_add frob
-    calc
+  have h_add := calc
     fp = (m f).comp lin := by rfl
-    _ = (m f_high + m f_low).comp lin := by rw [this]
+    _ = (m (f_high + f_low)).comp lin := by rw [←h_sum]
+    _ = (m f_high + m f_low).comp lin := by simp [m, Polynomial.map_add frob]
     _ = fp_high + fp_low := add_comp
   have h_highcoeff :=
     have h := calc
@@ -152,7 +143,7 @@ lemma linear_substitution {p : ℕ} [ExpChar F p] {d : ℕ} (a : F) (hd: 1 < d) 
     refine add_left_cancel_iff.mpr (coeff_eq_zero_of_natDegree_lt ?_)
     have h_deg : f_low.natDegree ≤ d-2 := by
       refine natDegree_le_iff_coeff_eq_zero.mpr ?_
-      intro N hN
+      intro N _
       if h : N = d - 1 then
         subst N
         exact erase_same f (d-1)

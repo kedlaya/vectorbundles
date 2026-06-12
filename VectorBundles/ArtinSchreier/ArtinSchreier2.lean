@@ -5,7 +5,6 @@ public import Mathlib.FieldTheory.Finite.Basic
 public import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
 
 public import VectorBundles.ArtinSchreier.FieldTheory
-public import VectorBundles.ArtinSchreier.Polynomials
 public import VectorBundles.ArtinSchreier.ArtinSchreier
 
 @[expose] public section
@@ -36,22 +35,20 @@ lemma finite_algebraic_closure_cyclic_prime : ¬ ringChar F = p := by
     _ = p := h_natdeg
   obtain ⟨y, hy4⟩ : ∃ y0 : F⟮x⟯, y0^p = y0 + iota a * x^(p-1) := by
     have hp1 := Nat.Prime.pos hp
-    let pol := X ^ p -  X -  C (x ^ (p-1) * iota a)
-    obtain ⟨y, hy⟩ : ∃ y : K, aeval y pol = 0 := by
-      have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
-      apply IsAlgClosed.exists_aeval_eq_zero K pol
-      have := (artin_schreier_poly (x^(p-1) * iota a) hp).1
-      calc
-      pol.degree = p := (degree_eq_iff_natDegree_eq_of_pos hp1).mpr this
-      _ ≠ 0 := Nat.cast_ne_zero.mpr (Nat.Prime.ne_zero hp)
-    have : y^p - y - x^(p-1) * iota a = 0 := by aesop
     have := calc
       (minpoly F x).degree = p := (degree_eq_iff_natDegree_eq_of_pos hp1).mpr h_natdeg
       _ = ↑(finrank F K) := Nat.cast_inj.mpr hrank.symm
-    have := (Field.primitive_element_iff_minpoly_degree_eq F x).mpr this
-    have := (IntermediateField.ext_iff.mp this y).mpr mem_top
+    have h := (Field.primitive_element_iff_minpoly_degree_eq F x).mpr this
+    let pol := X ^ p - X - C (x ^ (p-1) * iota a)
+    obtain ⟨y, hy⟩ : ∃ y : K, aeval y pol = 0 := by
+      have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
+      have := Nat.ne_of_lt' hp1
+      rw [←(artin_schreier_poly (x^(p-1) * iota a) hp).1] at this
+      exact IsAlgClosed.exists_aeval_eq_zero K pol (degree_ne_of_natDegree_ne this)
+    have := (IntermediateField.ext_iff.mp h y).mpr mem_top
     obtain ⟨y0, _⟩ : ∃ y0 : F⟮x⟯, y0 = y := CanLift.prf y this
     use y0
+    have : y^p - y - x^(p-1) * iota a = 0 := by aesop
     grind only
   obtain ⟨y_rep, h_pb_rep_y01, h_pb_rep_y02⟩ := PowerBasis.exists_eq_aeval pb y
   rw [h_pbdim] at h_pb_rep_y01
@@ -61,21 +58,17 @@ lemma finite_algebraic_closure_cyclic_prime : ¬ ringChar F = p := by
     linear_substitution a (Nat.Prime.one_lt hp) h_pb_rep_y01
   let y1p_rep := y_rep + monomial (p-1) a
   have h_matchcoeff :=
-    let frob := frobenius F p
-    let m := map frob
-    let lin := X + C a
-    let exp := expand F p
+    let m := map (frobenius F p) y_rep
     let iota₀ := algebraMap F F⟮x⟯
     have := calc
-      aeval x₀ ((m y_rep).comp lin) = aeval (aeval x₀ lin) (m y_rep) := aeval_comp x₀
-      _ = aeval (x₀ + iota₀ a) (m y_rep) := by rw [aeval_add x₀, aeval_X x₀, aeval_C x₀ a]
-      _ = aeval (x₀ ^ p) (m y_rep) := by
-        have h_rwx_bp : x₀ ^ p = x₀ + iota₀ a := SetLike.coe_eq_coe.mp h_rwx
-        rw [h_rwx_bp]
-      _ = aeval (aeval x₀ (X ^ p)) (m y_rep) := by rw [aeval_X_pow x₀]
-      _ = aeval x₀ ((m y_rep).comp (X ^ p)) := (aeval_comp x₀).symm
-      _ = aeval x₀ (exp (m y_rep)) := by rfl
-      _ = aeval x₀ (y_rep ^ p) := by rw [← map_expand, map_frobenius_expand p y_rep]
+      aeval x₀ (m.comp (X + C a)) = aeval (aeval x₀ (X + C a)) m := aeval_comp x₀
+      _ = aeval (x₀ + iota₀ a) m := by rw [aeval_add x₀, aeval_X x₀, aeval_C x₀ a]
+      _ = aeval (x₀ ^ p) m := by
+        have : x₀ ^ p = x₀ + iota₀ a := SetLike.coe_eq_coe.mp h_rwx
+        rw [this]
+      _ = aeval (aeval x₀ (X ^ p)) m := by rw [aeval_X_pow x₀]
+      _ = aeval x₀ (expand F p m) := (aeval_comp x₀).symm
+      _ = aeval x₀ (y_rep ^ p) := by rw [←map_expand, map_frobenius_expand p y_rep]
       _ = (aeval x₀ y_rep) ^ p := map_pow (aeval x₀) y_rep p
       _ = y ^ p := by rw [h_pb_rep_y02]
     have :=
@@ -83,65 +76,55 @@ lemma finite_algebraic_closure_cyclic_prime : ¬ ringChar F = p := by
       have := calc
         aeval x (yp_rep - y1p_rep) = aeval x yp_rep - aeval x y1p_rep := aeval_sub x
         _ = 0 := by
-          have h5 := calc
+          have h1 := calc
             aeval x yp_rep = aeval x₀ yp_rep := h7 yp_rep
-            _ = ↑ (y ^ p) := by rw [this]
-            _ = y ^ p := IntermediateField.coe_pow F⟮x⟯ y p
-          have h4 := calc
+            _ = y ^ p := by rw [this, IntermediateField.coe_pow F⟮x⟯ y p]
+          have h2 := calc
             aeval x y1p_rep = aeval x y_rep + aeval x (monomial (p-1) a) := aeval_add x
             _ = aeval x₀ y_rep + aeval x (monomial (p-1) a) := by simp [h7 y_rep]
-            _ = y + aeval x (monomial (p-1) a) := by rw [h_pb_rep_y02]
-            _ = y + iota a * x ^ (p-1) := by rw [aeval_monomial x]
-          rw [h5, h4]
-          exact sub_eq_zero.mpr hy4
+            _ = y + iota a * x ^ (p-1) := by rw [h_pb_rep_y02, aeval_monomial x]
+          rw [h1, h2, sub_eq_zero.mpr hy4]
       have hdiv : (minpoly F x) ∣ (yp_rep - y1p_rep) := minpoly.dvd_iff.mpr this
-      have := calc
-        y1p_rep.natDegree ≤ max y_rep.natDegree (monomial (p-1) a).natDegree :=
-          natDegree_add_le y_rep (monomial (p-1) a)
-        _ < p := by
-          refine Nat.max_lt.mpr ⟨h_pb_rep_y01, ?_⟩
-          calc
-          (monomial (p - 1) a).natDegree ≤ p-1 := natDegree_monomial_le a
-          _ < p := Nat.sub_one_lt_of_lt h_pb_rep_y01
       have := calc
         (yp_rep - y1p_rep).natDegree ≤ max yp_rep.natDegree y1p_rep.natDegree :=
           natDegree_sub_le yp_rep y1p_rep
-        _ < p := max_lt_iff.mpr ⟨h_y0rep1, this⟩
+        _ ≤ max yp_rep.natDegree (max y_rep.natDegree (monomial (p-1) a).natDegree) :=
+          max_le_max_left yp_rep.natDegree (natDegree_add_le y_rep (monomial (p-1) a))
+        _ < p :=
+          have := calc
+            (monomial (p - 1) a).natDegree ≤ p-1 := natDegree_monomial_le a
+            _ < p := Nat.sub_one_lt_of_lt h_pb_rep_y01
+          Nat.max_lt.mpr ⟨h_y0rep1, Nat.max_lt.mpr ⟨h_pb_rep_y01, this⟩⟩
         _ = (minpoly F x).natDegree := h_natdeg.symm
       have := eq_zero_of_dvd_of_natDegree_lt hdiv this
       sub_eq_zero.mp this
     ext_iff.mp this (p-1)
   have h_deg1 : (minpoly F x).natDegree = 1 := by
     have h_fieldeq := calc
-      c^p - c = yp_rep.coeff (p-1) - c := by rw [h_y0rep2]
-      _ = y1p_rep.coeff (p-1) - c := by rw [h_matchcoeff]
-      _ = y_rep.coeff (p-1) + (monomial (p-1) a).coeff (p-1) - c := by
-        rw [coeff_add y_rep (monomial (p-1) a) (p - 1)]
+      c^p - c = y_rep.coeff (p-1) + (monomial (p-1) a).coeff (p-1) - c := by
+        rw [←h_y0rep2, h_matchcoeff, coeff_add y_rep (monomial (p-1) a) (p-1)]
       _ = (monomial (p-1) a).coeff (p-1) := by ring
       _ = a := coeff_monomial_same (p-1) a
-    have : Fact (Nat.Prime p) := fact_iff.mpr hp
     have : CharP K p := (Algebra.charP_iff F K p).mp hFp
     let x1 := x - iota c
-    obtain ⟨n, hn⟩ : ∃ n : ℤ, ↑n = x1 :=
+    obtain ⟨n, hn⟩ :=
+      have : Fact (Nat.Prime p) := fact_iff.mpr hp
       have fieldeq := calc
         x1^p = x^p - iota c ^ p := sub_pow_char x (iota c)
-        _ = x + iota (c^p - c) - iota c ^ p := by rw [h_rwx, h_fieldeq]
         _ = x + (iota (c^p) - iota c) - iota c ^ p := by
-          have hsub : iota (c^p - c) = iota (c^p) - iota c := algebraMap.coe_sub (c ^ p) c
-          rw [hsub]
+          have : iota (c^p - c) = iota (c^p) - iota c := algebraMap.coe_sub (c ^ p) c
+          rw [h_rwx, ←h_fieldeq, this]
         _ = x1 := by grind
-      have := (Subfield.mem_bot_iff_pow_eq_self K p).mpr fieldeq
-      (mem_bot_iff_intCast p K).mp this
+      (mem_bot_iff_intCast p K).mp ((Subfield.mem_bot_iff_pow_eq_self K p).mpr fieldeq)
     apply minpoly.natDegree_eq_one_iff.mpr
     use n + c
     aesop
   have := calc
     1 < p := Nat.Prime.one_lt hp
-    _ = (minpoly F x).natDegree := h_natdeg.symm
-    _ = 1 := h_deg1
+    _ = 1 := by rw [←h_natdeg, h_deg1]
   exact (lt_self_iff_false 1).mp this
 
-include K p hp hrank in
+include K hp hrank in
 lemma finite_algebraic_closure_cyclic_quadratic : p = 2 := by
   have h_char := finite_algebraic_closure_cyclic_prime F K hp hrank
   have hK : (primitiveRoots (finrank F K) F).Nonempty := by
@@ -149,48 +132,39 @@ lemma finite_algebraic_closure_cyclic_quadratic : p = 2 := by
     have := calc
       cyclo.natDegree = p.totient := natDegree_cyclotomic p F
       _ = p - 1 := Nat.totient_prime hp
-    obtain ⟨f, h_fmonic, hf1, h_divcyclo⟩ : ∃ (f : Polynomial F), f.Monic
-      ∧ f.natDegree ∣ finrank F K ∧ f ∣ cyclo := by
+    obtain ⟨f, h_fmonic, hf1, h_divcyclo⟩ : ∃ f, f.Monic ∧ f.natDegree ∣ p ∧ f ∣ cyclo := by
+      rw [←hrank]
       apply divisor_by_finrank
       rw [this]
       exact Nat.sub_ne_zero_of_lt (Nat.Prime.one_lt hp)
-    rw [hrank] at hf1
-    have : f.natDegree = 1 := by
-      have : f.natDegree = 1 ∨ f.natDegree = p :=
-        Nat.Prime.eq_one_or_self_of_dvd hp f.natDegree hf1
+    have : f.degree = 1 := by
+      have := Nat.Prime.eq_one_or_self_of_dvd hp f.natDegree hf1
       cases this with
-      | inl h => exact h
-      | inr h =>
-        have : p > 0 := Nat.Prime.pos hp
-        simp_all only [dvd_refl]
-        have : f.natDegree ≤ cyclo.natDegree :=
-          natDegree_le_of_dvd h_divcyclo (cyclotomic_ne_zero p F)
+      | inl h => calc
+        f.degree = f.natDegree := degree_eq_natDegree (Monic.ne_zero h_fmonic)
+        _ = 1 := Nat.cast_eq_one.mpr h
+      | inr =>
+        have := Nat.Prime.pos hp
+        have := natDegree_le_of_dvd h_divcyclo (cyclotomic_ne_zero p F)
         grind only
-    obtain ⟨z, hz⟩ : ∃ z : F, f.IsRoot z := by
-      refine exists_root_of_degree_eq_one ?_
-      calc
-      f.degree = f.natDegree := degree_eq_natDegree (Monic.ne_zero h_fmonic)
-      _ = 1 := Nat.cast_eq_one.mpr this
-    apply Finset.nonempty_def.mpr
+    obtain ⟨z, hz⟩ := exists_root_of_degree_eq_one this
     use z
     apply (mem_primitiveRoots finrank_pos).mpr
     rw [hrank]
     have : NeZero (p : F) :=
       have : ¬CharP F p := ringChar.eq_iff.mpr.mt h_char
       { out := (CharP.charP_iff_prime_eq_zero hp).mpr.mt this }
-    have : cyclo.IsRoot z := IsRoot.dvd hz h_divcyclo
-    exact isRoot_cyclotomic_iff.mp this
-  obtain ⟨a, _, h5⟩ : ∃ a : F, Irreducible (X ^ p - C a) ∧ IsSplittingField F K (X ^ p - C a) := by
+    exact isRoot_cyclotomic_iff.mp (IsRoot.dvd hz h_divcyclo)
+  obtain ⟨a, _, h5⟩ : ∃ a, Irreducible (X ^ p - C a) ∧ IsSplittingField F K (X ^ p - C a) := by
     rw [←hrank]
     apply (List.TFAE.out (isCyclic_tfae F K hK) 0 1).mp
     (expose_names; refine ⟨inst_5, ?_⟩)
     have : Fact p.Prime := fact_iff.mpr hp
-    have := calc
-      Nat.card Gal(K/F) = finrank F K := IsGalois.card_aut_eq_finrank F K
-      _ = p := hrank
+    have := IsGalois.card_aut_eq_finrank F K
+    rw [hrank] at this
     exact isCyclic_of_prime_card this
   by_contra
-  have h_irr: ∀ n : ℕ, n ≠ 0 → (Irreducible (X ^ p ^ n - C a) ↔ ∀ (b : F), b ^ p ≠ a) := by
+  have h_irr: ∀ n, n ≠ 0 → (Irreducible (X ^ p ^ n - C a) ↔ ∀ b : F, b ^ p ≠ a) := by
     intro _ hn
     exact X_pow_sub_C_irreducible_iff_of_prime_pow hp this hn
   let pol := X ^ p ^ 2 - C a
@@ -199,20 +173,17 @@ lemma finite_algebraic_closure_cyclic_quadratic : p = 2 := by
     have : 2 ≠ 0 := (Nat.zero_ne_add_one 1).symm
     (h_irr 2 this).mpr ((h_irr 1 Nat.one_ne_zero).mp irr2)
   have h13 : pol.natDegree = p ^ 2 := natDegree_X_pow_sub_C
-  obtain ⟨f, hf, h_fdeg, h_div⟩ : ∃ (f : Polynomial F), f.Monic ∧ f.natDegree ∣ finrank F K
-    ∧ f ∣ pol := by
+  obtain ⟨f, _, h_fdeg, h_div⟩ : ∃ f, f.Monic ∧ f.natDegree ∣ p ∧ f ∣ pol := by
+    rw [←hrank]
     apply divisor_by_finrank
     rw [h13]
     aesop
   have h_deg : f.natDegree = pol.natDegree := by
-    have h_deg : f.natDegree = 0 ∨ f.natDegree = pol.natDegree :=
-      divisor_of_irreducible_poly h_div h_irr2
+    have := divisor_of_irreducible_poly h_div h_irr2
     aesop
   have h := calc
     p < p * p := Nat.lt_mul_self_iff.mpr (Nat.Prime.one_lt hp)
     _ = p^2 := by ring
-    _ = pol.natDegree := h13.symm
-    _ = f.natDegree := h_deg.symm
-    _ ≤ finrank F K := Nat.le_of_dvd finrank_pos h_fdeg
-    _ = p := hrank
+    _ = f.natDegree := by rw [←h13, h_deg]
+    _ ≤ p := Nat.le_of_dvd (Nat.Prime.pos hp) h_fdeg
   exact (lt_self_iff_false p).mp h
