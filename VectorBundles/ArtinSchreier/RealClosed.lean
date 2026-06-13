@@ -1,6 +1,5 @@
 module
 
-public import Mathlib.Algebra.Ring.SumsOfSquares
 public import Mathlib.FieldTheory.IsRealClosed.Basic
 public import Mathlib.FieldTheory.Relrank
 

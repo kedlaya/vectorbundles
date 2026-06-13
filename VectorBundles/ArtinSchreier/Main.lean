@@ -1,9 +1,5 @@
 module
 
-public import Mathlib.FieldTheory.IntermediateField.Basic
-public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
-public import Mathlib.FieldTheory.IsRealClosed.Basic
-
 public import VectorBundles.ArtinSchreier.ArtinSchreier3
 public import VectorBundles.ArtinSchreier.RealClosed
 
