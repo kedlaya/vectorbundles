@@ -87,25 +87,3 @@ lemma odd_irreducible_factor (h : Odd f.natDegree) :
   obtain ⟨g, hg1, hg2⟩ := this
   use g
   exact ⟨irreducible_of_factor g hg1, dvd_of_mem_factors hg1, hg2⟩
-
-lemma linear_substitution (p : ℕ) [ExpChar F p] {d : ℕ} (a : F) (hdeg: f.natDegree < d) :
-  let fp := (map (frobenius F p) f).comp (X + C a);
-    fp.natDegree < d ∧ fp.coeff (d-1) = (f.coeff (d-1)) ^ p := by
-  let m := map (frobenius F p)
-  let c := f.coeff (d-1)
-  let lin := X + C a
-  let fp := (m f).comp lin
-  have hlin : lin.natDegree = 1 := natDegree_X_add_C a
-  have hf3 : (m f).natDegree = f.natDegree := natDegree_map (frobenius F p)
-  have h_deg2 : fp.natDegree = (m f).natDegree * lin.natDegree := natDegree_comp
-  rw [hlin, hf3, Nat.mul_one] at h_deg2
-  refine ⟨lt_of_eq_of_lt h_deg2 hdeg, ?_⟩
-  by_cases hf0 : f.natDegree = d-1
-  · have hc : fp.coeff (fp.natDegree) = (m f).coeff (m f).natDegree *
-      lin.leadingCoeff ^ (m f).natDegree := leadingCoeff_comp (ne_zero_of_eq_one hlin)
-    rw [leadingCoeff_X_add_C a, hf3, h_deg2, hf0] at hc
-    aesop
-  · have hf1 : f.natDegree < d-1 := by grind only
-    have := coeff_eq_zero_of_natDegree_lt (lt_of_eq_of_lt h_deg2 hf1)
-    rw [coeff_eq_zero_of_natDegree_lt hf1, this]
-    exact (zero_pow (expChar_ne_zero F p)).symm

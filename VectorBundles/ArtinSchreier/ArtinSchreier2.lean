@@ -53,14 +53,18 @@ lemma finite_algebraic_closure_cyclic_prime : ¬ ringChar F = p := by
   obtain ⟨y_rep, h_pb_rep_y01, h_pb_rep_y02⟩ := PowerBasis.exists_eq_aeval pb y
   rw [h_pbdim] at h_pb_rep_y01
   let c := y_rep.coeff (p-1)
-  let yp_rep := (map (frobenius F p) y_rep).comp (X + C a)
-  obtain ⟨h_y0rep1, h_y0rep2⟩ := linear_substitution p a h_pb_rep_y01
   let y1p_rep := y_rep + monomial (p-1) a
-  have h_matchcoeff :=
+  have h_matchcoeff : y1p_rep.coeff (p-1) = c^p := by
     let m := map (frobenius F p) y_rep
+    let yp_rep := m.comp (X + C a)
+    let lin := X + C a
+    have hlin : lin.natDegree = 1 := natDegree_X_add_C a
+    have hf3 : m.natDegree = y_rep.natDegree := natDegree_map (frobenius F p)
+    have h_deg2 : yp_rep.natDegree = m.natDegree * lin.natDegree := natDegree_comp
+    rw [hlin, hf3, Nat.mul_one] at h_deg2
     let iota₀ := algebraMap F F⟮x⟯
-    have := calc
-      aeval x₀ (m.comp (X + C a)) = aeval (aeval x₀ (X + C a)) m := aeval_comp x₀
+    have h_eval := calc
+      aeval x₀ (m.comp lin) = aeval (aeval x₀ lin) m := aeval_comp x₀
       _ = aeval (x₀ + iota₀ a) m := by rw [aeval_add x₀, aeval_X x₀, aeval_C x₀ a]
       _ = aeval (x₀ ^ p) m := by
         have : x₀ ^ p = x₀ + iota₀ a := SetLike.coe_eq_coe.mp h_rwx
@@ -72,36 +76,37 @@ lemma finite_algebraic_closure_cyclic_prime : ¬ ringChar F = p := by
       _ = y ^ p := by rw [h_pb_rep_y02]
     have :=
       have h7 : ∀ f : Polynomial F, aeval x f = (aeval x₀) f := by aesop
-      have := calc
-        aeval x (yp_rep - y1p_rep) = aeval x yp_rep - aeval x y1p_rep := aeval_sub x
-        _ = 0 := by
-          have h1 := calc
-            aeval x yp_rep = aeval x₀ yp_rep := h7 yp_rep
-            _ = y ^ p := by rw [this, IntermediateField.coe_pow F⟮x⟯ y p]
-          have h2 := calc
-            aeval x y1p_rep = aeval x y_rep + aeval x (monomial (p-1) a) := aeval_add x
-            _ = aeval x₀ y_rep + aeval x (monomial (p-1) a) := by simp [h7 y_rep]
-            _ = y + iota a * x ^ (p-1) := by rw [h_pb_rep_y02, aeval_monomial x]
-          rw [h1, h2, sub_eq_zero.mpr hy4]
+      have : aeval x (yp_rep - y1p_rep) = 0 := by
+        rw [aeval_sub x, aeval_add x, h7, h7, h_eval, ←h_pb_rep_y02, aeval_monomial x,
+          IntermediateField.coe_pow F⟮x⟯ y p, hy4]
+        ring
       have hdiv : (minpoly F x) ∣ (yp_rep - y1p_rep) := minpoly.dvd_iff.mpr this
       have := calc
         (yp_rep - y1p_rep).natDegree ≤ max yp_rep.natDegree y1p_rep.natDegree :=
           natDegree_sub_le yp_rep y1p_rep
-        _ ≤ max yp_rep.natDegree (max y_rep.natDegree (monomial (p-1) a).natDegree) :=
-          max_le_max_left yp_rep.natDegree (natDegree_add_le y_rep (monomial (p-1) a))
-        _ < p :=
-          have := calc
-            (monomial (p - 1) a).natDegree ≤ p-1 := natDegree_monomial_le a
-            _ < p := Nat.sub_one_lt_of_lt h_pb_rep_y01
-          Nat.max_lt.mpr ⟨h_y0rep1, Nat.max_lt.mpr ⟨h_pb_rep_y01, this⟩⟩
+        _ ≤ max y_rep.natDegree (monomial (p-1) a).natDegree :=
+          max_le_iff.mpr ⟨le_max_of_le_left (le_of_eq h_deg2),
+            natDegree_add_le y_rep (monomial (p-1) a)⟩
+        _ ≤ max y_rep.natDegree (p-1) := max_le_max_left y_rep.natDegree (natDegree_monomial_le a)
+        _ < p := max_lt_iff.mpr ⟨h_pb_rep_y01, Nat.sub_one_lt_of_lt h_pb_rep_y01⟩
         _ = (minpoly F x).natDegree := h_natdeg.symm
       have := eq_zero_of_dvd_of_natDegree_lt hdiv this
       sub_eq_zero.mp this
-    ext_iff.mp this (p-1)
+    rw [←this]
+    by_cases hf0 : y_rep.natDegree = p-1
+    · have : yp_rep.coeff (yp_rep.natDegree) = m.coeff m.natDegree *
+        lin.leadingCoeff ^ m.natDegree := leadingCoeff_comp (ne_zero_of_eq_one hlin)
+      rw [leadingCoeff_X_add_C a, hf3, h_deg2, hf0] at this
+      aesop
+    · have hf1 : y_rep.natDegree < p-1 := by grind only
+      have h1 := coeff_eq_zero_of_natDegree_lt (lt_of_eq_of_lt h_deg2 hf1)
+      have h2 : c = 0 := coeff_eq_zero_of_natDegree_lt hf1
+      rw [h1, h2]
+      exact (zero_pow (expChar_ne_zero F p)).symm
   have h_range : x ∈ (algebraMap F K).range := by
     have h_fieldeq := calc
       c^p - c = y_rep.coeff (p-1) + (monomial (p-1) a).coeff (p-1) - c := by
-        rw [←h_y0rep2, h_matchcoeff, coeff_add y_rep (monomial (p-1) a) (p-1)]
+        rw [←h_matchcoeff, coeff_add y_rep (monomial (p-1) a) (p-1)]
       _ = (monomial (p-1) a).coeff (p-1) := by ring
       _ = a := coeff_monomial_same (p-1) a
     have : CharP K p := (Algebra.charP_iff F K p).mp hFp
