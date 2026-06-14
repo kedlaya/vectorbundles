@@ -2,8 +2,6 @@ module
 
 public import Mathlib.FieldTheory.AlgebraicClosure
 
-public import VectorBundles.ArtinSchreier.Polynomials
-
 @[expose] public section
 
 open Module Polynomial
@@ -13,10 +11,9 @@ variable (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [IsAlgClosure F
 lemma divisor_by_finrank {f : Polynomial F} (hf : f.natDegree ≠ 0) :
   ∃ (d : Polynomial F), d.Monic ∧ d.natDegree ∣ finrank F K ∧ d ∣ f := by
   have hf1 := Polynomial.degree_ne_of_natDegree_ne hf
-  obtain ⟨c, hc⟩ :=
-    have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
-    have := FaithfulSMul.algebraMap_injective F K
-    IsAlgClosed.exists_aeval_eq_zero_of_injective K this f hf1
+  have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
+  have := FaithfulSMul.algebraMap_injective F K
+  obtain ⟨c, hc⟩ := IsAlgClosed.exists_aeval_eq_zero_of_injective K this f hf1
   use minpoly F c
   have h_int : IsIntegral F c := Algebra.IsIntegral.isIntegral c
   open minpoly in exact ⟨monic h_int, degree_dvd h_int, dvd_iff.mpr hc⟩
@@ -53,18 +50,25 @@ lemma quadratic_algebraic_closure (h : finrank F K = 2) (a b : F) : IsSquare (a*
     use x^2 - a
     simp_all [g, g1, g2, g3]
     grind
-  | inr =>
-    obtain ⟨e, h_ftimese, _, _⟩ := polynomial_monic_divisor hf1 h_gmon hf3
+  | inr hf2 =>
+    obtain ⟨e, h_ftimese⟩ := exists_eq_mul_left_of_dvd hf3
     have : f.coeff 2 = 1 ∧ f.coeff 3 = 0 ∧ f.coeff 4 = 0 := by
       have : f.coeff f.natDegree = f.leadingCoeff := coeff_natDegree
       have : f.natDegree ≤ 2 ↔ ∀ N, 2 < N → f.coeff N = 0 := natDegree_le_iff_coeff_eq_zero
       simp_all
     have : e.coeff 2 = 1 ∧ e.coeff 3 = 0 ∧ e.coeff 4 = 0 := by
-      have : e.coeff e.natDegree = e.leadingCoeff := coeff_natDegree
-      have : e.natDegree ≤ 2 ↔ ∀ N, 2 < N → e.coeff N = 0 := natDegree_le_iff_coeff_eq_zero
-      simp_all
+      have : e ≠ 0 := by aesop
+      have : (f * e).natDegree = f.natDegree + e.natDegree := Monic.natDegree_mul' hf1 this
+      rw [Monic.natDegree_mul_comm hf1, ←h_ftimese, h_gdeg, hf2] at this
+      have : e.natDegree = 2 := by linarith
+      have := natDegree_le_iff_coeff_eq_zero.mp (Nat.le_of_eq this)
+      have := calc
+        e.coeff e.natDegree = e.leadingCoeff := coeff_natDegree
+        _ = (e * f).leadingCoeff := (leadingCoeff_mul_monic hf1).symm
+        _ = 1 := by rw [←h_ftimese, Monic.def.mp h_gmon]
+      grind
     have : e.coeff 0 * f.coeff 0 = a^2 + b ∧ e.coeff 0 * f.coeff 1 + e.coeff 1 * f.coeff 0 = 0 := by
-      rw [←hg0, ←hg1, ←h_ftimese]
+      rw [←hg0, ←hg1, h_ftimese]
       exact ⟨(mul_coeff_zero e f).symm, (mul_coeff_one e f).symm⟩
     have : f.coeff 0 + e.coeff 1 * f.coeff 1 + e.coeff 0 = -2*a ∧ e.coeff 1 + f.coeff 1 = 0 := by
       have := coeff_mul e f 2

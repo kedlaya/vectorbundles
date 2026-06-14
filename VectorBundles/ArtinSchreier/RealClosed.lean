@@ -2,12 +2,38 @@ module
 
 public import Mathlib.FieldTheory.IsRealClosed.Basic
 public import Mathlib.FieldTheory.Relrank
+public import Mathlib.RingTheory.Polynomial.UniqueFactorization
 
 public import VectorBundles.ArtinSchreier.ArtinSchreier
 
 @[expose] public section
 
 open IntermediateField Module Polynomial
+
+lemma odd_irreducible_factor {F : Type} [Field F] {f: Polynomial F} (h : Odd f.natDegree) :
+  ∃ g : Polynomial F, Irreducible g ∧ g ∣ f ∧ Odd g.natDegree := by
+  open UniqueFactorizationMonoid in
+  let S := factors f
+  have h_prod := Associated.symm (factors_prod (ne_zero_of_natDegree_gt (Odd.pos h)))
+  have h0S : 0 ∉ S := by
+    by_contra
+    rw [Multiset.prod_eq_zero this] at h_prod
+    have := ne_zero_of_natDegree_gt (Odd.pos h)
+    simp_all only [associated_zero_iff_eq_zero]
+  have : ∃ g ∈ S, Odd g.natDegree := by
+    have := natDegree_eq_of_degree_eq (degree_eq_degree_of_associated h_prod)
+    by_contra
+    let T := S.map natDegree
+    have := natDegree_multiset_prod S h0S
+    have : 2 ∣ T.sum := by
+      apply Multiset.dvd_sum
+      intro x hx
+      have : ∀ t : ℕ, t ∈ T → Even t := by aesop
+      exact Even.two_dvd (this x hx)
+    grind only [= Nat.odd_iff]
+  obtain ⟨g, hg1, hg2⟩ := this
+  use g
+  exact ⟨irreducible_of_factor g hg1, dvd_of_mem_factors hg1, hg2⟩
 
 lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algebra F K]
   [FiniteDimensional F K] [IsAlgClosure F K] (h1 : ∀ i : F, -1 ≠ i^2)
@@ -42,22 +68,15 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
   have odd_deg : ∀ {f : Polynomial F}, Odd f.natDegree → ∃ x, f.IsRoot x := by
     intro f h_odd
     obtain ⟨g, hg, h_div, h_oddg⟩ := odd_irreducible_factor h_odd
-    obtain ⟨x, h_x⟩ :=
-      have h_natgdeg : g.natDegree = 1 := by
-        have : g.natDegree ≤ 2 := by
-          obtain ⟨h, _, h_gdeg, hdiv⟩ :=
-            divisor_by_finrank F K (Nat.ne_zero_iff_zero_lt.mpr (Irreducible.natDegree_pos hg))
-          cases divisor_of_irreducible_poly hdiv hg with
-          | inl => aesop
-          | inr h1 => calc
-            g.natDegree = h.natDegree := h1.symm
-            _ ≤ finrank F K := Nat.le_of_dvd finrank_pos h_gdeg
-            _ = 2 := h_rank2
-        grind only [= Nat.odd_iff]
-      have := (degree_eq_iff_natDegree_eq_of_pos (Nat.zero_lt_succ 0)).mpr h_natgdeg
-      exists_root_of_degree_eq_one this
+    have := Irreducible.natDegree_dvd_finrank hg (IsAlgClosed.splits (map (algebraMap F K) g))
+    rw [h_rank2] at this
+    have h_natgdeg : g.natDegree = 1 := by
+      have := Nat.Prime.eq_one_or_self_of_dvd Nat.prime_two g.natDegree this
+      grind
+    have := (degree_eq_iff_natDegree_eq_of_pos (Nat.zero_lt_succ 0)).mpr h_natgdeg
+    obtain ⟨x, hx⟩ := exists_root_of_degree_eq_one this
     use x
-    exact IsRoot.dvd h_x h_div
+    exact IsRoot.dvd hx h_div
   have semi : IsSemireal F := by
     have hs: ∀ x y: F, ∃ z : F, x * x + y * y = z * z := by
       intro x y

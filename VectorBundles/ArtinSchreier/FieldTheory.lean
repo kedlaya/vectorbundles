@@ -5,17 +5,29 @@ public import Mathlib.LinearAlgebra.FreeModule.PID
 public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 public import Mathlib.RingTheory.Trace.Basic
 
-public import VectorBundles.ArtinSchreier.Polynomials
-
 @[expose] public section
 
 open IntermediateField Module Polynomial
 
-variable (F K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
+lemma artin_schreier_poly {F : Type} [Field F] {p : ℕ} (c : F) (hp : Nat.Prime p) :
+  (X ^ p - X - C c).natDegree = p ∧ (X ^ p - X - C c).Monic := by
+  let lin := - X - C c
+  have h := calc
+    lin.natDegree ≤ 1 := by
+      apply (natDegree_sub_le_iff_right (natDegree_neg_le_of_le natDegree_X_le)).mpr
+      simp only [natDegree_C, zero_le]
+    _ ≤ p := Nat.Prime.one_le hp
+  have h2 := natDegree_add_le_of_degree_le (natDegree_X_pow_le p) h
+  have h3 : (X ^ p + lin).coeff p = 1 := by aesop
+  have : X ^ p + lin = X^p - X - C c := by grind only
+  rw [← this]
+  constructor
+  · exact natDegree_eq_of_le_of_coeff_ne_zero h2 (ne_zero_of_eq_one h3)
+  · exact monic_of_natDegree_le_of_coeff_eq_one p h2 h3
 
-lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
-  (hrank: finrank F K = p) (hchar: ringChar F = p) : ∃ a : F,
-    ∃ x : K, minpoly F x = X ^ p - X - C a := by
+lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra F K]
+  [FiniteDimensional F K] [IsGalois F K] {p : ℕ} (hp: Nat.Prime p) (hrank: finrank F K = p)
+    (hchar: ringChar F = p) : ∃ a : F, ∃ x : K, minpoly F x = X ^ p - X - C a := by
   have := (Algebra.charP_iff F K p).mp (ringChar.of_eq hchar)
   let G := Gal(K/F)
   have h_ord := IsGalois.card_aut_eq_finrank F K
@@ -89,7 +101,7 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
       _ = g (z^p) - g z := map_sub g (z ^ p) z
       _ = z^p - 1^p - (z - 1) := by rw [map_pow g z p, this, sub_pow_char z 1]
       _ = z^p - 1 - (z - 1) := by simp
-      _ = b := sub_sub_sub_cancel_right (z ^ p) z 1
+      _ = b := by ring
     have := mem_fixedBy_zpowers_iff_mem_fixedBy.mpr (mem_fixedBy.mpr this)
     have : ∀ h : G, h b = b := by
       intro h
@@ -100,18 +112,19 @@ lemma cyclic_char_p_as_artin_schreier [IsGalois F K] {p : ℕ} (hp: Nat.Prime p)
     (IsGalois.mem_bot_iff_fixed b).mpr this
   obtain ⟨a, ha⟩ := Set.mem_range.mp this
   use a, z
-  obtain ⟨_, h_mon⟩ := artin_schreier_poly a hp
+  obtain ⟨h_deg, h_mon⟩ := artin_schreier_poly a hp
   have h_eval : aeval z (X ^ p - X - C a) = 0 := by aesop
   have h_int : IsIntegral F z := Algebra.IsIntegral.isIntegral z
   open minpoly in
-  have := polynomial_monic_divisor (monic h_int) h_mon (dvd_iff.mpr h_eval)
-  have : (minpoly F z).natDegree = p := by
+  have h : (X ^ p - X - C a).natDegree ≤ (minpoly F z).natDegree := by
     have h : (minpoly F z).natDegree ∣ finrank F K := degree_dvd h_int
     rw [hrank] at h
     have := (Nat.dvd_prime hp).mp h
     by_contra
-    have : (minpoly F z).natDegree = 1 := by simp_all only [or_false, ne_eq]
+    have : (minpoly F z).natDegree = 1 := by aesop
     have := natDegree_eq_one_iff.mp this
     have := (IsGalois.mem_range_algebraMap_iff_fixed z).mp this g
     grind only
-  aesop
+  have := eq_leadingCoeff_mul_of_monic_of_dvd_of_natDegree_le (monic h_int) (dvd_iff.mpr h_eval) h
+  simp [Monic.def.mp h_mon] at this
+  exact this.symm

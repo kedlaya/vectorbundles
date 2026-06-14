@@ -9,15 +9,15 @@ open IntermediateField
 
 theorem artin_schreier_thm (F : Type) (K : Type) [Field F] [Field K] [Algebra F K]
   [FiniteDimensional F K] [IsAlgClosure F K] : IsAlgClosed F ∨ IsRealClosed F := by
-  have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
   if hF : ∃ j : F, -1 = j^2 then
     left
     apply finite_algebraic_closure_with_i F K hF
   else
     right
     push Not at hF
-    obtain ⟨i, hi⟩ := IsAlgClosed.exists_pow_nat_eq (-1 : K) Nat.two_pos
+    have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
     apply RealClosed_from_quadratic F K hF
+    obtain ⟨i, hi⟩ := IsAlgClosed.exists_pow_nat_eq (-1 : K) Nat.two_pos
     use i
     symm at hi
     refine ⟨hi, (ext ?_).symm⟩
