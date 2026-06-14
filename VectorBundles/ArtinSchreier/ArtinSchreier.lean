@@ -8,12 +8,11 @@ open Module Polynomial
 
 variable (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [IsAlgClosure F K]
 
-lemma divisor_by_finrank {f : Polynomial F} (hf : f.natDegree ≠ 0) :
+lemma divisor_by_finrank {f : Polynomial F} (hf : f.degree ≠ 0) :
   ∃ (d : Polynomial F), d.Monic ∧ d.natDegree ∣ finrank F K ∧ d ∣ f := by
-  have hf1 := Polynomial.degree_ne_of_natDegree_ne hf
   have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
   have := FaithfulSMul.algebraMap_injective F K
-  obtain ⟨c, hc⟩ := IsAlgClosed.exists_aeval_eq_zero_of_injective K this f hf1
+  obtain ⟨c, hc⟩ := IsAlgClosed.exists_aeval_eq_zero_of_injective K this f hf
   use minpoly F c
   have h_int : IsIntegral F c := Algebra.IsIntegral.isIntegral c
   open minpoly in exact ⟨monic h_int, degree_dvd h_int, dvd_iff.mpr hc⟩
@@ -37,7 +36,7 @@ lemma quadratic_algebraic_closure (h : finrank F K = 2) (a b : F) : IsSquare (a*
   obtain ⟨f, hf1, hf2, hf3⟩ : ∃ f, f.Monic ∧ (f.natDegree = 1 ∨ f.natDegree = 2) ∧ f ∣ g := by
     have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
     have hg0 : g.natDegree ≠ 0 := by simp_all
-    obtain ⟨f, h1, h2, h3⟩ := divisor_by_finrank F K hg0
+    obtain ⟨f, h1, h2, h3⟩ := divisor_by_finrank F K (degree_ne_of_natDegree_ne hg0)
     use f
     rw [h] at h2
     exact ⟨h1, (Nat.dvd_prime Nat.prime_two).mp h2, h3⟩
@@ -75,7 +74,6 @@ lemma quadratic_algebraic_closure (h : finrank F K = 2) (a b : F) : IsSquare (a*
       have := coeff_mul e f 3
       simp [Finset.antidiagonal] at *
       grind only
-    unfold IsSquare
     if f.coeff 1 = 0 then
       right
       use f.coeff 0 + a

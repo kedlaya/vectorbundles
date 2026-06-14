@@ -13,7 +13,7 @@ variable (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensio
   [IsAlgClosure F K] (h : ∃ i : F, -1 = i^2)
 
 include h in
-lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAlgClosed F :=
+lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAlgClosed F := by
   have : IsGalois F K := by
     (expose_names; exact { to_isSeparable := inst_5, to_normal := IsAlgClosure.normal F K })
   have h_ac : IsAlgClosed K := IsAlgClosure.isAlgClosed F
@@ -25,10 +25,8 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
     obtain ⟨g, hg⟩ := exists_prime_orderOf_dvd_card p hp1a
     let H := Subgroup.zpowers g
     let E := fixedField H
-    have h_ekrank := calc
-      finrank E K = Nat.card H := finrank_fixedField_eq_card H
-      _ = orderOf g := Nat.card_zpowers g
-      _ = p := hg
+    have h_ekrank := finrank_fixedField_eq_card H
+    rw [Nat.card_zpowers g, hg] at h_ekrank
     have : IsAlgClosure E K := { isAlgClosed := h_ac, isAlgebraic := isAlgebraic_tower_top }
     have hq := finite_algebraic_closure_cyclic_quadratic E K hp1 h_ekrank
     rw [hq.1] at hp1 h_ekrank
@@ -40,14 +38,10 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
       have : IsSquare (-1 : E) := by grind
       have := IsSquare.mul this ha
       simp_all only [mul_neg, neg_mul, one_mul, neg_neg]
-  have := calc
-    finrank F K = Nat.card G := (IsGaloisGroup.card_eq_finrank G F K).symm
-    _ = Fintype.card G := Nat.card_eq_fintype_card
-    _ = 1 := this
-  have := calc
-    algebraicClosure F K = ⊤ := (algebraicClosure.eq_top_iff F K).mpr Algebra.IsIntegral.isAlgebraic
-    _ = ⊥ := (bot_eq_top_iff_finrank_eq_one.mpr this).symm
-  (IsAlgClosed.algebraicClosure_eq_bot_iff F K).mp this
+  rw [←Nat.card_eq_fintype_card, IsGaloisGroup.card_eq_finrank G F K] at this
+  have := bot_eq_top_iff_finrank_eq_one.mpr this
+  rw [←(algebraicClosure.eq_top_iff F K).mpr Algebra.IsIntegral.isAlgebraic] at this
+  exact (IsAlgClosed.algebraicClosure_eq_bot_iff F K).mp this.symm
 
 include h in
 lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : IsAlgClosed F :=
@@ -64,16 +58,13 @@ lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : Is
         obtain ⟨n, hn⟩ := finrank_eq_pow F K p
         have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
         obtain ⟨x, hx⟩ := IsAlgClosed.exists_pow_nat_eq (iota b) (expChar_pow_pos F p (n + 1))
+        have : ¬finrank F K < (minpoly F x).natDegree := Nat.le_lt_asymm (minpoly.natDegree_le x)
+        rw [minpoly_natDegree_eq' F p x, hn] at this
         let e := elemExponent F x
-        let c := elemReduct F x
-        have := calc
-          p ^ e = (minpoly F x).natDegree := (minpoly_natDegree_eq' F p x).symm
-          _ ≤ finrank F K := minpoly.natDegree_le x
-          _ = p ^ n := hn
-        have : ¬ (e > n) :=
-           (pow_lt_pow_right₀ (Nat.Prime.one_lt hp1)).mt (Nat.le_lt_asymm this)
-        let a := c ^ p ^ (n-e)
+        have : ¬ (e > n) := (pow_lt_pow_right₀ (Nat.Prime.one_lt hp1)).mt this
         have h : e + (n-e) = n := by grind only
+        let c := elemReduct F x
+        let a := c ^ p ^ (n-e)
         have := calc
           x ^ p ^ n = x ^ p ^ (e + (n-e)) := by rw [h]
           _ = x ^ (p ^ e * p ^ (n-e)) := by grind only
@@ -81,15 +72,13 @@ lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : Is
           _ = (iota c) ^ (p ^ (n-e)) := by rw [← algebraMap_elemReduct_eq' F p x]
           _ = iota a := by grind only [= map_pow]
         have := calc
-          iota (a ^ p) = iota a ^ p := by simp_all only [map_pow]
-          _ = (x ^ p ^ n) ^ p := by simp [this]
+          iota (a ^ p) = (x ^ p ^ n) ^ p := by simp [this]
           _ = x ^ (p ^ n * p) := by ring
           _ = x ^ p ^ (n + 1) := by grind only
           _ = iota b := hx
-        have h1 := FaithfulSMul.algebraMap_injective F K
-        have := (Function.Injective.eq_iff h1).mp this
         use a
-        simp_all only [frobenius, RingHom.coe_mk, powMonoidHom_apply]
+        have h1 := FaithfulSMul.algebraMap_injective F K
+        apply (Function.Injective.eq_iff h1).mp this
       have := PerfectRing.ofSurjective F p this
       exact PerfectRing.toPerfectField F p
     | inr hp1 =>
