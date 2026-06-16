@@ -1,105 +1,59 @@
 module
 
-public import Mathlib.FieldTheory.Galois.IsGaloisGroup
-public import Mathlib.FieldTheory.PurelyInseparable.Exponent
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
 
+public import VectorBundles.ArtinSchreier.ArtinSchreier
 public import VectorBundles.ArtinSchreier.ArtinSchreier2
 
 @[expose] public section
 
-open IntermediateField Module
-
-variable (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
-  [IsAlgClosure F K] (h : ∃ i : F, -1 = i^2)
-
-include h in
-lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAlgClosed F := by
-  have : IsGalois F K := by
-    (expose_names; exact { to_isSeparable := inst_5, to_normal := IsAlgClosure.normal F K })
-  have h_ac : IsAlgClosed K := IsAlgClosure.isAlgClosed F
-  let G := Gal(K/F)
-  have : Fintype.card G = 1 := by
+lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) {p : ℕ} [Field F] [Field K]
+  [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K] [IsGalois F K] (hp : Nat.Prime p)
+  (hrank : Module.finrank F K = p) : p = 2 ∧ ∃ a : F, ¬ IsSquare a := by
+  open Nat Polynomial in
+  have h_char := finite_algebraic_closure_cyclic_prime F K hp hrank
+  have hK : (primitiveRoots (Module.finrank F K) F).Nonempty := by
+    have hp1 := Prime.pos hp
+    let cyclo := cyclotomic p F
+    have := Std.ne_of_lt (degree_cyclotomic_pos p F hp1)
+    obtain ⟨f, h_fmonic, hf1, h_divcyclo⟩ := divisor_by_finrank F K this.symm
+    rw [hrank] at *
+    have := Prime.eq_one_or_self_of_dvd hp f.natDegree hf1
+    have : f.degree = 1 := by cases this with
+      | inl h => exact (degree_eq_iff_natDegree_eq_of_pos one_pos).mpr h
+      | inr h =>
+        have := natDegree_le_of_dvd h_divcyclo (cyclotomic_ne_zero p F)
+        rw [h, natDegree_cyclotomic p F, totient_prime hp] at this
+        grind only
+    obtain ⟨z, hz⟩ := exists_root_of_degree_eq_one this
+    use z
+    have : ¬CharP F p := ringChar.eq_iff.mpr.mt h_char
+    have : NeZero (p : F) := { out := (CharP.charP_iff_prime_eq_zero hp).mpr.mt this }
+    exact (mem_primitiveRoots hp1).mpr (isRoot_cyclotomic_iff.mp (IsRoot.dvd hz h_divcyclo))
+  obtain ⟨a, h2, _⟩ : ∃ a, Irreducible (X ^ p - C a) ∧ IsSplittingField F K (X ^ p - C a) := by
+    have h := (List.TFAE.out (isCyclic_tfae F K hK) 0 1).mp
+    have := fact_iff.mpr hp
+    have := IsGalois.card_aut_eq_finrank F K
+    rw [hrank] at *
+    (expose_names; exact h ⟨inst_5, isCyclic_of_prime_card this⟩)
+  have hp : p = 2 := by
+    have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
     by_contra
-    obtain ⟨p, hp1, hp1a⟩ := Nat.exists_prime_and_dvd this
-    have := fact_iff.mpr hp1
-    obtain ⟨g, hg⟩ := exists_prime_orderOf_dvd_card p hp1a
-    let H := Subgroup.zpowers g
-    let E := fixedField H
-    have h_ekrank := finrank_fixedField_eq_card H
-    rw [Nat.card_zpowers g, hg] at h_ekrank
-    have : IsAlgClosure E K := { isAlgClosed := h_ac, isAlgebraic := isAlgebraic_tower_top }
-    have hq := finite_algebraic_closure_cyclic_quadratic E K hp1 h_ekrank
-    rw [hq.1] at hp1 h_ekrank
-    obtain ⟨a, ha⟩ := hq.2
-    cases (quadratic_algebraic_closure E K h_ekrank 0 a) with
-    | inl ha => simp_all only [mul_zero, zero_add]
-    | inr ha =>
-      have := IsSquare.map (algebraMap F ↥E) ((isSquare_iff_exists_sq (-1)).mpr h)
-      have : IsSquare (-1 : E) := by grind
-      have := IsSquare.mul this ha
-      simp_all only [mul_neg, neg_mul, one_mul, neg_neg]
-  rw [←Nat.card_eq_fintype_card, IsGaloisGroup.card_eq_finrank G F K] at this
-  have := bot_eq_top_iff_finrank_eq_one.mpr this
-  rw [←(algebraicClosure.eq_top_iff F K).mpr Algebra.IsIntegral.isAlgebraic] at this
-  exact (IsAlgClosed.algebraicClosure_eq_bot_iff F K).mp this.symm
-
-include h in
-lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : IsAlgClosed F :=
-  open IsPurelyInseparable in
-  have h_perf : PerfectField F := by
-    let p := ringChar F
-    have hp1 := CharP.char_is_prime_or_zero F p
-    cases hp1 with
-    | inl hp1 =>
-      have : ExpChar F p := ExpChar.prime hp1
-      have : Function.Surjective (frobenius F p) := by
-        intro b
-        let iota := algebraMap F K
-        obtain ⟨n, hn⟩ := finrank_eq_pow F K p
-        have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
-        obtain ⟨x, hx⟩ := IsAlgClosed.exists_pow_nat_eq (iota b) (expChar_pow_pos F p (n + 1))
-        have : ¬finrank F K < (minpoly F x).natDegree := Nat.le_lt_asymm (minpoly.natDegree_le x)
-        rw [minpoly_natDegree_eq' F p x, hn] at this
-        let e := elemExponent F x
-        have : ¬ (e > n) := (pow_lt_pow_right₀ (Nat.Prime.one_lt hp1)).mt this
-        have h : e + (n-e) = n := by grind only
-        let c := elemReduct F x
-        let a := c ^ p ^ (n-e)
-        have := calc
-          x ^ p ^ n = x ^ p ^ (e + (n-e)) := by rw [h]
-          _ = x ^ (p ^ e * p ^ (n-e)) := by grind only
-          _ = (x ^ p ^ e) ^ (p ^ (n-e)) := pow_mul x (p ^ e) (p ^ (n - e))
-          _ = (iota c) ^ (p ^ (n-e)) := by rw [← algebraMap_elemReduct_eq' F p x]
-          _ = iota a := by grind only [= map_pow]
-        have := calc
-          iota (a ^ p) = (x ^ p ^ n) ^ p := by simp [this]
-          _ = x ^ (p ^ n * p) := by ring
-          _ = x ^ p ^ (n + 1) := by grind only
-          _ = iota b := hx
-        use a
-        have h1 := FaithfulSMul.algebraMap_injective F K
-        apply (Function.Injective.eq_iff h1).mp this
-      have := PerfectRing.ofSurjective F p this
-      exact PerfectRing.toPerfectField F p
-    | inr hp1 =>
-      have := (CharP.ringChar_zero_iff_CharZero F).mp hp1
-      exact PerfectField.ofCharZero
-  have : Algebra.IsSeparable F K := Algebra.IsAlgebraic.isSeparable_of_perfectField
-  finite_separable_algebraic_closure_with_i F K h
-
-include K h in
-lemma finite_algebraic_closure_with_i : IsAlgClosed F :=
-  let E := separableClosure F K
-  have : IsAlgClosure E K :=
-    { isAlgClosed := IsAlgClosure.isAlgClosed F, isAlgebraic := isAlgebraic_tower_top }
-  have : IsAlgClosed E := by
-    apply finite_inseparable_algebraic_closure_with_i E K
-    let iota := algebraMap F E
-    obtain ⟨i, hi⟩ := h
-    use iota i
-    have : iota (i^2) = iota (-1) := by grind only
-    grind only [= map_pow, = map_neg, = map_one]
-  have : IsAlgClosure F E :=
-    { isAlgClosed := IsSepClosed.isAlgClosed_of_perfectField ↥E,
-      isAlgebraic := separableClosure.isAlgebraic F K }
-  finite_separable_algebraic_closure_with_i F E h
+    have h_irr: ∀ n, n ≠ 0 → (Irreducible (X ^ p ^ n - C a) ↔ ∀ b : F, b ^ p ≠ a) := by
+      intro _ hn
+      exact X_pow_sub_C_irreducible_iff_of_prime_pow hp this hn
+    have : Irreducible (X ^ p ^ 1 - C a) := by simp_all only [pow_one]
+    have := (h_irr 2 (zero_ne_add_one 1).symm).mpr ((h_irr 1 one_ne_zero).mp this)
+    let pol := map (algebraMap F K) (X ^ p ^ 2 - C a)
+    have := Irreducible.natDegree_dvd_finrank this (IsAlgClosed.splits pol)
+    rw [natDegree_X_pow_sub_C, hrank] at this
+    simp_all only [not_pos_pow_dvd, Prime.one_lt hp, one_lt_two]
+  refine ⟨hp, ?_⟩
+  use a
+  by_contra
+  obtain ⟨c, hc⟩ := IsSquare.exists_sq a this
+  have : eval c (X ^ 2 - C a) = 0 := by simp [eval_sub, eval_X_pow 2, eval_C, hc]
+  rw [hp] at hrank h2
+  have := degree_eq_one_of_irreducible_of_root h2 (IsRoot.def.mpr this)
+  have := degree_X_pow_sub_C two_pos a
+  aesop

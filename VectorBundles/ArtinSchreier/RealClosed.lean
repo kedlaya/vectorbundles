@@ -25,11 +25,8 @@ lemma odd_irreducible_factor {F : Type} [Field F] {f: Polynomial F} (h : Odd f.n
     by_contra
     let T := S.map natDegree
     have := natDegree_multiset_prod S h0S
-    have : 2 ∣ T.sum := by
-      apply Multiset.dvd_sum
-      intro x hx
-      have : ∀ t : ℕ, t ∈ T → Even t := by aesop
-      exact Even.two_dvd (this x hx)
+    have : ∀ t : ℕ, t ∈ T → Even t := by aesop
+    have : 2 ∣ T.sum := Multiset.dvd_sum (fun x hx => Even.two_dvd (this x hx))
     grind only [= Nat.odd_iff]
   use g
   exact ⟨irreducible_of_factor g hg1, dvd_of_mem_factors hg1, hg2⟩
@@ -71,17 +68,7 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
     use x
     exact IsRoot.dvd hx h_div
   have semi : IsSemireal F := by
-    have hs : ∀ x y : F, ∃ z : F, x * x + y * y = z * z := by
-      intro x y
-      have hssq := quadratic_algebraic_closure F K h_rank2 x (y * y)
-      cases hssq with
-      | inl hssq => exact hssq
-      | inr hssq =>
-        by_cases y = 0
-        · use x
-          grind only
-        · obtain ⟨r, _⟩ := hssq
-          grind only [h1 (r/y)]
+    rw [isSemireal_iff_not_isSumSq_neg_one]
     have hssq : ∀ x : F, IsSumSq x → IsSquare x := by
       intro x hx
       induction hx with
@@ -89,12 +76,19 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
         use 0
         simp only [mul_zero]
       | sq_add y _ hz =>
-          rcases hz with ⟨z, hz⟩
-          subst hz
-          exact hs y z
-    rw [isSemireal_iff_not_isSumSq_neg_one]
+        rcases hz with ⟨z, hz⟩
+        subst hz
+        cases (quadratic_algebraic_closure F K h_rank2 y (z * z)) with
+        | inl hs => exact hs
+        | inr hs =>
+          by_cases z = 0
+          · use y
+            grind only
+          · obtain ⟨r, _⟩ := hs
+            grind only [h1 (r/z)]
+    apply (hssq (-1)).mt
     by_contra
-    obtain ⟨r, _⟩ := IsSquare.exists_sq (-1) (hssq (-1) this)
+    obtain ⟨r, _⟩ := this
     grind only [h1 r]
   exact
   { toIsSemireal := semi, isSquare_or_isSquare_neg := issquare,

@@ -1,6 +1,6 @@
 module
 
-public import VectorBundles.ArtinSchreier.ArtinSchreier3
+public import VectorBundles.ArtinSchreier.ArtinSchreier4
 public import VectorBundles.ArtinSchreier.RealClosed
 
 @[expose] public section
