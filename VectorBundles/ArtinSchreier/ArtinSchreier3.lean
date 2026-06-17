@@ -27,7 +27,7 @@ lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) {p : ℕ} 
         grind only
     obtain ⟨z, hz⟩ := exists_root_of_degree_eq_one this
     use z
-    have : ¬CharP F p := ringChar.eq_iff.mpr.mt h_char
+    have := ringChar.eq_iff.mpr.mt h_char
     have : NeZero (p : F) := { out := (CharP.charP_iff_prime_eq_zero hp).mpr.mt this }
     exact (mem_primitiveRoots hp1).mpr (isRoot_cyclotomic_iff.mp (IsRoot.dvd hz h_divcyclo))
   obtain ⟨a, h2, _⟩ : ∃ a, Irreducible (X ^ p - C a) ∧ IsSplittingField F K (X ^ p - C a) := by
@@ -37,13 +37,11 @@ lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) {p : ℕ} 
     rw [hrank] at *
     (expose_names; exact h ⟨inst_5, isCyclic_of_prime_card this⟩)
   have hp : p = 2 := by
-    have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
+    have := IsAlgClosure.isAlgClosed F (K := K)
     by_contra
-    have h_irr: ∀ n, n ≠ 0 → (Irreducible (X ^ p ^ n - C a) ↔ ∀ b : F, b ^ p ≠ a) := by
-      intro _ hn
-      exact X_pow_sub_C_irreducible_iff_of_prime_pow hp this hn
+    have h := fun n ↦ X_pow_sub_C_irreducible_iff_of_prime_pow hp this (K := F) (n := n)
     have : Irreducible (X ^ p ^ 1 - C a) := by simp_all only [pow_one]
-    have := (h_irr 2 (zero_ne_add_one 1).symm).mpr ((h_irr 1 one_ne_zero).mp this)
+    have := (h 2 (zero_ne_add_one 1).symm).mpr ((h 1 one_ne_zero).mp this)
     let pol := map (algebraMap F K) (X ^ p ^ 2 - C a)
     have := Irreducible.natDegree_dvd_finrank this (IsAlgClosed.splits pol)
     rw [natDegree_X_pow_sub_C, hrank] at this

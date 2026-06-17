@@ -1,7 +1,5 @@
 module
 
-public import Mathlib.FieldTheory.KummerExtension
-public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 public import Mathlib.RingTheory.Trace.Basic
 
 @[expose] public section
@@ -10,15 +8,11 @@ open Polynomial
 
 lemma artin_schreier_poly {F : Type} [Field F] {p : ℕ} (c : F) (hp : Nat.Prime p) :
   (X ^ p - X - C c).natDegree = p ∧ (X ^ p - X - C c).Monic := by
-  let lin := - X - C c
-  have h := calc
-    lin.natDegree ≤ 1 := by
-      apply (natDegree_sub_le_iff_right (natDegree_neg_le_of_le natDegree_X_le)).mpr
-      simp only [natDegree_C, zero_le]
-    _ ≤ p := Nat.Prime.one_le hp
+  have h := Nat.Prime.one_le hp
+  rw [←natDegree_X_add_C c, ←natDegree_neg] at h
   have h2 := natDegree_add_le_of_degree_le (natDegree_X_pow_le p) h
-  have h3 : (X ^ p + lin).coeff p = 1 := by aesop
-  have : X ^ p + lin = X^p - X - C c := by grind only
+  have h3 : (X ^ p - (X + C c)).coeff p = 1 := by aesop
+  have : X ^ p - (X + C c) = X^p - X - C c := by grind only
   rw [← this]
   constructor
   · exact natDegree_eq_of_le_of_coeff_ne_zero h2 (ne_zero_of_eq_one h3)
@@ -27,7 +21,7 @@ lemma artin_schreier_poly {F : Type} [Field F] {p : ℕ} (c : F) (hp : Nat.Prime
 lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra F K]
   [IsGalois F K] {p : ℕ} (hp: Nat.Prime p) (hrank: Module.finrank F K = p)
     (hchar: ringChar F = p) : ∃ a : F, ∃ x : K, minpoly F x = X ^ p - X - C a := by
-  open Algebra Finset Nat in
+  open Algebra Finset MulAction Subgroup Nat in
   have := Prime.pos hp
   rw [←hrank] at this
   have := FiniteDimensional.of_finrank_pos this
@@ -45,15 +39,13 @@ lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra 
   let z := ∑ i : rp, (g^(i:ℕ)) y * i
   have : g z = z - 1 := calc
     g z = ∑ i : rp, g ((g^(i:ℕ)) y * i) := by apply map_finset_sum
-    _ = ∑ i : rp, (g * (g^(i:ℕ))) y * i := by
-      simp_all only [map_mul, map_natCast, AlgEquiv.mul_apply]
+    _ = ∑ i : rp, (g * (g^(i:ℕ))) y * i := by simp_all
     _ = ∑ i : rp, (g^(i+1:ℕ)) y * i := by
       apply sum_congr rfl
       intro i _
       rw [pow_succ' g ↑i]
     _ = ∑ i : rp, ((g^(i+1:ℕ)) y * (i+1) - (g^(i+1:ℕ)) y) := by grind only
-    _ = ∑ i : rp, (g^(i+1:ℕ)) y * (i+1) - ∑ i : rp, (g^(i+1:ℕ)) y := by
-      apply sum_sub_distrib
+    _ = ∑ i : rp, (g^(i+1:ℕ)) y * (i+1) - ∑ i : rp, (g^(i+1:ℕ)) y := by apply sum_sub_distrib
     _ = z - ∑ i : rp, (g^(i+1:ℕ)) y := by
       apply sub_left_inj.mpr
       have hp1 : p - 1 + 1 = p := succ_pred_prime hp
@@ -64,8 +56,7 @@ lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra 
       _ = ∑ i ∈ rp, f1 i := (sum_subtype rp (fun x ↦ Iff.of_eq rfl) f1).symm
       _ = ∑ i ∈ range (p-1+1), f1 i := by rw [hp1]
       _ = ∑ i ∈ range (p-1), f1 i + f (p-1+1) := sum_range_succ f1 (p-1)
-      _ = ∑ i ∈ range (p-1), f1 i + f 0 := by
-        simp_all only [CharP.cast_eq_zero, mul_zero, cast_zero, f]
+      _ = ∑ i ∈ range (p-1), f1 i + f 0 := by simp_all [f]
       _ = ∑ i ∈ range (p-1+1), f i := (sum_range_succ' f (p-1)).symm
       _ = ∑ i ∈ rp, f i := by rw [hp1]
       _ = z := sum_subtype rp (fun x ↦ Iff.of_eq rfl) f
@@ -79,7 +70,7 @@ lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra 
           constructor
           · intro b
             have : DecidableEq G := Classical.typeDecidableEq G
-            have := Subgroup.mem_top (g ^ (-1:ℤ) * b)
+            have := mem_top (g ^ (-1:ℤ) * b)
             rw [←h_gen] at this
             have := (mem_zpowers_iff_mem_range_orderOf (isOfFinOrder_of_finite g)).mp this
             rw [h_ordg, mem_image] at this
@@ -96,13 +87,13 @@ lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra 
       _ = (algebraMap F K) 1 := by rw [hy]
       _ = 1 := algebraMap.coe_one
   let b := z^p - z
-  have := open MulAction in
+  have :=
     have := calc
       g b = g (z^p) - g z := map_sub g (z ^ p) z
-      _ = z^p - 1 - (z - 1) := by simp [map_pow g z p, this, sub_pow_char z 1]
+      _ = z^p - 1 - (z - 1) := by simp [map_pow, this, sub_pow_char]
       _ = b := by ring
     have := mem_fixedBy_zpowers_iff_mem_fixedBy.mpr (mem_fixedBy.mpr this)
-    have : ∀ h : G, h b = b := by open Subgroup in
+    have : ∀ h : G, h b = b := by
       intro h
       have h1 := (Subgroup.ext_iff.mp h_gen.symm h).mp (mem_top h)
       obtain ⟨n, h3⟩ := mem_zpowers_iff.mp h1
@@ -113,7 +104,7 @@ lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra 
   use a, z
   obtain ⟨h_deg, h_mon⟩ := artin_schreier_poly a hp
   have h_eval : aeval z (X ^ p - X - C a) = 0 := by aesop
-  have h_int : IsIntegral F z := IsIntegral.isIntegral z
+  have h_int := IsIntegral.isIntegral z (R := F)
   open minpoly in
   have h : (X ^ p - X - C a).natDegree ≤ (minpoly F z).natDegree := by
     have h := degree_dvd h_int

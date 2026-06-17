@@ -16,7 +16,7 @@ include h in
 lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAlgClosed F := by
   have : IsGalois F K := by
     (expose_names; exact { to_isSeparable := inst_5, to_normal := IsAlgClosure.normal F K })
-  have h_ac : IsAlgClosed K := IsAlgClosure.isAlgClosed F
+  have h_ac := IsAlgClosure.isAlgClosed F (K := K)
   let G := Gal(K/F)
   have : Fintype.card G = 1 := by
     by_contra
@@ -45,20 +45,20 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
 
 include h in
 lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : IsAlgClosed F :=
-  open IsPurelyInseparable Module in
+  open Function IsPurelyInseparable Module in
   have h_perf : PerfectField F := by
     let p := ringChar F
     have hp1 := CharP.char_is_prime_or_zero F p
     cases hp1 with
     | inl hp1 =>
-      have : ExpChar F p := ExpChar.prime hp1
-      have : Function.Surjective (frobenius F p) := by
+      have := ExpChar.prime hp1 (R := F)
+      have : Surjective (frobenius F p) := by
         intro b
         let iota := algebraMap F K
         obtain ⟨n, hn⟩ := finrank_eq_pow F K p
-        have : IsAlgClosed K := IsAlgClosure.isAlgClosed F
+        have := IsAlgClosure.isAlgClosed F (K := K)
         obtain ⟨x, hx⟩ := IsAlgClosed.exists_pow_nat_eq (iota b) (expChar_pow_pos F p (n + 1))
-        have : ¬finrank F K < (minpoly F x).natDegree := Nat.le_lt_asymm (minpoly.natDegree_le x)
+        have := Nat.le_lt_asymm (minpoly.natDegree_le x (K := F))
         rw [minpoly_natDegree_eq' F p x, hn] at this
         let e := elemExponent F x
         have : ¬ (e > n) := (pow_lt_pow_right₀ (Nat.Prime.one_lt hp1)).mt this
@@ -66,8 +66,7 @@ lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : Is
         let c := elemReduct F x
         let a := c ^ p ^ (n-e)
         have := calc
-          x ^ p ^ n = x ^ p ^ (e + (n-e)) := by rw [h]
-          _ = x ^ (p ^ e * p ^ (n-e)) := by grind only
+          x ^ p ^ n = x ^ (p ^ e * p ^ (n-e)) := by grind only
           _ = (x ^ p ^ e) ^ (p ^ (n-e)) := pow_mul x (p ^ e) (p ^ (n - e))
           _ = (iota c) ^ (p ^ (n-e)) := by rw [← algebraMap_elemReduct_eq' F p x]
           _ = iota a := by grind only [= map_pow]
@@ -77,8 +76,7 @@ lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : Is
           _ = x ^ p ^ (n + 1) := by grind only
           _ = iota b := hx
         use a
-        have h1 := FaithfulSMul.algebraMap_injective F K
-        apply (Function.Injective.eq_iff h1).mp this
+        exact (Injective.eq_iff (FaithfulSMul.algebraMap_injective F K)).mp this
       have := PerfectRing.ofSurjective F p this
       exact PerfectRing.toPerfectField F p
     | inr hp1 =>

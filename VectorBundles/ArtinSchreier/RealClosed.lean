@@ -8,11 +8,10 @@ public import VectorBundles.ArtinSchreier.ArtinSchreier
 
 @[expose] public section
 
-open IntermediateField Module Polynomial
+open IntermediateField Module Polynomial UniqueFactorizationMonoid
 
 lemma odd_irreducible_factor {F : Type} [Field F] {f: Polynomial F} (h : Odd f.natDegree) :
   ∃ g : Polynomial F, Irreducible g ∧ g ∣ f ∧ Odd g.natDegree := by
-  open UniqueFactorizationMonoid in
   let S := factors f
   have h_prod := Associated.symm (factors_prod (ne_zero_of_natDegree_gt (Odd.pos h)))
   have h0S : 0 ∉ S := by
@@ -34,10 +33,10 @@ lemma odd_irreducible_factor {F : Type} [Field F] {f: Polynomial F} (h : Odd f.n
 lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algebra F K]
   [FiniteDimensional F K] [IsAlgClosure F K] (h1 : ∀ i : F, -1 ≠ i^2)
     (h2 : ∃ i : K, -1 = i^2 ∧ F⟮i⟯ = ⊤) : IsRealClosed F := by
-  have h_alg : IsAlgClosed K := IsAlgClosure.isAlgClosed F
+  have h_alg := IsAlgClosure.isAlgClosed F (K := K)
   obtain ⟨i, h2a, h2b⟩ := h2
   symm at h2a
-  have h_int : IsIntegral F i := Algebra.IsIntegral.isIntegral i
+  have h_int := Algebra.IsIntegral.isIntegral i (R := F)
   have hi_pol : (minpoly F i).natDegree = 2 := by open minpoly in
     have : aeval i (X ^ 2 + C (1 : F)) = 0 := by aesop
     have := natDegree_le_of_dvd (dvd_iff.mpr this) (X_pow_add_C_ne_zero Nat.two_pos 1)
@@ -48,12 +47,9 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
       have : (algebraMap F K) (i₀ ^ 2) = (algebraMap F K) (-1) := by grind
       grind only [= map_pow, = map_neg, = map_one, = map_mul, = map_sub]
     grind only [natDegree_pos h_int]
-  have h_rank2 := calc
-    finrank F K = finrank (⊥: IntermediateField F K) K := finrank_bot'.symm
-    _ = relfinrank ⊥ F⟮i⟯ * finrank F⟮i⟯ K :=
-      (relfinrank_mul_finrank_top (OrderBot.bot_le F⟮i⟯)).symm
-    _ = 2 := by rw [relfinrank_bot_left F⟮i⟯, adjoin.finrank h_int, hi_pol,
-      finrank_eq_one_iff_eq_top.mpr h2b, Nat.mul_one 2]
+  have h_rank2 : finrank F K = 2 := by
+    rw [←finrank_bot', ←relfinrank_mul_finrank_top (OrderBot.bot_le F⟮i⟯), relfinrank_bot_left,
+    adjoin.finrank h_int, hi_pol, finrank_eq_one_iff_eq_top.mpr h2b, Nat.mul_one]
   have issquare := quadratic_algebraic_closure F K h_rank2 0
   simp only [mul_zero, zero_add] at issquare
   have odd_deg : ∀ {f : Polynomial F}, Odd f.natDegree → ∃ x, f.IsRoot x := by
@@ -74,7 +70,7 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
       induction hx with
       | zero =>
         use 0
-        simp only [mul_zero]
+        exact (mul_zero 0).symm
       | sq_add y _ hz =>
         rcases hz with ⟨z, hz⟩
         subst hz
