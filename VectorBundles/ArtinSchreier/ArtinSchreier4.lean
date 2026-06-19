@@ -2,7 +2,6 @@ module
 
 public import Mathlib.FieldTheory.Galois.IsGaloisGroup
 public import Mathlib.FieldTheory.PurelyInseparable.Exponent
-
 public import VectorBundles.ArtinSchreier.ArtinSchreier3
 
 @[expose] public section
@@ -23,9 +22,8 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
     obtain ⟨p, hp1, hp1a⟩ := Nat.exists_prime_and_dvd this
     have := fact_iff.mpr hp1
     obtain ⟨g, hg⟩ := exists_prime_orderOf_dvd_card p hp1a
-    let H := Subgroup.zpowers g
-    let E := fixedField H
-    have h_ekrank := finrank_fixedField_eq_card H
+    let E := fixedField (Subgroup.zpowers g)
+    have h_ekrank := finrank_fixedField_eq_card (Subgroup.zpowers g)
     rw [Nat.card_zpowers g, hg] at h_ekrank
     have : IsAlgClosure E K := { isAlgClosed := h_ac, isAlgebraic := isAlgebraic_tower_top }
     have hq := finite_algebraic_closure_cyclic_quadratic E K hp1 h_ekrank
@@ -68,12 +66,10 @@ lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : Is
         have := calc
           x ^ p ^ n = x ^ (p ^ e * p ^ (n-e)) := by grind only
           _ = (x ^ p ^ e) ^ (p ^ (n-e)) := pow_mul x (p ^ e) (p ^ (n - e))
-          _ = (iota c) ^ (p ^ (n-e)) := by rw [← algebraMap_elemReduct_eq' F p x]
-          _ = iota a := by grind only [= map_pow]
+          _ = iota a := by rw [← algebraMap_elemReduct_eq' F p x, map_pow]
         have := calc
           iota (a ^ p) = (x ^ p ^ n) ^ p := by simp [this]
           _ = x ^ (p ^ n * p) := by ring
-          _ = x ^ p ^ (n + 1) := by grind only
           _ = iota b := hx
         use a
         exact (Injective.eq_iff (FaithfulSMul.algebraMap_injective F K)).mp this

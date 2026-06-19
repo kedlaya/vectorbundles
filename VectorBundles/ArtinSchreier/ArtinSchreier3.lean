@@ -1,7 +1,7 @@
 module
 
+public import Mathlib.FieldTheory.KummerExtension
 public import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
-
 public import VectorBundles.ArtinSchreier.ArtinSchreier
 public import VectorBundles.ArtinSchreier.ArtinSchreier2
 
@@ -9,33 +9,29 @@ public import VectorBundles.ArtinSchreier.ArtinSchreier2
 
 lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) {p : ℕ} [Field F] [Field K]
   [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K] [IsGalois F K] (hp : Nat.Prime p)
-  (hrank : Module.finrank F K = p) : p = 2 ∧ ∃ a : F, ¬ IsSquare a := by
+    (hrank : Module.finrank F K = p) : p = 2 ∧ ∃ a : F, ¬ IsSquare a := by
   open Nat Polynomial in
   have h_char := finite_algebraic_closure_cyclic_prime F K hp hrank
-  have hK : (primitiveRoots (Module.finrank F K) F).Nonempty := by
-    have hp1 := Prime.pos hp
-    let cyclo := cyclotomic p F
-    have := Std.ne_of_lt (degree_cyclotomic_pos p F hp1)
-    obtain ⟨f, h_fmonic, hf1, h_divcyclo⟩ := divisor_by_finrank F K this.symm
-    rw [hrank] at *
+  have h := fun hK ↦ (List.TFAE.out (isCyclic_tfae F K hK) 0 1).mp
+  have hp1 := Prime.pos hp
+  let cyclo := cyclotomic p F
+  have := Std.ne_of_lt (degree_cyclotomic_pos p F hp1)
+  obtain ⟨f, h_fmonic, hf1, h_divcyclo⟩ := divisor_by_finrank F K this.symm
+  have hG := IsGalois.card_aut_eq_finrank F K
+  rw [hrank] at h hf1 hG
+  have hK : (primitiveRoots p F).Nonempty := by
+    have := natDegree_le_of_dvd h_divcyclo (cyclotomic_ne_zero p F)
+    rw [natDegree_cyclotomic p F, totient_prime hp] at this
     have := Prime.eq_one_or_self_of_dvd hp f.natDegree hf1
-    have : f.degree = 1 := by cases this with
-      | inl h => exact (degree_eq_iff_natDegree_eq_of_pos one_pos).mpr h
-      | inr h =>
-        have := natDegree_le_of_dvd h_divcyclo (cyclotomic_ne_zero p F)
-        rw [h, natDegree_cyclotomic p F, totient_prime hp] at this
-        grind only
+    have : f.natDegree = 1 := by grind only
+    have := (degree_eq_iff_natDegree_eq_of_pos one_pos).mpr this
     obtain ⟨z, hz⟩ := exists_root_of_degree_eq_one this
     use z
     have := ringChar.eq_iff.mpr.mt h_char
     have : NeZero (p : F) := { out := (CharP.charP_iff_prime_eq_zero hp).mpr.mt this }
     exact (mem_primitiveRoots hp1).mpr (isRoot_cyclotomic_iff.mp (IsRoot.dvd hz h_divcyclo))
-  obtain ⟨a, h2, _⟩ : ∃ a, Irreducible (X ^ p - C a) ∧ IsSplittingField F K (X ^ p - C a) := by
-    have h := (List.TFAE.out (isCyclic_tfae F K hK) 0 1).mp
-    have := fact_iff.mpr hp
-    have := IsGalois.card_aut_eq_finrank F K
-    rw [hrank] at *
-    (expose_names; exact h ⟨inst_5, isCyclic_of_prime_card this⟩)
+  have := fact_iff.mpr hp
+  obtain ⟨a, h2, _⟩ := by (expose_names; exact h hK ⟨inst_5, isCyclic_of_prime_card hG⟩)
   have hp : p = 2 := by
     have := IsAlgClosure.isAlgClosed F (K := K)
     by_contra
