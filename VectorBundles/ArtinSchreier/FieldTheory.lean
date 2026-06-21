@@ -17,7 +17,7 @@ lemma artin_schreier_poly {F : Type} [Field F] {p : ℕ} (c : F) (hp : 1 < p) :
 lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra F K]
   [IsGalois F K] {p : ℕ} (hp: Nat.Prime p) (hrank: Module.finrank F K = p)
     (hchar: ringChar F = p) : ∃ a : F, ∃ x : K, minpoly F x = X ^ p - X - C a := by
-  open Algebra Finset MulAction Subgroup Nat in
+  open Algebra Finset MulAction Subgroup Nat minpoly in
   have := Prime.pos hp
   rw [←hrank] at this
   have := FiniteDimensional.of_finrank_pos this
@@ -27,17 +27,15 @@ lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra 
   rw [hrank] at h_ord
   have := fact_iff.mpr hp
   have := isCyclic_of_prime_card h_ord
-  obtain ⟨g, h_gen⟩ := isCyclic_iff_exists_zpowers_eq_top.mp this
+  have ⟨g, h_gen⟩ := isCyclic_iff_exists_zpowers_eq_top.mp this
   have h_ordg := orderOf_eq_card_of_zpowers_eq_top h_gen
   rw [h_ord] at h_ordg
-  obtain ⟨y, hy⟩ := Set.mem_range.mp (trace_surjective F K 1)
+  have ⟨y, hy⟩ := Set.mem_range.mp (trace_surjective F K 1)
   let rp := range p
   let z := ∑ i : rp, (g^(i:ℕ)) y * i
   have := calc
     g z = ∑ i : rp, g ((g^(i:ℕ)) y * i) := by apply map_finset_sum
-    _ = ∑ i : rp, (g^(i+1:ℕ)) y * i := by
-      apply sum_congr rfl
-      simp [pow_succ' g]
+    _ = ∑ i : rp, (g^(i+1:ℕ)) y * i := by simp [pow_succ' g]
     _ = ∑ i : rp, ((g^(i+1:ℕ)) y * (i+1) - (g^(i+1:ℕ)) y) := by grind only
     _ = ∑ i : rp, (g^(i+1:ℕ)) y * (i+1) - ∑ i : rp, (g^(i+1:ℕ)) y := by apply sum_sub_distrib
     _ = z - ∑ i : rp, (g^(i+1:ℕ)) y := by
@@ -55,23 +53,21 @@ lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra 
     _ = z - 1 := by
       apply sub_right_inj.mpr
       calc
-      ∑ i : rp, (g^(i+1:ℕ)) y = ∑ σ : G, σ y := by
+      ∑ i : rp, (g^(i+1:ℕ)) y = ∑ σ : G, σ y := by open IsOfFinOrder in
         let f := fun (i : rp) ↦ g ^ (i+1:ℕ)
-        have : Function.Bijective f := by open IsOfFinOrder in
-          apply (Nat.bijective_iff_surjective_and_card f).mpr
-          constructor
-          · intro b
-            have : DecidableEq G := Classical.typeDecidableEq G
-            have := mem_top (g ^ (-1:ℤ) * b)
-            rw [←h_gen] at this
-            have := (mem_zpowers_iff_mem_range_orderOf (isOfFinOrder_of_finite g)).mp this
-            rw [h_ordg, mem_image] at this
-            obtain ⟨i, hb1, hb2⟩ := this
-            simp_all only [Subtype.exists, f]
-            use i, hb1
-            simp only [pow_succ' g i, hb2, zpow_neg, zpow_one, mul_inv_cancel_left]
-          · rw [card_eq_finsetCard rp, card_range p, ←h_ord]
-        apply sum_bijective f this
+        apply sum_bijective f
+        apply (Nat.bijective_iff_surjective_and_card f).mpr
+        constructor
+        · intro b
+          have : DecidableEq G := Classical.typeDecidableEq G
+          have := mem_top (g ^ (-1:ℤ) * b)
+          rw [←h_gen] at this
+          have := (mem_zpowers_iff_mem_range_orderOf (isOfFinOrder_of_finite g)).mp this
+          rw [h_ordg, mem_image] at this
+          have ⟨i, hb1, hb2⟩ := this
+          use ⟨i, hb1⟩
+          simp only [f, pow_succ' g i, hb2, zpow_neg, zpow_one, mul_inv_cancel_left]
+        · rw [card_eq_finsetCard rp, card_range p, ←h_ord]
         · simp only [univ_eq_attach, mem_attach, mem_univ, implies_true]
         · exact fun i _ ↦ rfl
       _ = (algebraMap F K) (trace F K y) := (trace_eq_sum_automorphisms y).symm
@@ -87,17 +83,15 @@ lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra 
     have : ∀ h : G, h b = b := by
       intro h
       have h1 := (Subgroup.ext_iff.mp h_gen.symm h).mp (mem_top h)
-      obtain ⟨n, h3⟩ := mem_zpowers_iff.mp h1
+      have ⟨n, h3⟩ := mem_zpowers_iff.mp h1
       rw [←h3, ←AlgEquiv.smul_def]
       exact mem_stabilizerSubmonoid_iff.mp (this n)
     (IsGalois.mem_bot_iff_fixed b).mpr this
-  obtain ⟨a, ha⟩ := Set.mem_range.mp this
-  use a, z
-  obtain ⟨h_deg, h_mon⟩ := artin_schreier_poly a (Nat.Prime.one_lt hp)
+  have ⟨a, ha⟩ := Set.mem_range.mp this
+  have ⟨h_deg, h_mon⟩ := artin_schreier_poly a (Nat.Prime.one_lt hp)
   have h_eval : aeval z (X ^ p - X - C a) = 0 := by aesop
   have h_int := IsIntegral.isIntegral z (R := F)
-  open minpoly in
-  have h : (X ^ p - X - C a).natDegree ≤ (minpoly F z).natDegree := by
+  have h : (X ^ p - X - C a).natDegree ≤ (minpoly F z).natDegree := by open minpoly in
     have h := degree_dvd h_int
     rw [hrank] at h
     have := (dvd_prime hp).mp h
@@ -108,4 +102,4 @@ lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra 
     grind only
   have := eq_leadingCoeff_mul_of_monic_of_dvd_of_natDegree_le (monic h_int) (dvd_iff.mpr h_eval) h
   simp only [Monic.def.mp h_mon, map_one, one_mul] at this
-  exact this.symm
+  exact ⟨a, z, this.symm⟩

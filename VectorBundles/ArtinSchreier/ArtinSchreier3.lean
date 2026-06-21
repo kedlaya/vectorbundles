@@ -14,40 +14,29 @@ lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) {p : ℕ} 
   have h_char := finite_algebraic_closure_cyclic_prime F K hp hrank
   have h := fun hK ↦ (List.TFAE.out (isCyclic_tfae F K hK) 0 1).mp
   have hp1 := Prime.pos hp
-  let cyclo := cyclotomic p F
-  have := Std.ne_of_lt (degree_cyclotomic_pos p F hp1)
-  obtain ⟨f, h_fmonic, hf1, h_divcyclo⟩ := divisor_by_finrank F K this.symm
+  have := natDegree_pos_iff_degree_pos.mpr (degree_cyclotomic_pos p F hp1)
+  have ⟨f, _, hf1, h_divcyclo⟩ := divisor_by_finrank F K this
   have hG := IsGalois.card_aut_eq_finrank F K
   rw [hrank] at h hf1 hG
   have hK : (primitiveRoots p F).Nonempty := by
     have := natDegree_le_of_dvd h_divcyclo (cyclotomic_ne_zero p F)
     rw [natDegree_cyclotomic p F, totient_prime hp] at this
-    have := Prime.eq_one_or_self_of_dvd hp f.natDegree hf1
-    have : f.natDegree = 1 := by grind only
+    have : f.natDegree = 1 := by grind only [Prime.eq_one_or_self_of_dvd]
     have := (degree_eq_iff_natDegree_eq_of_pos one_pos).mpr this
-    obtain ⟨z, hz⟩ := exists_root_of_degree_eq_one this
-    use z
+    have ⟨z, hz⟩ := exists_root_of_degree_eq_one this
     have := ringChar.eq_iff.mpr.mt h_char
     have : NeZero (p : F) := { out := (CharP.charP_iff_prime_eq_zero hp).mpr.mt this }
-    exact (mem_primitiveRoots hp1).mpr (isRoot_cyclotomic_iff.mp (IsRoot.dvd hz h_divcyclo))
+    exact ⟨z, (mem_primitiveRoots hp1).mpr (isRoot_cyclotomic_iff.mp (IsRoot.dvd hz h_divcyclo))⟩
   have := fact_iff.mpr hp
   obtain ⟨a, h2, _⟩ := by (expose_names; exact h hK ⟨inst_5, isCyclic_of_prime_card hG⟩)
-  have hp : p = 2 := by
-    have := IsAlgClosure.isAlgClosed F (K := K)
+  have hp2 : p = 2 := by
     by_contra
     have h := fun n ↦ X_pow_sub_C_irreducible_iff_of_prime_pow hp this (K := F) (n := n)
     have : Irreducible (X ^ p ^ 1 - C a) := by simp_all only [pow_one]
     have := (h 2 (zero_ne_add_one 1).symm).mpr ((h 1 one_ne_zero).mp this)
-    let pol := map (algebraMap F K) (X ^ p ^ 2 - C a)
-    have := Irreducible.natDegree_dvd_finrank this (IsAlgClosed.splits pol)
+    have := Irreducible.natDegree_dvd_finrank this (pol_splits F K (X ^ p ^ 2 - C a))
     rw [natDegree_X_pow_sub_C, hrank] at this
     simp_all only [not_pos_pow_dvd, Prime.one_lt hp, one_lt_two]
-  refine ⟨hp, ?_⟩
-  use a
-  by_contra
-  obtain ⟨c, hc⟩ := IsSquare.exists_sq a this
-  have : eval c (X ^ 2 - C a) = 0 := by simp [eval_sub, eval_X_pow 2, eval_C, hc]
-  rw [hp] at hrank h2
-  have := degree_eq_one_of_irreducible_of_root h2 (IsRoot.def.mpr this)
-  have := degree_X_pow_sub_C two_pos a
-  aesop
+  rw [hp2] at h2
+  refine ⟨hp2, ⟨a, nthRoots_two_eq_zero_iff.mp ?_⟩⟩
+  refine roots_eq_zero_of_irreducible_of_natDegree_ne_one h2 ?_; aesop
