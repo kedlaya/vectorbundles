@@ -13,8 +13,7 @@ variable (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensio
 
 include h in
 lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAlgClosed F := by
-  have : IsGalois F K := by
-    (expose_names; exact { to_isSeparable := inst_5, to_normal := IsAlgClosure.normal F K })
+  have : IsGalois F K := { to_isSeparable := inferInstance, to_normal := IsAlgClosure.normal F K }
   have h_ac := IsAlgClosure.isAlgClosed F (K := K)
   let G := Gal(K/F)
   have : Fintype.card G = 1 := by
@@ -24,31 +23,28 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
     let E := fixedField (Subgroup.zpowers g)
     have h_ekrank := finrank_fixedField_eq_card (Subgroup.zpowers g)
     rw [Nat.card_zpowers g, hg] at h_ekrank
+    have h1E : IsSquare (-1 : E) := by grind [IsSquare.map (algebraMap F ↥E) h]
     have : IsAlgClosure E K := { isAlgClosed := h_ac, isAlgebraic := isAlgebraic_tower_top }
     have ⟨hq1, ⟨a, ha⟩⟩ := finite_algebraic_closure_cyclic_quadratic E K hp1 h_ekrank
     rw [hq1] at hp1 h_ekrank
     cases (quadratic_algebraic_closure E K h_ekrank 0 a) with
     | inl ha => simp_all only [mul_zero, zero_add]
-    | inr ha =>
-      have : IsSquare (-1 : E) := by grind [IsSquare.map (algebraMap F ↥E) h]
-      have := IsSquare.mul this ha; simp_all only [mul_neg, neg_mul, one_mul, neg_neg]
+    | inr ha => have := IsSquare.mul h1E ha; simp_all only [mul_neg, neg_mul, one_mul, neg_neg]
   rw [←Nat.card_eq_fintype_card, IsGaloisGroup.card_eq_finrank G F K] at this
-  have := bot_eq_top_iff_finrank_eq_one.mpr this
+  have := (bot_eq_top_iff_finrank_eq_one.mpr this).symm
   rw [←(algebraicClosure.eq_top_iff F K).mpr Algebra.IsIntegral.isAlgebraic] at this
-  exact (IsAlgClosed.algebraicClosure_eq_bot_iff F K).mp this.symm
+  exact (IsAlgClosed.algebraicClosure_eq_bot_iff F K).mp this
 
 include h in
 lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : IsAlgClosed F :=
   open Function IsPurelyInseparable Module in
   have h_perf : PerfectField F := by
     let p := ringChar F
-    have hp1 := CharP.char_is_prime_or_zero F p
-    cases hp1 with
+    cases CharP.char_is_prime_or_zero F p with
     | inl hp1 =>
       have := ExpChar.prime hp1 (R := F)
       have : Surjective (frobenius F p) := by
-        intro b
-        let iota := algebraMap F K
+        intro b; let iota := algebraMap F K
         have ⟨n, hn⟩ := finrank_eq_pow F K p
         have := IsAlgClosure.isAlgClosed F (K := K)
         have ⟨x, hx⟩ := IsAlgClosed.exists_pow_nat_eq (iota b) (expChar_pow_pos F p (n + 1))
@@ -57,8 +53,7 @@ lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : Is
         let e := elemExponent F x
         have : ¬ (e > n) := (pow_lt_pow_right₀ (Nat.Prime.one_lt hp1)).mt this
         have h : e + (n-e) = n := by grind only
-        let c := elemReduct F x
-        let a := c ^ p ^ (n-e)
+        let c := elemReduct F x; let a := c ^ p ^ (n-e)
         have := calc
           iota b = x ^ (p ^ n * p) := hx.symm
           _ = (x ^ p ^ n) ^ p := by ring
@@ -75,15 +70,11 @@ lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : Is
   finite_separable_algebraic_closure_with_i F K h
 
 include K h in
-lemma finite_algebraic_closure_with_i : IsAlgClosed F :=
-  let E := separableClosure F K
-  have : IsAlgClosure E K :=
+lemma finite_algebraic_closure_with_i : IsAlgClosed F := by
+  let E := separableClosure F K; have : IsAlgClosure E K :=
     { isAlgClosed := IsAlgClosure.isAlgClosed F, isAlgebraic := isAlgebraic_tower_top }
-  have : IsAlgClosed E := by
-    have h1 : (algebraMap F E) (-1) = -1 := by aesop
-    apply finite_inseparable_algebraic_closure_with_i E K
-    rw [←h1]
-    exact IsSquare.map (algebraMap F E) h
+  have := IsSquare.map (algebraMap F E) h; rw [map_neg, map_one] at this
   have : IsAlgClosure F E :=
-    { isAlgClosed := this, isAlgebraic := separableClosure.isAlgebraic F K }
-  finite_separable_algebraic_closure_with_i F E h
+    { isAlgClosed := finite_inseparable_algebraic_closure_with_i E K this,
+      isAlgebraic := separableClosure.isAlgebraic F K }
+  exact finite_separable_algebraic_closure_with_i F E h
