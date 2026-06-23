@@ -8,8 +8,9 @@ public import VectorBundles.ArtinSchreier.ArtinSchreier2
 @[expose] public section
 
 lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) {p : ℕ} [Field F] [Field K]
-  [Algebra F K] [FiniteDimensional F K] [IsAlgClosure F K] [IsGalois F K] (hp : Nat.Prime p)
+  [Algebra F K] [IsAlgClosure F K] [IsGalois F K] (hp : Nat.Prime p)
     (hrank : Module.finrank F K = p) : p = 2 ∧ ∃ a : F, ¬ IsSquare a := by open Nat Polynomial in
+  have := FiniteDimensional.of_finrank_pos (by rw [hrank]; exact Prime.pos hp)
   have h := fun hK ↦ (List.TFAE.out (isCyclic_tfae F K hK) 0 1).mp
   have hG := IsGalois.card_aut_eq_finrank F K
   rw [hrank] at h hG
@@ -17,8 +18,8 @@ lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) {p : ℕ} 
     have hp1 := Prime.pos hp
     have h_char := finite_algebraic_closure_cyclic_prime F K hp hrank
     have := natDegree_pos_iff_degree_pos.mpr (degree_cyclotomic_pos p F hp1)
-    rcases divisor_by_finrank F K hrank hp this with ⟨z, hz⟩ | ⟨f, hf1, hf2, hf3⟩
-    · have : NeZero (p : F) := { out := (CharP.charP_iff_prime_eq_zero hp).mpr.mt h_char }
+    rcases divisor_by_finrank F K hrank hp this with ⟨z, hz⟩ | ⟨f, ⟨_, _⟩, hf3⟩
+    · have : NeZero (p : F) := ⟨(CharP.charP_iff_prime_eq_zero hp).mpr.mt h_char⟩
       exact ⟨z, (mem_primitiveRoots hp1).mpr (isRoot_cyclotomic_iff.mp hz)⟩
     · have := natDegree_le_of_dvd hf3 (cyclotomic_ne_zero p F)
       rw [natDegree_cyclotomic p F, totient_prime hp] at this; grind

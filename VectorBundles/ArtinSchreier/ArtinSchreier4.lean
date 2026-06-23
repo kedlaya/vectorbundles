@@ -13,7 +13,7 @@ variable (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensio
 
 include h in
 lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAlgClosed F := by
-  have : IsGalois F K := { to_isSeparable := inferInstance, to_normal := IsAlgClosure.normal F K }
+  have := isGalois_iff.mpr ⟨inferInstance, IsAlgClosure.normal F K⟩
   have h_ac := IsAlgClosure.isAlgClosed F (K := K)
   let G := Gal(K/F)
   have : Fintype.card G = 1 := by
@@ -24,7 +24,7 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
     have h_ekrank := finrank_fixedField_eq_card (Subgroup.zpowers g)
     rw [Nat.card_zpowers g, hg] at h_ekrank
     have h1E : IsSquare (-1 : E) := by grind [IsSquare.map (algebraMap F ↥E) h]
-    have : IsAlgClosure E K := { isAlgClosed := h_ac, isAlgebraic := isAlgebraic_tower_top }
+    have : IsAlgClosure E K := ⟨h_ac, isAlgebraic_tower_top⟩
     have ⟨hq1, ⟨a, ha⟩⟩ := finite_algebraic_closure_cyclic_quadratic E K hp1 h_ekrank
     rw [hq1] at hp1 h_ekrank
     cases (quadratic_algebraic_closure E K h_ekrank 0 a) with
@@ -71,10 +71,9 @@ lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : Is
 
 include K h in
 lemma finite_algebraic_closure_with_i : IsAlgClosed F := by
-  let E := separableClosure F K; have : IsAlgClosure E K :=
-    { isAlgClosed := IsAlgClosure.isAlgClosed F, isAlgebraic := isAlgebraic_tower_top }
+  let E := separableClosure F K
+  have : IsAlgClosure E K := ⟨IsAlgClosure.isAlgClosed F, isAlgebraic_tower_top⟩
   have := IsSquare.map (algebraMap F E) h; rw [map_neg, map_one] at this
-  have : IsAlgClosure F E :=
-    { isAlgClosed := finite_inseparable_algebraic_closure_with_i E K this,
-      isAlgebraic := separableClosure.isAlgebraic F K }
+  have : IsAlgClosure F E := ⟨finite_inseparable_algebraic_closure_with_i E K this,
+    separableClosure.isAlgebraic F K⟩
   exact finite_separable_algebraic_closure_with_i F E h

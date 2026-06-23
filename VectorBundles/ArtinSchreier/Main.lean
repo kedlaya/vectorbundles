@@ -6,7 +6,7 @@ public import VectorBundles.ArtinSchreier.RealClosed
 @[expose] public section
 
 theorem artin_schreier_thm (F : Type) (K : Type) [Field F] [Field K] [Algebra F K]
-  [FiniteDimensional F K] [IsAlgClosure F K] : IsAlgClosed F ∨ IsRealClosed F := by
+  [IsAlgClosure F K] [FiniteDimensional F K] : IsAlgClosed F ∨ IsRealClosed F := by
   open IntermediateField IsAlgClosed IsAlgClosure IsIntegral in
   have : IsAlgClosed K := isAlgClosed F
   have ⟨i, hi⟩ := exists_pow_nat_eq (-1 : K) Nat.two_pos; symm at hi
