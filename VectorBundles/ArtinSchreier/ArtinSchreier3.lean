@@ -11,9 +11,6 @@ lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) {p : ℕ} 
   [Algebra F K] [IsAlgClosure F K] [IsGalois F K] (hp : Nat.Prime p)
     (hrank : Module.finrank F K = p) : p = 2 ∧ ∃ a : F, ¬ IsSquare a := by open Nat Polynomial in
   have := FiniteDimensional.of_finrank_pos (by rw [hrank]; exact Prime.pos hp)
-  have h := fun hK ↦ (List.TFAE.out (isCyclic_tfae F K hK) 0 1).mp
-  have hG := IsGalois.card_aut_eq_finrank F K
-  rw [hrank] at h hG
   have hK : (primitiveRoots p F).Nonempty := by
     have hp1 := Prime.pos hp
     have h_char := finite_algebraic_closure_cyclic_prime F K hp hrank
@@ -23,8 +20,12 @@ lemma finite_algebraic_closure_cyclic_quadratic (F : Type) (K : Type) {p : ℕ} 
       exact ⟨z, (mem_primitiveRoots hp1).mpr (isRoot_cyclotomic_iff.mp hz)⟩
     · have := natDegree_le_of_dvd hf3 (cyclotomic_ne_zero p F)
       rw [natDegree_cyclotomic p F, totient_prime hp] at this; grind
-  have := fact_iff.mpr hp
-  obtain ⟨a, h2, _⟩ := h hK ⟨‹IsGalois F K›, isCyclic_of_prime_card hG⟩
+  have ⟨a, h2, _⟩ : ∃ a, Irreducible (Polynomial.X ^ p - Polynomial.C a) ∧
+        Polynomial.IsSplittingField F K (Polynomial.X ^ p - Polynomial.C a) := by
+    have := fact_iff.mpr hp
+    have h := fun hK ↦ (List.TFAE.out (isCyclic_tfae F K hK) 0 1).mp
+    have hG := IsGalois.card_aut_eq_finrank F K
+    rw [hrank] at h hG; exact h hK ⟨‹IsGalois F K›, isCyclic_of_prime_card hG⟩
   have hp2 : p = 2 := by
     by_contra
     have h := fun n ↦ X_pow_sub_C_irreducible_iff_of_prime_pow hp this (K := F) (n := n)

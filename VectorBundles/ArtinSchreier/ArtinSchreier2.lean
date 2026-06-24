@@ -9,12 +9,11 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) {p : ℕ} [Fie
   [Algebra F K] [IsAlgClosure F K] [IsGalois F K] (hp : Nat.Prime p)
     (hrank : Module.finrank F K = p) : ¬CharP F p := by
   open IntermediateField IsAlgClosed Nat Polynomial Subfield in
-  have := FiniteDimensional.of_finrank_pos (by rw [hrank]; exact Prime.pos hp)
-  by_contra
-  have ⟨a, x, ha⟩ := cyclic_char_p_as_artin_schreier F K hp hrank
-  have := ExpChar.prime hp (R := F)
   have hp1 := Prime.pos hp; have hp1' := Prime.one_lt hp; have := fact_iff.mpr hp
-  have h_natdeg := (artin_schreier_poly a hp1').1; rw [←ha] at h_natdeg
+  have := FiniteDimensional.of_finrank_pos (by rw [hrank]; exact hp1)
+  by_contra
+  have ⟨a, x, ha⟩ := cyclic_char_p_as_param F K hp hrank
+  have h_natdeg := (artinSchreierPoly_isMonicOfDegree a hp1').1; rw [←ha] at h_natdeg
   have h_int := Algebra.IsIntegral.isIntegral x (R := F)
   let pb := adjoin.powerBasis h_int; let iota := algebraMap F K
   have ⟨y, hy⟩ : ∃ y : F⟮x⟯, y^p = y + a * pb.gen^(p-1) := by
@@ -24,10 +23,10 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) {p : ℕ} [Fie
       rw [←(Field.primitive_element_iff_minpoly_degree_eq F x).mpr this] at h1
       have := IsAlgClosure.isAlgClosed F (K := K); exact of_ringEquiv K ↥F⟮x⟯ h1.symm
     let t := pb.gen ^ (p-1) * a; let pol := X ^ p - X - C t
-    have := (artin_schreier_poly t hp1').1.trans_ne hp1.ne'
+    have := (artinSchreierPoly_isMonicOfDegree t hp1').1.trans_ne hp1.ne'
     have ⟨y, hy⟩ := exists_aeval_eq_zero F⟮x⟯ pol (degree_ne_of_natDegree_ne this)
-    simp_all only [map_pow, aeval_sub, coe_aeval_eq_eval, aeval_X, eval_C, pol]
-    use y; grind only
+    use y
+    simp_all only [map_pow, aeval_sub, coe_aeval_eq_eval, aeval_X, eval_C, pol]; grind only
   have ⟨y_rep, h_pb1, _⟩ := PowerBasis.exists_eq_aeval pb y
   rw [adjoin.powerBasis_dim h_int, h_natdeg] at h_pb1
   let c := y_rep.coeff (p-1); let y1p_rep := y_rep + monomial (p-1) a

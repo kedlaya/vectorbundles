@@ -10,9 +10,9 @@ open IntermediateField Polynomial UniqueFactorizationMonoid
 
 lemma odd_irreducible_factor {F : Type} [Field F] {f : F[X]} (h : Odd f.natDegree) :
   ∃ g : F[X], Irreducible g ∧ g ∣ f ∧ Odd g.natDegree :=
-  let S := factors f
   have := ne_zero_of_natDegree_gt (Odd.pos h)
   have h_prod := Associated.symm (factors_prod this)
+  let S := factors f
   have : 0 ∉ S := by
     by_contra
     rw [Multiset.prod_eq_zero this] at h_prod; simp_all only [associated_zero_iff_eq_zero]
@@ -27,7 +27,6 @@ lemma odd_irreducible_factor {F : Type} [Field F] {f : F[X]} (h : Odd f.natDegre
 lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algebra F K]
     [IsAlgClosure F K] (h1 : ¬IsSquare (-1 : F)) (h2 : ∃ i : K, -1 = i^2 ∧ F⟮i⟯ = ⊤) :
     IsRealClosed F := by
-  have h_alg := IsAlgClosure.isAlgClosed F (K := K)
   have ⟨i, h2a, h2b⟩ := h2; symm at h2a
   have h_int := Algebra.IsIntegral.isIntegral i (R := F)
   have h_rank2 : (minpoly F i).natDegree = 2 := by open minpoly in
@@ -50,8 +49,7 @@ lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algeb
       · have := natDegree_eq_zero_of_isUnit h1; aesop
       · grind [natDegree_eq_of_degree_eq, degree_eq_degree_of_associated]
   have neg : ∀ x : F, 0 ≠ x → IsSquare x → ¬ IsSquare (-x) := by
-    intro x hx hs
-    by_contra
+    intro x hx hs; by_contra
     have := IsSquare.div this hs; rw [neg_div_self hx.symm] at this; contradiction
   have hssq : ∀ x : F, IsSumSq x → IsSquare x := by
     apply IsSumSq.rec'

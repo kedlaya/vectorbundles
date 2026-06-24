@@ -27,24 +27,24 @@ lemma quadratic_algebraic_closure (h : finrank F K = 2) (a b : F) :
     IsSquare (a*a+b) ∨ IsSquare (-b) := by
   let g := monomial 4 1 + monomial 2 (-2 * a) + monomial 0 (a^2 + b)
   have h1 : g.IsMonicOfDegree 4 := by dsimp [g]; exact ⟨by compute_degree!, by monicity⟩
-  have ⟨hg₀, hg₁, hg₂, hg₃⟩ : g.coeff 0 = (a^2 + b) ∧ g.coeff 1 = 0 ∧
-    g.coeff 2 = -2*a ∧ g.coeff 3 = 0 := by simp only [g, coeff_add,
-      coeff_monomial, ↓reduceIte, add_zero, zero_add, Nat.reduceEqDiff, and_self]
   rcases divisor_by_finrank F K h Nat.prime_two (f := g) (by grind [h1.1])
-    with ⟨x, hx⟩ | ⟨f, ⟨hf2, hf1⟩, ⟨e, h_ftimese⟩⟩
+    with ⟨x, hx⟩ | ⟨f, ⟨hf2, hf1⟩, ⟨e, he⟩⟩
   · simp only [IsRoot.def, eval_add, eval_monomial, g] at hx
     right; use x^2 - a; grind only
-  · rw [h_ftimese] at hg₀ h1
+  · rw [he] at h1
     have ⟨he2, he1⟩ : e.IsMonicOfDegree 2 := IsMonicOfDegree.of_mul_left ⟨hf2, hf1⟩ h1
     let f₀ := f.coeff 0; let f₁ := f.coeff 1; let e₀ := e.coeff 0; let e₁ := e.coeff 1
-    have : a^2 + b = f₀ * e₀ ∧ 0 = f₀*e₁ + f₁*e₀ ∧ -2*a = f₀ + f₁*e₁ + e₀ ∧ 0 = f₁ + e₁ := by
-      have : f.coeff 2 = 1 := by rw [←hf2, ←hf1.leadingCoeff, coeff_natDegree]
-      have : e.coeff 2 = 1 := by rw [←he2, ←he1.leadingCoeff, coeff_natDegree]
-      have : e.coeff 3 = 0 := by grind [natDegree_le_iff_coeff_eq_zero.mp he2.le]
-      have : f.coeff 3 = 0 := by grind [natDegree_le_iff_coeff_eq_zero.mp hf2.le]
-      have hm₁ := coeff_mul f e 1; have hm₃ := coeff_mul f e 3; have hm₂ := coeff_mul f e 2
-      simp [Finset.antidiagonal] at hg₀ hm₁ hm₂ hm₃; grind only
+    have : f₀ * e₀ = a^2 + b ∧ 0 = f₀*e₁ + f₁*e₀ ∧ -2*a = f₀ + (f₁*e₁ + e₀) ∧
+        0 = f₁ + e₁ := by
+      have hf₂ : f.coeff 2 = 1 := by rw [←hf2, ←hf1.leadingCoeff, coeff_natDegree]
+      have he₂ : e.coeff 2 = 1 := by rw [←he2, ←he1.leadingCoeff, coeff_natDegree]
+      have he₃ : e.coeff 3 = 0 := by grind [natDegree_le_iff_coeff_eq_zero.mp he2.le]
+      have hf₃ : f.coeff 3 = 0 := by grind [natDegree_le_iff_coeff_eq_zero.mp hf2.le]
+      have hm := coeff_mul f e; rw [←he] at hm
+      have hm₀ := (hm 0).symm; have hm₁ := hm 1; have hm₂ := hm 2; have hm₃ := hm 3
+      simp only [g, coeff_add, coeff_monomial, Finset.antidiagonal] at hm₀ hm₁ hm₂ hm₃
+      simp [hf₂, he₂, he₃, hf₃] at hm₀ hm₁ hm₂ hm₃ ⊢
+      ring_nf at hm₀ hm₁ hm₂ hm₃ ⊢; exact ⟨hm₀, hm₁, hm₂, hm₃⟩
     by_cases f.coeff 1 = 0
-    · right; use f.coeff 0 + a; simp_all only; grind => ring
-    · left
-      use f.coeff 0; grind => ring
+    · right; use f.coeff 0 + a; clear he; grind only
+    · left; use f.coeff 0; grind only

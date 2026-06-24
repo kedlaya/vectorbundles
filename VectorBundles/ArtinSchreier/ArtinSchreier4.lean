@@ -35,45 +35,44 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
   rw [←(algebraicClosure.eq_top_iff F K).mpr Algebra.IsIntegral.isAlgebraic] at this
   exact (IsAlgClosed.algebraicClosure_eq_bot_iff F K).mp this
 
-include h in
-lemma finite_inseparable_algebraic_closure_with_i [IsPurelyInseparable F K] : IsAlgClosed F :=
-  open Function IsPurelyInseparable Module in
-  have h_perf : PerfectField F := by
-    let p := ringChar F
-    cases CharP.char_is_prime_or_zero F p with
-    | inl hp1 =>
-      have := ExpChar.prime hp1 (R := F)
-      have : Surjective (frobenius F p) := by
-        intro b; let iota := algebraMap F K
-        have ⟨n, hn⟩ := finrank_eq_pow F K p
-        have := IsAlgClosure.isAlgClosed F (K := K)
-        have ⟨x, hx⟩ := IsAlgClosed.exists_pow_nat_eq (iota b) (expChar_pow_pos F p (n + 1))
-        have := Nat.le_lt_asymm (minpoly.natDegree_le x (K := F))
-        rw [minpoly_natDegree_eq' F p x, hn] at this
-        let e := elemExponent F x
-        have : ¬ (e > n) := (pow_lt_pow_right₀ (Nat.Prime.one_lt hp1)).mt this
-        have h : e + (n-e) = n := by grind only
-        let c := elemReduct F x; let a := c ^ p ^ (n-e)
-        have := calc
-          iota b = x ^ (p ^ n * p) := hx.symm
-          _ = (x ^ p ^ n) ^ p := by ring
-          _ = (x ^ (p ^ e * p ^ (n-e))) ^ p := by grind only
-          _ = ((x ^ p ^ e) ^ (p ^ (n-e))) ^ p := by rw [pow_mul]
-          _ = iota (a ^ p) := by rw [←algebraMap_elemReduct_eq' F p x, map_pow, map_pow]
-        exact ⟨a, (Injective.eq_iff (FaithfulSMul.algebraMap_injective F K)).mp this.symm⟩
-      have := PerfectRing.ofSurjective F p this
-      exact PerfectRing.toPerfectField F p
-    | inr hp1 =>
-      have := (CharP.ringChar_zero_iff_CharZero F).mp hp1
-      exact PerfectField.ofCharZero
-  have : Algebra.IsSeparable F K := Algebra.IsAlgebraic.isSeparable_of_perfectField
-  finite_separable_algebraic_closure_with_i F K h
+lemma finite_inseparable_algebraic_closure [IsPurelyInseparable F K] : PerfectField F := by
+  let p := ringChar F
+  cases CharP.char_is_prime_or_zero F p with
+  | inl hp1 => open Function IsPurelyInseparable Module in
+    have := ExpChar.prime hp1 (R := F)
+    have : Surjective (frobenius F p) := by
+      intro b; let iota := algebraMap F K
+      have ⟨n, hn⟩ := finrank_eq_pow F K p
+      have := IsAlgClosure.isAlgClosed F (K := K)
+      have ⟨x, hx⟩ := IsAlgClosed.exists_pow_nat_eq (iota b) (expChar_pow_pos F p (n + 1))
+      have := Nat.le_lt_asymm (minpoly.natDegree_le x (K := F))
+      rw [minpoly_natDegree_eq' F p x, hn] at this
+      let e := elemExponent F x
+      have : ¬ (e > n) := (pow_lt_pow_right₀ (Nat.Prime.one_lt hp1)).mt this
+      have h : e + (n-e) = n := by grind only
+      let c := elemReduct F x; let a := c ^ p ^ (n-e)
+      have := calc
+        iota b = x ^ (p ^ n * p) := hx.symm
+        _ = (x ^ p ^ n) ^ p := by ring
+        _ = (x ^ (p ^ e * p ^ (n-e))) ^ p := by grind only
+        _ = ((x ^ p ^ e) ^ (p ^ (n-e))) ^ p := by rw [pow_mul]
+        _ = iota (a ^ p) := by rw [←algebraMap_elemReduct_eq' F p x, map_pow, map_pow]
+      exact ⟨a, (Injective.eq_iff (FaithfulSMul.algebraMap_injective F K)).mp this.symm⟩
+    have := PerfectRing.ofSurjective F p this
+    exact PerfectRing.toPerfectField F p
+  | inr hp1 =>
+    have := (CharP.ringChar_zero_iff_CharZero F).mp hp1
+    exact PerfectField.ofCharZero
 
 include K h in
 lemma finite_algebraic_closure_with_i : IsAlgClosed F := by
   let E := separableClosure F K
   have : IsAlgClosure E K := ⟨IsAlgClosure.isAlgClosed F, isAlgebraic_tower_top⟩
   have := IsSquare.map (algebraMap F E) h; rw [map_neg, map_one] at this
-  have : IsAlgClosure F E := ⟨finite_inseparable_algebraic_closure_with_i E K this,
-    separableClosure.isAlgebraic F K⟩
+  have := finite_inseparable_algebraic_closure E K
+  have : Algebra.IsSeparable E K := Algebra.IsAlgebraic.isSeparable_of_perfectField
+  have : (algebraMap F E) (-1) = -1 := by aesop
+  have h1 := IsSquare.map (algebraMap F E) h; rw [this] at h1
+  have : IsAlgClosed E := finite_separable_algebraic_closure_with_i E K h1
+  have : IsAlgClosure F E := ⟨this, separableClosure.isAlgebraic F K⟩
   exact finite_separable_algebraic_closure_with_i F E h
