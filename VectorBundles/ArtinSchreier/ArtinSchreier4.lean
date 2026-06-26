@@ -25,11 +25,8 @@ lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAl
     rw [Nat.card_zpowers g, hg] at h_ekrank
     have h1E : IsSquare (-1 : E) := by grind [IsSquare.map (algebraMap F ↥E) h]
     have : IsAlgClosure E K := ⟨h_ac, isAlgebraic_tower_top⟩
-    have ⟨hq1, ⟨a, ha⟩⟩ := finite_algebraic_closure_cyclic_quadratic E K hp1 h_ekrank
-    rw [hq1] at hp1 h_ekrank
-    cases (quadratic_algebraic_closure E K h_ekrank 0 a) with
-    | inl ha => simp_all only [mul_zero, zero_add]
-    | inr ha => have := IsSquare.mul h1E ha; simp_all only [mul_neg, neg_mul, one_mul, neg_neg]
+    have ⟨_, ⟨a, ha⟩, h⟩ := finite_algebraic_closure_cyclic_quadratic E K hp1 h_ekrank
+    have := IsSquare.mul h1E (h a ha); simp_all
   rw [←Nat.card_eq_fintype_card, IsGaloisGroup.card_eq_finrank G F K] at this
   have := (bot_eq_top_iff_finrank_eq_one.mpr this).symm
   rw [←(algebraicClosure.eq_top_iff F K).mpr Algebra.IsIntegral.isAlgebraic] at this

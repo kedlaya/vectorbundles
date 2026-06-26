@@ -6,7 +6,7 @@ public import VectorBundles.ArtinSchreier.FieldTheory
 @[expose] public section
 
 lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) {p : ℕ} [Field F] [Field K]
-  [Algebra F K] [IsAlgClosure F K] [IsGalois F K] (hp : Nat.Prime p)
+    [Algebra F K] [IsAlgClosure F K] [IsGalois F K] (hp : Nat.Prime p)
     (hrank : Module.finrank F K = p) : ¬CharP F p := by
   open IntermediateField IsAlgClosed Nat Polynomial Subfield in
   have hp1 := Prime.pos hp; have hp1' := Prime.one_lt hp; have := fact_iff.mpr hp
@@ -30,7 +30,7 @@ lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) {p : ℕ} [Fie
   have ⟨y_rep, h_pb1, _⟩ := PowerBasis.exists_eq_aeval pb y
   rw [adjoin.powerBasis_dim h_int, h_natdeg] at h_pb1
   let c := y_rep.coeff (p-1); let y1p_rep := y_rep + monomial (p-1) a
-  have := minpoly.aeval F x; have : x^p - x - iota a = 0 := by aesop
+  have : x^p - x - iota a = 0 := by have := minpoly.aeval F x; aesop
   have h_matchcoeff : y1p_rep.coeff (p-1) = c^p := by
     have hlin := natDegree_X_add_C a
     let m := map (frobenius F p) y_rep; let yp_rep := m.comp (X + C a)

@@ -10,18 +10,18 @@ open IntermediateField Polynomial UniqueFactorizationMonoid
 
 lemma odd_irreducible_factor {F : Type} [Field F] {f : F[X]} (h : Odd f.natDegree) :
   ∃ g : F[X], Irreducible g ∧ g ∣ f ∧ Odd g.natDegree :=
-  have := ne_zero_of_natDegree_gt (Odd.pos h)
-  have h_prod := Associated.symm (factors_prod this)
   let S := factors f
-  have : 0 ∉ S := by
-    by_contra
-    rw [Multiset.prod_eq_zero this] at h_prod; simp_all only [associated_zero_iff_eq_zero]
   have ⟨g, hg1, hg2⟩ : ∃ g ∈ S, Odd g.natDegree := by
-    have := natDegree_eq_of_degree_eq (degree_eq_degree_of_associated h_prod)
+    have h0 := ne_zero_of_natDegree_gt (Odd.pos h)
+    have hf0 := (associated_zero_iff_eq_zero f).mp.mt h0
+    have h_prod := Associated.symm (factors_prod h0)
+    have : S.prod ≠ 0 := by by_contra; rw [this] at h_prod; contradiction
+    have h0S : 0 ∉ S := Multiset.prod_eq_zero.mt this
+    have hd := natDegree_eq_of_degree_eq (degree_eq_degree_of_associated h_prod)
     by_contra
     let T := S.map natDegree; have : ∀ t : ℕ, t ∈ T → Even t := by aesop
-    have : 2 ∣ T.sum := Multiset.dvd_sum (fun x hx => Even.two_dvd (this x hx))
-    grind only [=Nat.odd_iff, =natDegree_multiset_prod]
+    have : 2 ∣ T.sum := Multiset.dvd_sum (fun x hx ↦ Even.two_dvd (this x hx))
+    rw [hd, natDegree_multiset_prod S h0S] at h; grind only [= Nat.odd_iff]
   ⟨g, irreducible_of_factor g hg1, dvd_of_mem_factors hg1, hg2⟩
 
 lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algebra F K]
