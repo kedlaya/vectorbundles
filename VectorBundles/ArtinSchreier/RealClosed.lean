@@ -1,6 +1,5 @@
 module
 
-public import Mathlib.Algebra.Polynomial.SpecificDegree
 public import Mathlib.FieldTheory.IsRealClosed.Basic
 public import VectorBundles.ArtinSchreier.ArtinSchreier
 
@@ -9,56 +8,51 @@ public import VectorBundles.ArtinSchreier.ArtinSchreier
 open IntermediateField Polynomial UniqueFactorizationMonoid
 
 lemma odd_irreducible_factor {F : Type} [Field F] {f : F[X]} (h : Odd f.natDegree) :
-  ∃ g : F[X], Irreducible g ∧ g ∣ f ∧ Odd g.natDegree :=
+  ∃ g, Irreducible g ∧ g ∣ f ∧ Odd g.natDegree :=
   let S := factors f
   have ⟨g, hg1, hg2⟩ : ∃ g ∈ S, Odd g.natDegree := by
     have h0 := ne_zero_of_natDegree_gt (Odd.pos h)
-    have hf0 := (associated_zero_iff_eq_zero f).mp.mt h0
+    have := (associated_zero_iff_eq_zero f).mp.mt h0
     have h_prod := Associated.symm (factors_prod h0)
     have : S.prod ≠ 0 := by by_contra; rw [this] at h_prod; contradiction
-    have h0S : 0 ∉ S := Multiset.prod_eq_zero.mt this
     have hd := natDegree_eq_of_degree_eq (degree_eq_degree_of_associated h_prod)
+    have h0S := Multiset.prod_eq_zero.mt this; rw [hd, natDegree_multiset_prod S h0S] at h
     by_contra
-    let T := S.map natDegree; have : ∀ t : ℕ, t ∈ T → Even t := by aesop
-    have : 2 ∣ T.sum := Multiset.dvd_sum (fun x hx ↦ Even.two_dvd (this x hx))
-    rw [hd, natDegree_multiset_prod S h0S] at h; grind only [= Nat.odd_iff]
+    have : 2 ∣ (S.map natDegree).sum := by apply Multiset.dvd_sum; simp_all [Even.two_dvd]
+    grind only [= Nat.odd_iff]
   ⟨g, irreducible_of_factor g hg1, dvd_of_mem_factors hg1, hg2⟩
 
 lemma RealClosed_from_quadratic (F : Type) (K : Type) [Field F] [Field K] [Algebra F K]
-    [IsAlgClosure F K] (h1 : ¬IsSquare (-1 : F)) (h2 : ∃ i : K, -1 = i^2 ∧ F⟮i⟯ = ⊤) :
+    [IsAlgClosure F K] (h1 : ¬IsSquare (-1 : F)) (h2 : ∃ i : K, i^2 = -1 ∧ F⟮i⟯ = ⊤) :
     IsRealClosed F := by
-  have ⟨i, h2a, h2b⟩ := h2; symm at h2a
+  obtain ⟨i, h2a, h2b⟩ := h2
+  let iota := algebraMap F K; have hi : i ∉ iota.range := by
+    by_contra; obtain ⟨i₀, h⟩ := this; have := FaithfulSMul.algebraMap_injective F K
+    have : i₀^2 = -1 := (by aesop); grind only [isSquare_iff_exists_sq]
   have h_int := Algebra.IsIntegral.isIntegral i (R := F)
   have h_rank2 : (minpoly F i).natDegree = 2 := by open minpoly in
-    let pol := X ^ 2 + C (1 : F); have : aeval i pol = 0 := by aesop
-    have := natDegree_le_of_dvd (dvd_iff.mpr this) (X_pow_add_C_ne_zero Nat.two_pos 1)
-    by_contra
-    have : (minpoly F i).natDegree = 1 := by grind [natDegree_pos h_int, =natDegree_X_pow_add_C]
-    have ⟨i₀, _⟩ := natDegree_eq_one_iff.mp this
-    have : (algebraMap F K) (i₀ ^ 2) = (algebraMap F K) (-1) := by simp_all
-    grind only [=map_pow, =map_neg, =map_one, =map_mul, =map_sub, isSquare_iff_exists_sq]
+    have ha : aeval i (X ^ 2 + C (1 : F)) = 0 := by aesop
+    have := natDegree_le_of_dvd (dvd_iff.mpr ha) (X_pow_add_C_ne_zero Nat.two_pos 1)
+    have := (two_le_natDegree_iff h_int).mpr hi; grind only [=natDegree_X_pow_add_C]
   rw [←adjoin.finrank h_int, h2b, finrank_top'] at h_rank2
-  have issquare := quadratic_algebraic_closure F K h_rank2 0
-  simp only [mul_zero, zero_add] at issquare
   have odd_deg : ∀ {f : F[X]}, Odd f.natDegree → ∃ x, f.IsRoot x := by
     intro f h; have ⟨g, hg, h_div, h_oddg⟩ := odd_irreducible_factor h
     rcases divisor_by_finrank F K h_rank2 Nat.prime_two (Irreducible.natDegree_pos hg)
-      with ⟨x, hx⟩ | ⟨_, ⟨_, _⟩, hd3⟩
+      with ⟨x, hx⟩ | ⟨w, ⟨_, _⟩, hd3⟩
     · exact ⟨x, IsRoot.dvd hx h_div⟩
-    · rcases (Irreducible.dvd_iff hg).mp hd3 with h1 | h2
-      · have := natDegree_eq_zero_of_isUnit h1; aesop
-      · grind [natDegree_eq_of_degree_eq, degree_eq_degree_of_associated]
+    · have := not_isUnit_of_natDegree_pos w (by grind)
+      have := (Irreducible.isUnit_iff_not_associated_of_dvd hg hd3).mpr.mt this
+      grind [natDegree_eq_of_degree_eq, degree_eq_degree_of_associated]
   have neg : ∀ x : F, 0 ≠ x → IsSquare x → ¬ IsSquare (-x) := by
-    intro x hx hs; by_contra
-    have := IsSquare.div this hs; rw [neg_div_self hx.symm] at this; contradiction
+    intro x hx hs; by_contra; have := IsSquare.div this hs
+    rw [neg_div_self hx.symm] at this; contradiction
+  have h := quadratic_algebraic_closure F K h_rank2
   have hssq : ∀ x : F, IsSumSq x → IsSquare x := by
-    apply IsSumSq.rec'
-    · exact IsSquare.zero
-    · intro a b ⟨y, hy⟩ _ hb
-      by_cases hb0 : 0 = b
-      · simp [←hb0, hy]
-      · have := neg b hb0 hb; have := quadratic_algebraic_closure F K h_rank2 y b; simp_all
-  have semi : IsSemireal F := isSemireal_iff_not_isSumSq_neg_one.mpr
-    ((hssq (-1)).mt (neg 1 zero_ne_one IsSquare.one))
-  exact { toIsSemireal := semi, isSquare_or_isSquare_neg :=
-    issquare, exists_isRoot_of_odd_natDegree := odd_deg }
+    apply IsSumSq.rec'; exact IsSquare.zero
+    intro a b ⟨y, hy⟩ _ hb; by_cases hb0 : 0 = b
+    · simp [←hb0, hy]
+    · have := neg b hb0 hb; have := h y b; simp_all
+  have := isSemireal_iff_not_isSumSq_neg_one.mpr ((hssq (-1)).mt (neg 1 zero_ne_one IsSquare.one))
+  let issquare := h 0; ring_nf at issquare; exact
+    { toIsSemireal := this, isSquare_or_isSquare_neg := issquare,
+      exists_isRoot_of_odd_natDegree := odd_deg }
