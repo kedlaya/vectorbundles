@@ -1,51 +1,88 @@
 module
 
-public import VectorBundles.ArtinSchreier.FieldTheory
+public import Mathlib.FieldTheory.Galois.IsGaloisGroup
+public import Mathlib.FieldTheory.KummerExtension
+public import Mathlib.FieldTheory.PurelyInseparable.Exponent
+public import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
+public import VectorBundles.ArtinSchreier.ArtinSchreier
 
 @[expose] public section
 
-lemma finite_algebraic_closure_cyclic_prime (F : Type) (K : Type) {p : ℕ} [Field F] [Field K]
-    [Algebra F K] [IsAlgClosure F K] [IsGalois F K] (hp : Nat.Prime p)
-    (hrank : Module.finrank F K = p) : ¬CharP F p := by
-  open IntermediateField IsAlgClosed Nat Polynomial Subfield in
-  have hp1 := Prime.pos hp; have hp1' := Prime.one_lt hp; have := fact_iff.mpr hp
-  by_contra
-  have ⟨a, x, ha⟩ := cyclic_char_p_as_param F K hp hrank
-  have h_deg := (artinSchreierPoly_isMonicOfDegree a hp1').1; rw [←ha] at h_deg
-  have h_int := Algebra.IsIntegral.isIntegral x (R := F)
-  let pb := adjoin.powerBasis h_int; let iota := algebraMap F K
-  have ⟨y, hy⟩ : ∃ y : F⟮x⟯, ↑y^p - (↑y + (iota a) * pb.gen^(p-1)) = 0 := by
-    have : IsAlgClosed F⟮x⟯ := by
-      have := FiniteDimensional.of_finrank_pos (by rw [hrank]; exact hp1)
-      have h1 := (topEquiv (F := F) (E := K)).symm
-      have := (degree_eq_iff_natDegree_eq_of_pos hp1).mpr h_deg; rw [←hrank] at this
-      rw [←(Field.primitive_element_iff_minpoly_degree_eq F x).mpr this] at h1
-      have := IsAlgClosure.isAlgClosed F (K := K); exact of_ringEquiv K ↥F⟮x⟯ h1
-    let t := a * pb.gen ^ (p-1)
-    have := (artinSchreierPoly_isMonicOfDegree t hp1').1.trans_ne hp1.ne'
-    have ⟨y, hy⟩ := exists_aeval_eq_zero F⟮x⟯ (X ^ p - X - C t) (degree_ne_of_natDegree_ne this)
-    rw [coe_aeval_eq_eval, eval_sub, eval_sub, eval_pow, eval_X, eval_C, sub_sub, sub_eq_zero]
-      at hy; use y; rw [←IntermediateField.coe_pow]; aesop
-  have ⟨y_rep, h_pb1, h_pb2⟩ := PowerBasis.exists_eq_aeval pb y
-  let c := y_rep.coeff (p-1); have : c^p = c + a := by
-    rw [adjoin.powerBasis_dim h_int, h_deg] at h_pb1
-    let m := map (frobenius F p) y_rep; let yp_rep := m.taylor a
-    have hd := (natDegree_taylor m a).trans (natDegree_map _)
-    let y1p_rep := y_rep + monomial (p-1) a; have h : yp_rep = y1p_rep := by
-      have h_eval : aeval x yp_rep = aeval x (expand F p m) := by
-        have := minpoly.aeval F x; have hx : x^p - x - iota a = 0 := by aesop
-        rw [sub_sub, sub_eq_zero] at hx; simp [yp_rep, taylor_apply, aeval_comp, hx, iota]
-      have hdiv : aeval x (yp_rep - y1p_rep) = 0 := by
-        have h : aeval x y_rep = y := by aesop
-        rw [aeval_sub, h_eval, ←map_expand, map_frobenius_expand, map_pow, aeval_add, h,
-          aeval_monomial]; exact hy
-      refine sub_eq_zero.mp (eq_zero_of_dvd_of_natDegree_lt (minpoly.dvd_iff.mpr hdiv) ?_)
-      grind only [!natDegree_add_le, !natDegree_sub_le, !natDegree_monomial_le, =max_def]
-    have : yp_rep.coeff (p-1) = c^p := by
-      by_cases hf0 : y_rep.natDegree = p-1
-      · rw [←hf0, ←hd, ←leadingCoeff, leadingCoeff_taylor, leadingCoeff_map, leadingCoeff]; aesop
-      · subst c; rw [coeff_eq_zero_of_natDegree_lt, coeff_eq_zero_of_natDegree_lt, zero_pow]
-        repeat grind only
-    rw [←this, h, coeff_add y_rep, coeff_monomial_same]
-  have hirr := minpoly.irreducible h_int; rw [←h_deg] at hp1'
-  have := Irreducible.not_isRoot_of_natDegree_ne_one hirr hp1'.ne' (x := c); simp_all
+variable (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [FiniteDimensional F K]
+  [IsAlgClosure F K] (h : IsSquare (-1 : F))
+
+omit [FiniteDimensional F K] in
+lemma finite_algebraic_closure_cyclic_quadratic {p : ℕ} [IsGalois F K] (hp : Nat.Prime p)
+    (hrank : Module.finrank F K = p) : p = 2 ∧ ∃ a : F, ¬IsSquare a ∧ IsSquare (-a) := by
+  open Nat Polynomial in
+  have hp1 := Prime.pos hp; have := fact_iff.mpr hp
+  have hK : (primitiveRoots p F).Nonempty := by
+    have h_char := finite_algebraic_closure_cyclic_prime F K hp hrank
+    have := natDegree_pos_iff_degree_pos.mpr (degree_cyclotomic_pos p F hp1)
+    rcases divisor_by_finrank F K hrank hp this with ⟨z, hz⟩ | ⟨f, ⟨_, _⟩, hf3⟩
+    · have : NeZero (p : F) := ⟨(CharP.charP_iff_prime_eq_zero hp).mpr.mt h_char⟩
+      exact ⟨z, (mem_primitiveRoots hp1).mpr (isRoot_cyclotomic_iff.mp hz)⟩
+    · have := natDegree_le_of_dvd hf3 (cyclotomic_ne_zero p F)
+      rw [natDegree_cyclotomic p F, totient_prime hp] at this; grind
+  have ⟨a, h2⟩ : ∃ a : F, Irreducible (X ^ p - C a) := by
+    rw [←hrank] at hp1; have := FiniteDimensional.of_finrank_pos hp1
+    have h := fun hK ↦ (List.TFAE.out (isCyclic_tfae F K hK) 0 1).mp
+    have hG := IsGalois.card_aut_eq_finrank F K; rw [hrank] at h hG
+    have ⟨a, _, _⟩ := h hK ⟨‹IsGalois F K›, isCyclic_of_prime_card hG⟩; use a
+  have hp2 : p = 2 := by
+    by_contra
+    have h := fun n ↦ X_pow_sub_C_irreducible_iff_of_prime_pow hp this (K := F) (n := n)
+    have := (h 2 (by simp)).mpr ((h 1 one_ne_zero).mp (by rw [pow_one]; exact h2))
+    have := Irreducible.natDegree_dvd_finrank this (pol_splits F K _)
+    have := not_pos_pow_dvd (Prime.one_lt hp) one_lt_two; grind [natDegree_X_pow_sub_C]
+  rw [hp2] at h2 hrank; let h := quadratic_algebraic_closure F K hrank 0 a; ring_nf at h
+  have ha := nthRoots_two_eq_zero_iff.mp (roots_eq_zero_of_irreducible_of_natDegree_ne_one h2 ?_)
+  refine ⟨hp2, ⟨a, ha, ?_⟩⟩; repeat aesop
+
+lemma finite_inseparable_algebraic_closure [IsPurelyInseparable F K] : PerfectField F := by
+  let p := ringChar F; open Function IsPurelyInseparable in
+  rcases CharP.char_is_prime_or_zero F p with hp | hp
+  · have := ExpChar.prime hp (R := F); have : Surjective (frobenius F p) := by
+      intro b; let iota := algebraMap F K; have ⟨n, hn⟩ := finrank_eq_pow F K p
+      have := IsAlgClosure.isAlgClosed F (K := K)
+      have ⟨x, hx⟩ := IsAlgClosed.exists_pow_nat_eq (iota b) (expChar_pow_pos F p (n + 1))
+      let e := elemExponent F x; have : e + (n-e) = n := by
+        have := Nat.le_lt_asymm (minpoly.natDegree_le x (K := F))
+        rw [minpoly_natDegree_eq' F p, hn] at this
+        have := (pow_lt_pow_right₀ (Nat.Prime.one_lt hp)).mt this; grind only
+      let c := elemReduct F x; let a := c ^ p ^ (n-e); have := calc
+        iota b = (x ^ p ^ n) ^ p := by rw [←hx]; ring
+        _ = (x ^ (p ^ e * p ^ (n-e))) ^ p := by grind only
+        _ = iota (a ^ p) := by rw [pow_mul, ←algebraMap_elemReduct_eq', map_pow, map_pow]
+      exact ⟨a, (Injective.eq_iff (FaithfulSMul.algebraMap_injective F K)).mp this.symm⟩
+    have := PerfectRing.ofSurjective F p this; exact PerfectRing.toPerfectField F p
+  · have := (CharP.ringChar_zero_iff_CharZero F).mp hp; exact PerfectField.ofCharZero
+
+include h in
+lemma finite_separable_algebraic_closure_with_i [Algebra.IsSeparable F K] : IsAlgClosed F := by
+  open IntermediateField in
+  have h_ac := IsAlgClosure.isAlgClosed F (K := K)
+  have : Module.finrank F K = 1 := by
+    have := isGalois_iff.mpr ⟨inferInstance, IsAlgClosure.normal F K⟩
+    rw [←IsGaloisGroup.card_eq_finrank Gal(K/F) F K, Nat.card_eq_fintype_card]
+    by_contra
+    have ⟨p, hp1, hp1a⟩ := Nat.exists_prime_and_dvd this; have := fact_iff.mpr hp1
+    obtain ⟨g, rfl⟩ := exists_prime_orderOf_dvd_card p hp1a
+    let H := Subgroup.zpowers g; let E := fixedField H
+    have : IsAlgClosure E K := ⟨h_ac, isAlgebraic_tower_top⟩
+    have h_ekrank := finrank_fixedField_eq_card H; rw [Nat.card_zpowers] at h_ekrank
+    have ⟨_, ⟨_, _, hs⟩⟩ := finite_algebraic_closure_cyclic_quadratic E K hp1 h_ekrank
+    have := IsSquare.mul (IsSquare.map (algebraMap F ↥E) h) hs; simp_all
+  have h1 := botEquiv F K; rw [bot_eq_top_iff_finrank_eq_one.mpr this] at h1
+  exact IsAlgClosed.of_ringEquiv K F (topEquiv.symm.trans h1)
+
+include K h in
+lemma finite_algebraic_closure_with_i : IsAlgClosed F := by
+  open IntermediateField in
+  let E := separableClosure F K
+  have : IsAlgClosure E K := ⟨IsAlgClosure.isAlgClosed F, isAlgebraic_tower_top⟩
+  have := finite_inseparable_algebraic_closure E K
+  have := IsSquare.map (algebraMap F E) h; rw [map_neg, map_one] at this
+  have := finite_separable_algebraic_closure_with_i E K this
+  have : IsAlgClosure F E := ⟨this, separableClosure.isAlgebraic F K⟩
+  exact finite_separable_algebraic_closure_with_i F E h
