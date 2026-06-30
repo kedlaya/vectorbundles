@@ -9,11 +9,20 @@ public import Mathlib.RingTheory.Trace.Basic
 
 open Polynomial
 
+lemma exists_root_of_natDegree_eq_one {R : Type u} [Field R] {p : Polynomial R}
+  (h : p.natDegree = 1) : ∃ (x : R), p.IsRoot x :=
+  exists_root_of_degree_eq_one ((degree_eq_iff_natDegree_eq_of_pos Nat.one_pos).mpr h)
+
 @[simp]
 lemma artinSchreierPoly_isMonicOfDegree {F : Type} [Field F] {p : ℕ} (a : F) (hp : 1 < p) :
     (X ^ p - X - C a).IsMonicOfDegree p := by
   rw [←natDegree_X_add_C a] at hp; rw [←sub_add_eq_sub_sub]
   exact IsMonicOfDegree.sub (isMonicOfDegree_X_pow F p) hp
+
+@[simp]
+lemma artinSchreierPoly_aeval {F : Type} {K : Type} {p : ℕ} [Field F] [Field K] [Algebra F K]
+  (c : F) (z : K) : aeval z (X ^ p - X - C c) = z ^ p - z - (algebraMap F K) c := by
+  simp only [aeval_sub, map_pow, aeval_X, aeval_C]
 
 @[simp]
 lemma artinSchreierPoly_taylor (F : Type) [Field F] {p : ℕ} [CharP F p] (a c : F)
@@ -65,7 +74,7 @@ lemma artinSchreierPoly_irred (F : Type) [Field F] {p : ℕ} [CharP F p] (a : F)
     rw [←natDegree_multiset_prod S (by aesop), (hnd _ _ hp0).mp hd] at hdiv
     exact Prime.eq_one_or_self_of_dvd hp b.natDegree hdiv
   rcases this with h | h
-  · have ⟨x, hx⟩ := exists_root_of_degree_eq_one ((hnd _ _ one_pos).mpr h)
+  · have ⟨x, hx⟩ := exists_root_of_natDegree_eq_one h
     have hroot := (mem_roots h0).mpr (IsRoot.dvd hx (hirr2 b hb)); aesop
   · have := associated_of_dvd_of_natDegree_le (hirr2 b hb) h0
     rw [hmon.1, h] at this; exact Associated.irreducible (this (le_refl p)) (hirr b hb)
@@ -133,19 +142,17 @@ lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra 
   have := (Algebra.charP_iff F K p).mp ‹CharP F p›
   have ⟨a, z, hz⟩ := cyclic_char_p_as_param F K hp hrank
   let pol := X ^ p - X - C a; let iota := algebraMap F K; let pol' := map iota pol
-  have hmap : pol' = X ^ p - X - C (iota a) := by aesop
   have ⟨h_deg, h_mon⟩ := artinSchreierPoly_isMonicOfDegree a (Prime.one_lt hp)
   have h_eval := minpoly.aeval F z; rw [hz] at h_eval
-  have hroot1 : pol'.IsRoot ≠ ⊥ := Function.ne_iff.mpr ⟨z, (by aesop)⟩
-  have : pol' ≠ 0 := map_monic_ne_zero h_mon
-  have hroot2 := (roots_eq_zero_iff_isRoot_eq_bot this).mp.mt hroot1
   have splits : pol'.Splits := by
-    rw [hmap] at *; exact artinSchreierPoly_isRoot_splits K (iota a) hp hroot2
+    have : pol' ≠ 0 := map_monic_ne_zero h_mon
+    have hr := (roots_eq_zero_iff_isRoot_eq_bot this).mp.mt (Function.ne_iff.mpr ⟨z, (by aesop)⟩)
+    have hi : pol' = X ^ p - X - C (iota a) := (by aesop); rw [hi] at hr ⊢
+    exact artinSchreierPoly_isRoot_splits K (iota a) hp hr
   have adjoin : IntermediateField.adjoin F (pol.rootSet K) = ⊤ := by
     have hp0 := Prime.pos hp; rw [←hz] at h_deg; rw [←hrank] at hp0 h_deg
-    have : z ∈ pol.rootSet K := (Monic.mem_rootSet h_mon).mpr h_eval
-    have := adjoin_simple_le_iff.mpr (mem_adjoin_of_mem F this)
+    have := adjoin_simple_le_iff.mpr (mem_adjoin_of_mem F ((Monic.mem_rootSet h_mon).mpr h_eval))
     have := FiniteDimensional.of_finrank_pos hp0
     have hd := (degree_eq_iff_natDegree_eq_of_pos hp0).mpr h_deg
-    have := (Field.primitive_element_iff_minpoly_degree_eq F z).mpr hd; simp_all
+    have := (Field.primitive_element_iff_minpoly_degree_eq F z).mpr hd; simp_all [pol]
   exact ⟨a, isSplittingField_iff_intermediateField.mpr ⟨splits, adjoin⟩⟩

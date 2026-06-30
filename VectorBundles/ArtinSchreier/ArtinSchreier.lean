@@ -10,24 +10,24 @@ open Module Polynomial
 
 variable (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [IsAlgClosure F K]
 
-lemma pol_splits (p : F[X]) : (map (algebraMap F K) p).Splits :=
-  have : IsAlgClosed K := IsAlgClosure.isAlgClosed F; IsAlgClosed.splits (map (algebraMap F K) p)
+lemma pol_splits (f : F[X]) : (map (algebraMap F K) f).Splits :=
+  have : IsAlgClosed K := IsAlgClosure.isAlgClosed F; IsAlgClosed.splits (map (algebraMap F K) f)
 
 lemma divisor_by_finrank {f : F[X]} {p : ℕ} (hr : finrank F K = p) (hp : Nat.Prime p) (hf : 0 <
     f.natDegree) : (∃ x, f.IsRoot x) ∨ ∃ d, d.IsMonicOfDegree p ∧ d ∣ f := by
   have ⟨c, hc1, hc2, hc3⟩ := exists_monic_irreducible_factor f (not_isUnit_of_natDegree_pos f hf)
   have hd := Irreducible.natDegree_dvd_finrank hc2 (pol_splits F K c)
   rw [hr] at hd; rcases Nat.Prime.eq_one_or_self_of_dvd hp _ hd with h | h
-  · have := (degree_eq_iff_natDegree_eq_of_pos Nat.one_pos).mpr h
-    have ⟨x, hx⟩ := exists_root_of_degree_eq_one this; left; exact ⟨x, IsRoot.dvd hx hc3⟩
+  · left; have h := (degree_eq_iff_natDegree_eq_of_pos Nat.one_pos).mpr h
+    have ⟨x, hx⟩ := exists_root_of_degree_eq_one h; exact ⟨x, IsRoot.dvd hx hc3⟩
   · right; exact ⟨c, ⟨h, hc1⟩, hc3⟩
 
-lemma quadratic_algebraic_closure (h : finrank F K = 2) (a b : F) :
+lemma quadratic_algebraic_closure (hr2 : finrank F K = 2) (a b : F) :
     IsSquare (a*a+b) ∨ IsSquare (-b) := by
   let g := monomial 4 1 + monomial 2 (-2 * a) + monomial 0 (a^2 + b)
   have h1 : g.IsMonicOfDegree 4 := by dsimp [g]; exact ⟨by compute_degree!, by monicity⟩
-  rcases divisor_by_finrank F K h Nat.prime_two (f := g) (by grind [h1.1])
-    with ⟨x, hx⟩ | ⟨f, hf2, ⟨e, he⟩⟩
+  rcases divisor_by_finrank F K hr2 Nat.prime_two (f := g) (by grind [h1.1]) with
+    ⟨x, hx⟩ | ⟨f, hf2, ⟨e, he⟩⟩
   · right; use x^2 - a; simp only [IsRoot.def, eval_add, eval_monomial, g] at hx; grind only
   · let f₀ := f.coeff 0; let f₁ := f.coeff 1; let e₀ := e.coeff 0; let e₁ := e.coeff 1
     have : f₀*e₀ = a^2 + b ∧ 0 = f₀*e₁ + f₁*e₀ ∧ -2*a = f₀ + f₁*e₁ + e₀ ∧ 0 = f₁ + e₁ := by
@@ -48,9 +48,8 @@ lemma finite_algebraic_closure_cyclic_prime {p : ℕ} [IsGalois F K] (hp : Nat.P
   by_contra
   have ⟨a, x, ha⟩ := cyclic_char_p_as_param F K hp hrank
   have h_deg := (artinSchreierPoly_isMonicOfDegree a hp1').1; rw [←ha] at h_deg
-  have h_int := Algebra.IsIntegral.isIntegral x (R := F)
-  let pb := adjoin.powerBasis h_int; let iota := algebraMap F K
-  have ⟨y, hy⟩ : ∃ y : F⟮x⟯, ↑y^p - (↑y + (iota a) * pb.gen^(p-1)) = 0 := by
+  have h_int := Algebra.IsIntegral.isIntegral x (R := F); let pb := adjoin.powerBasis h_int
+  have ⟨y, hy⟩ : ∃ y : F⟮x⟯, ↑y^p = ↑y + ((algebraMap F K) a) * x^(p-1) := by
     have : IsAlgClosed F⟮x⟯ := by
       have := FiniteDimensional.of_finrank_pos (by rw [hrank]; exact hp1)
       have h1 := (topEquiv (F := F) (E := K)).symm
@@ -59,29 +58,26 @@ lemma finite_algebraic_closure_cyclic_prime {p : ℕ} [IsGalois F K] (hp : Nat.P
       have := IsAlgClosure.isAlgClosed F (K := K); exact of_ringEquiv K ↥F⟮x⟯ h1
     let t := a * pb.gen ^ (p-1)
     have := (artinSchreierPoly_isMonicOfDegree t hp1').1.trans_ne hp1.ne'
-    have ⟨y, hy⟩ := exists_aeval_eq_zero F⟮x⟯ (X ^ p - X - C t) (degree_ne_of_natDegree_ne this)
-    rw [coe_aeval_eq_eval, eval_sub, eval_sub, eval_pow, eval_X, eval_C, sub_sub, sub_eq_zero]
-      at hy; use y; rw [←IntermediateField.coe_pow]; aesop
-  have ⟨y_rep, h_pb1, h_pb2⟩ := PowerBasis.exists_eq_aeval pb y
+    have ⟨y, hy⟩ := exists_aeval_eq_zero F⟮x⟯ _ (degree_ne_of_natDegree_ne this)
+    rw [artinSchreierPoly_aeval, sub_sub, sub_eq_zero] at hy
+    use y; rw [←IntermediateField.coe_pow]; aesop
+  obtain ⟨y_rep, h_pb1, rfl⟩ := PowerBasis.exists_eq_aeval pb y
   let c := y_rep.coeff (p-1); have : c^p = c + a := by
+    have h : aeval x y_rep = aeval pb.gen y_rep := (by aesop); rw [←h] at hy
+    let m := map (frobenius F p) y_rep; have hd := (natDegree_taylor m a).trans (natDegree_map _)
     rw [adjoin.powerBasis_dim h_int, h_deg] at h_pb1
-    let m := map (frobenius F p) y_rep; let yp_rep := m.taylor a
-    have hd := (natDegree_taylor m a).trans (natDegree_map _)
-    let y1p_rep := y_rep + monomial (p-1) a; have h : yp_rep = y1p_rep := by
-      have h_eval : aeval x yp_rep = aeval x (expand F p m) := by
-        have := minpoly.aeval F x; have hx : x^p - x - iota a = 0 := by aesop
-        rw [sub_sub, sub_eq_zero] at hx; simp [yp_rep, taylor_apply, aeval_comp, hx, iota]
-      have hdiv : aeval x (yp_rep - y1p_rep) = 0 := by
-        have h : aeval x y_rep = y := by aesop
-        rw [aeval_sub, h_eval, ←map_expand, map_frobenius_expand, map_pow, aeval_add, h,
-          aeval_monomial]; exact hy
-      refine sub_eq_zero.mp (eq_zero_of_dvd_of_natDegree_lt (minpoly.dvd_iff.mpr hdiv) ?_)
+    have h : m.taylor a = y_rep + monomial (p-1) a := by
+      have hx := minpoly.aeval F x; rw [ha, artinSchreierPoly_aeval, sub_sub, sub_eq_zero] at hx
+      have hdiv := calc
+        aeval x (m.taylor a) = aeval x (expand F p m) := by simp [taylor_apply, aeval_comp, hx]
+        _ = aeval x (y_rep + monomial (p-1) a) := by simp [m, ←map_expand, map_frobenius_expand, hy]
+      rw [←sub_eq_zero, ←aeval_sub] at hdiv; have h := minpoly.dvd_iff.mpr hdiv
+      refine sub_eq_zero.mp (eq_zero_of_dvd_of_natDegree_lt h ?_)
       grind only [!natDegree_add_le, !natDegree_sub_le, !natDegree_monomial_le, =max_def]
-    have : yp_rep.coeff (p-1) = c^p := by
+    have h1 : (m.taylor a).coeff (p-1) = c^p := by
       by_cases hf0 : y_rep.natDegree = p-1
       · rw [←hf0, ←hd, ←leadingCoeff, leadingCoeff_taylor, leadingCoeff_map, leadingCoeff]; aesop
-      · subst c; rw [coeff_eq_zero_of_natDegree_lt, coeff_eq_zero_of_natDegree_lt, zero_pow]
-        repeat grind only
-    rw [←this, h, coeff_add y_rep, coeff_monomial_same]
+      · subst c; (repeat' rw [coeff_eq_zero_of_natDegree_lt]); rw [zero_pow]; repeat grind only
+    rw [←h1, h, coeff_add, coeff_monomial_same]
   have hirr := minpoly.irreducible h_int; rw [←h_deg] at hp1'
   have := Irreducible.not_isRoot_of_natDegree_ne_one hirr hp1'.ne' (x := c); simp_all
