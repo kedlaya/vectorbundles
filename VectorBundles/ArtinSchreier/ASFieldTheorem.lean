@@ -12,34 +12,30 @@ public import VectorBundles.ArtinSchreier.ArtinSchreierExt
 
 open IntermediateField Module Polynomial
 
-/- A polynomial of odd degree over a field has an irreducible factor of odd degree. -/
-lemma odd_irreducible_factor {F : Type} [Field F] {f : F[X]} (h : Odd f.natDegree) :
-    ∃ g, Irreducible g ∧ g ∣ f ∧ Odd g.natDegree :=
-  open Multiset UniqueFactorizationMonoid in /- -/ let S := factors f
-  have ⟨g, hg1, hg2⟩ : ∃ g ∈ S, Odd g.natDegree := by
-    have h0 := ne_zero_of_natDegree_gt (Odd.pos h); have hp := (factors_prod h0).symm
-    have h1 : S.prod ≠ 0 := by grind only [(associated_zero_iff_eq_zero f).mp.mt h0]
-    have hd := natDegree_eq_of_degree_eq (degree_eq_degree_of_associated hp)
-    have h0S := prod_eq_zero.mt h1; rw [hd, natDegree_multiset_prod S h0S] at h
-    by_contra; have : 2 ∣ (S.map natDegree).sum := by apply dvd_sum; simp_all [Even.two_dvd]
-    grind only [=Nat.odd_iff]
-  ⟨g, irreducible_of_factor g hg1, dvd_of_mem_factors hg1, hg2⟩
-
 variable (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [Hac: IsAlgClosed K]
 
-/- Given a polynomial over a field, its base change to an algebraic closure splits. -/
-lemma pol_splits (f : F[X]) : (map (algebraMap F K) f).Splits :=
-  IsAlgClosed.splits (map (algebraMap F K) f)
+/- The degree of any irreducible polynomial divides the degree of the algebraic closure .-/
+lemma finrank_divides {f : F[X]} (h : Irreducible f) : f.natDegree ∣ finrank F K :=
+  Irreducible.natDegree_dvd_finrank h (IsAlgClosed.splits (map (algebraMap F K) f))
 
 /- If a field admits an algebraically closed extension of degree dividing a prime p, any polynomial
-   over this field of positive degree has either a root or an irreducible divisor of degree p. -/
-lemma divisor_by_finrank (f : F[X]) {p : ℕ} (hr : finrank F K ∣ p) (hp : Nat.Prime p) (hf : 0 <
-    f.natDegree) : (∃ x, f.IsRoot x) ∨ ∃ d, d.IsMonicOfDegree p ∧ d ∣ f := by
-  have ⟨c, hc1, hc2, hc3⟩ := exists_monic_irreducible_factor f (not_isUnit_of_natDegree_pos f hf)
-  have hd := (Irreducible.natDegree_dvd_finrank hc2 (pol_splits F K c)).trans hr
-  rcases Nat.Prime.eq_one_or_self_of_dvd hp _ hd with h | h
-  · left; have ⟨x, hx⟩ := exists_root_of_natDegree_eq_one h; exact ⟨x, IsRoot.dvd hx hc3⟩
-  · right; exact ⟨c, ⟨h, hc1⟩, hc3⟩
+   over this field either has a root or:
+     - only has irreducible divisors of degree p;
+     - has degree divisible by p.  -/
+lemma divisor_by_finrank (f : F[X]) {p : ℕ} (hr : finrank F K ∣ p) (hp : Nat.Prime p) :
+  (∃ x, f.IsRoot x) ∨ (∀ d, Irreducible d → d ∣ f → d.natDegree = p) := by open Nat in
+  by_cases h : ∃ x, f.IsRoot x; left; exact h; right; intro d hd1 hd2
+  rcases Prime.eq_one_or_self_of_dvd hp _ ((finrank_divides F K hd1).trans hr) with h | h
+  have ⟨x, hx⟩ := exists_root_of_natDegree_eq_one h; grind [IsRoot.dvd hx hd2]; /- -/ exact h
+
+lemma divisor_by_finrank' (f : F[X]) {p : ℕ} (hr : finrank F K ∣ p) (hp : Nat.Prime p):
+  (∃ x, f.IsRoot x) ∨ p ∣ f.natDegree := by open Multiset UniqueFactorizationMonoid in
+  rcases divisor_by_finrank F K f hr hp with h | h1; left; exact h; right; let S := factors f
+  by_cases h0 : f = 0; simp_all; /- -/ push Not at h0; have hS := (factors_prod h0).symm
+  have h2 : S.prod ≠ 0 := by grind only [(associated_zero_iff_eq_zero f).mp.mt h0]
+  have hd := natDegree_eq_of_degree_eq (degree_eq_degree_of_associated hS)
+  rw [hd, natDegree_multiset_prod S (prod_eq_zero.mt h2)]; apply dvd_sum; simp
+  intro d hd; exact (h1 d (irreducible_of_factor d hd) (dvd_of_mem_factors hd)).symm.dvd
 
 /- If a field admits a Galois extension of prime degree p which is algebraically closed, then
    its characteristic cannot equal p. -/
@@ -76,16 +72,18 @@ lemma quadratic_alg_closure (h : finrank F K ∣ 2) (a b : F) :
     IsSquare (a*a+b) ∨ IsSquare (-b) := by open And Finset IsMonicOfDegree in
   let g := monomial 4 1 + monomial 2 (-2 * a) + monomial 0 (a^2 + b); let h2 := Nat.prime_two
   have h1 : g.IsMonicOfDegree 4 := by subst g; exact ⟨by compute_degree!, by monicity⟩
-  rcases divisor_by_finrank F K g h h2 (by grind [h1.1]) with ⟨x, hx⟩ | ⟨f, hf, ⟨e, he⟩⟩
+  rcases divisor_by_finrank F K g h h2 with ⟨x, hx⟩ | h
   · right; use x^2 - a; simp only [IsRoot.def, g, eval_add, eval_monomial] at hx; grind only
-  · subst g; let f₀ := f.coeff 0; let f₁ := f.coeff 1; let e₀ := e.coeff 0; let e₁ := e.coeff 1
+  · have ⟨f, hf2, h4, ⟨e, he⟩⟩ := exists_monic_irreducible_factor g (not_isUnit_of_natDegree_pos
+      g (by grind [h1.1])); have hf : f.IsMonicOfDegree 2 := ⟨h f h4 ⟨e, he⟩, hf2⟩; subst g
+    let f₀ := f.coeff 0; let f₁ := f.coeff 1; let e₀ := e.coeff 0; let e₁ := e.coeff 1
     have : f₀*e₀ = a^2 + b ∧ f₀*e₁ + f₁*e₀ = 0 ∧ f₀ + f₁*e₁ + e₀ = -2*a ∧ f₁ + e₁ = 0 := by
-      have hm := fun n ↦ (coeff_mul f e n).symm; rw [he] at h1
-      have h : ∀ {t : F[X]}, IsMonicOfDegree t 2 → t.coeff 2 = 1 ∧ t.coeff 3 = 0 := by
-        intro t ⟨h1, h2⟩; rw [←h1]; simp [h2, natDegree_le_iff_coeff_eq_zero.mp h1.le 3]
-      have hm' := intro (hm 0) (intro (hm 1) (intro (hm 2) (hm 3))); rw [←he] at hm'
+      have h : ∀ {t : F[X]}, t.IsMonicOfDegree 2 → t.coeff 2 = 1 ∧ t.coeff 3 = 0 := by
+        intro t h; rw [←h.1]; simp [h.2, natDegree_le_iff_coeff_eq_zero.mp h.1.le 3]
+      have hm := fun n ↦ (coeff_mul f e n).symm; rw [←he] at hm
+      have hm' := intro (hm 0) (intro (hm 1) (intro (hm 2) (hm 3)))
       simp only [coeff_add, coeff_monomial, antidiagonal] at hm'
-      simp [h hf, h (of_mul_left hf h1)] at hm'; ring_nf at hm' ⊢; exact hm'
+      rw [he] at h1; simp [h hf, h (of_mul_left hf h1)] at hm'; ring_nf at hm' ⊢; exact hm'
     clear h1 h he; by_cases f₁ = 0; right; use f₀ + a; grind only; left; use f₀; grind only
 
 /- If a field F admits a prime-degree Galois extension which is algebraically closed, then
@@ -94,22 +92,19 @@ lemma finite_algebraic_closure_cyclic_quadratic {p : ℕ} [H : IsGalois F K] (hp
     (hr : Module.finrank F K = p) : ¬IsSquare (-1 : F) := by
   open FiniteDimensional IsGalois IsSquare Nat Or Polynomial in
   have hp0 := Prime.pos hp; have := fact_iff.mpr hp; have hK : (primitiveRoots p F).Nonempty := by
-    have h_char := finite_algebraic_closure_cyclic_prime F K hp hr
-    have := natDegree_pos_iff_degree_pos.mpr (degree_cyclotomic_pos p F hp0)
-    rcases divisor_by_finrank F K _ hr.dvd hp this with ⟨z, hz⟩ | ⟨f, ⟨_, _⟩, hf3⟩
+    have h_char := finite_algebraic_closure_cyclic_prime F K hp hr; have hp1 := Prime.one_lt hp
+    rcases divisor_by_finrank' F K _ hr.dvd hp with ⟨z, hz⟩ | hz
     · have : NeZero (p : F) := ⟨(CharP.charP_iff_prime_eq_zero hp).mpr.mt h_char⟩
       exact ⟨z, (mem_primitiveRoots hp0).mpr (isRoot_cyclotomic_iff.mp hz)⟩
-    · have := natDegree_le_of_dvd hf3 (cyclotomic_ne_zero p F)
-      rw [natDegree_cyclotomic p F, totient_prime hp] at this; grind only
-  have ⟨a, h2⟩ : ∃ a : F, Irreducible (X ^ p - C a) := by
-    rw [←hr] at hp0; have := of_finrank_pos hp0; have hG := card_aut_eq_finrank F K
-    have h := fun hK ↦ (List.TFAE.out (isCyclic_tfae F K hK) 0 1).mp
-    rw [hr] at h hG; have ⟨a, h, _⟩ := h hK ⟨H, isCyclic_of_prime_card hG⟩; exact ⟨a, h⟩
+    · rw [natDegree_cyclotomic p F, totient_prime hp] at hz
+      have := le_of_dvd (zero_lt_sub_of_lt hp1) hz; grind only
+  rw [←hr] at hp0; have := of_finrank_pos hp0; have hG := card_aut_eq_finrank F K
+  have h := fun hK ↦ (List.TFAE.out (isCyclic_tfae F K hK) 0 1).mp; rw [hr] at h hG
+  have ⟨a, h2, _⟩ := h hK ⟨H, isCyclic_of_prime_card hG⟩
   have hp : p = 2 := by
     by_contra; have h := fun n ↦ X_pow_sub_C_irreducible_iff_of_prime_pow hp this (K := F) (n := n)
     have h := (h 2 (by simp)).mpr ((h 1 (by simp)).mp (by rw [pow_one]; exact h2))
-    have := Irreducible.natDegree_dvd_finrank h (pol_splits F K _)
-    have := not_pos_pow_dvd (Prime.one_lt hp) one_lt_two; simp_all
+    have := finrank_divides F K h; have := not_pos_pow_dvd (Prime.one_lt hp) one_lt_two; simp_all
   rw [hp] at h2 hr; let h := quadratic_alg_closure F K hr.dvd 0 a; ring_nf at h; by_contra
   have ha := nthRoots_two_eq_zero_iff.mp (roots_eq_zero_of_irreducible_of_natDegree_ne_one h2 ?_)
   have h := mul this (resolve_left h ha); repeat aesop
@@ -135,7 +130,8 @@ lemma finite_algebraic_closure_with_i [FiniteDimensional F K] (h : IsSquare (-1 
    closure, is real closed. -/
 omit Hac in lemma RealClosed_from_quadratic (h1 : ¬IsSquare (-1 : F))
     (h2 : ∃ i : K, i^2 = -1 ∧ IsAlgClosed F⟮i⟯) : IsRealClosed F := by
-  obtain ⟨i, h2a, _⟩ := h2; have hr : finrank F F⟮i⟯ ∣ 2 := by open IsIntegral minpoly in
+  open IsIntegral Multiset Nat UniqueFactorizationMonoid in /- -/
+  obtain ⟨i, h2a, _⟩ := h2; have hr : finrank F F⟮i⟯ ∣ 2 := by open minpoly in
     have h_int : IsIntegral F i := by apply of_pow two_pos; rw [h2a]; exact neg isIntegral_one
     rw [adjoin.finrank h_int]; have h := X_pow_add_C_ne_zero two_pos (1 : F)
     have h := natDegree_le_of_dvd (dvd_iff (x := i).mpr (by aesop)) h; have := natDegree_pos h_int
@@ -147,11 +143,8 @@ omit Hac in lemma RealClosed_from_quadratic (h1 : ¬IsSquare (-1 : F))
     apply IsSumSq.rec'; exact IsSquare.zero; rintro a b ⟨y, rfl⟩ _ hb; by_cases hb0 : 0 = b
     rw [←hb0, add_zero]; use y; /- -/ exact Or.resolve_right (hq y b) (ng b hb0 hb)
   have := isSemireal_iff_not_isSumSq_neg_one.mpr ((hssq (-1)).mt (ng 1 zero_ne_one IsSquare.one))
-  let issquare := hq 0; ring_nf at issquare; refine ⟨issquare, ?_⟩; open Nat in
-  intro f h; have ⟨w, hg, h_div, _⟩ := odd_irreducible_factor h
-  have hd := (Irreducible.natDegree_dvd_finrank hg (pol_splits F F⟮i⟯ _)).trans hr
-  have h : w.natDegree = 1 := by grind [Prime.eq_one_or_self_of_dvd prime_two _ hd]
-  have ⟨x, hx⟩ := exists_root_of_natDegree_eq_one h; exact ⟨x, IsRoot.dvd hx h_div⟩
+  let issquare := hq 0; ring_nf at issquare; refine ⟨issquare, ?_⟩; intro f _
+  rcases divisor_by_finrank' F F⟮i⟯ f hr prime_two with h | h1; exact h; grind only [=odd_iff]
 
 /- A field admitting an algebraic closure which is a finite extension is either algebraically
    closed or real closed. -/
