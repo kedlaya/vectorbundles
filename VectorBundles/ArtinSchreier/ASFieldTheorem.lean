@@ -15,46 +15,45 @@ variable (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] [Hac: IsAlgClos
 
 /- The degree of any irreducible polynomial divides the degree of the algebraic closure .-/
 lemma finrank_divides {f : F[X]} (h : Irreducible f) : f.natDegree ∣ finrank F K :=
-  Irreducible.natDegree_dvd_finrank h (IsAlgClosed.splits (f.map _))
+  h.natDegree_dvd_finrank (Hac.splits _)
 
 /- If a field admits an algebraically closed extension of degree dividing a prime p, any polynomial
-   over this field either has a root or:
-     - only has irreducible divisors of degree p;
-     - has degree divisible by p.  -/
-lemma divisor_by_finrank (f : F[X]) (hr : finrank F K ∣ p) (hp : p.Prime) :
+   either has a root or has all irreducible divisors of degree p and degree divisible by p. -/
+lemma divisor_by_finrank {p : ℕ} (f : F[X]) (hr : finrank F K ∣ p) (hp : p.Prime) :
     (∃ x, f.IsRoot x) ∨ (∀ d, Irreducible d → d ∣ f → d.natDegree = p) := by
   rw [or_iff_not_imp_right]; push Not; rintro ⟨d, h1, h2, h3⟩
   have h := ((dvd_prime hp).mp ((finrank_divides F K h1).trans hr)).resolve_right h3
   have ⟨x, hx⟩ := exists_root_of_natDegree_eq_one h; exact ⟨x, hx.dvd h2⟩
 
-lemma divisor_by_finrank' (f : F[X]) (hr : finrank F K ∣ p) (hp : p.Prime) :
-    (∃ x, f.IsRoot x) ∨ p ∣ f.natDegree := by open Multiset PrincipalIdealRing in
-  refine Or.imp_right ?_ (divisor_by_finrank F K f hr hp); intro h
-  refine dvd_natDegree_from_irred F f ?_; intro d h1 h2; exact (h d h1 h2).symm.dvd
-
-/- If a field admits a Galois extension of prime degree p which is algebraically closed, then
-   its characteristic cannot equal p. -/
-lemma finite_alg_closure_prime [IsGalois F K] (hp : p.Prime) (hr : finrank F K = p) : ¬CharP F p :=
-  by let t := p-1; subst hr; have := FiniteDimensional.of_finrank_pos hp.pos; open Field in
-  by_contra; have h_a {E} [Field E] (x : E) := (artinSchreierPoly_isMonicOfDegree x hp.one_lt).1
-  have ⟨a, x, ha⟩ := cyclic_char_p_as_param F K hp rfl; have := artin_schreier_tower F K hp a x ha
-  have h := coe_lt_degree.mpr ((h_a ((algebraMap F K) a * x^t)).trans_gt hp.pos); have h_d := h_a a
-  rw [←ha] at h_d; have ⟨y, hy⟩ := Hac.exists_aeval_eq_zero K _ h.ne'
-  simp_all [t, (primitive_element_iff_minpoly_natDegree_eq F x).mpr h_d]
+lemma divisor_by_finrank' {p : ℕ} (f : F[X]) (hr : finrank F K ∣ p) (hp : p.Prime) :
+    (∃ x, f.IsRoot x) ∨ p ∣ f.natDegree := by
+  refine (divisor_by_finrank F K f hr hp).imp_right (fun h ↦ dvd_natDegree_from_irred F f ?_)
+  exact fun d h1 h2 ↦ (h d h1 h2).symm.dvd
 
 /- A field admitting a finite extension which is algebraically closed is perfect. -/
-lemma finite_alg_closure_perfect [FiniteDimensional F K] : PerfectField F
-  := by open CharP FaithfulSMul Function IsPurelyInseparable in
-  let E := separableClosure F K; let p := ringChar E; have : PerfectField E := by
-    have := ringChar.charP ↥E; rcases char_is_prime_or_zero ↥E p with h | h
-    let n := exponent E K; have := ExpChar.prime h (R := E); have h : Surjective (frobenius E p) := by
+lemma finite_alg_closure_perfect [FiniteDimensional F K] : PerfectField F := by
+  let E := separableClosure F K; open FaithfulSMul Function IsPurelyInseparable in
+  let p := ringChar E; have := ringChar.charP E; have : PerfectField E := by
+    let n := exponent E K; rcases CharP.char_is_prime_or_zero E p with h | h
+    have := ExpChar.prime h (R := E); have h : Surjective (frobenius E p) := by
       intro b; have h := Hac.exists_pow_nat_eq ((algebraMap E K) b) (expChar_pow_pos E p (n + 1))
       obtain ⟨x, hx⟩ := h; rw [pow_succ', ←pow_mul_pow_sub p (elemExponent_le_exponent E x)] at hx
       use elemReduct E x ^ p ^ (n - elemExponent E x); apply (algebraMap_injective E K).eq_iff.mp
       rw [←hx, frobenius_def, ←pow_mul, map_pow, algebraMap_elemReduct_eq' E p]; ring
     open PerfectRing in have := ofSurjective E p h; exact toPerfectField E p
-    · have := (ringChar_zero_iff_CharZero E).mp h; exact PerfectField.ofCharZero
+    · have := (CharP.ringChar_zero_iff_CharZero E).mp h; exact PerfectField.ofCharZero
   exact perfectField_of_isSeparable_of_perfectField_top F E
+
+/- If a field admits an extension of prime degree p which is algebraically closed, then
+   its characteristic cannot equal p. -/
+lemma finite_alg_closure_prime {p : ℕ} (hp : p.Prime) (hr : finrank F K = p) : ¬CharP F p := by
+  by_contra; let t := p-1; subst hr; have := FiniteDimensional.of_finrank_pos hp.pos
+  have := finite_alg_closure_perfect F K; have : IsAlgClosure F K := ⟨Hac, inferInstance⟩
+  have h_a {E} [Field E] (x : E) := (artinSchreierPoly_isMonicOfDegree x hp.one_lt).1
+  have ⟨a, x, ha⟩ := cyclic_char_p_as_param F K hp rfl; have := artin_schreier_tower F K hp a x ha
+  have h := (coe_lt_degree.mpr ((h_a ((algebraMap F K) a * x^t)).trans_gt hp.pos)).ne'; subst t
+  absurd Hac.exists_aeval_eq_zero K _ h
+  simp_all [(Field.primitive_element_iff_minpoly_natDegree_eq F x).mpr]
 
 /- If a and b belong to a field which admits an algebraically closed quadratic extension,
    then one of a^2+b or -b is a square. -/
@@ -67,11 +66,11 @@ lemma quadratic_alg_closure (h : finrank F K ∣ 2) (a b : F) : IsSquare (a*a+b)
     obtain ⟨f, h3, h4, ⟨e, he⟩⟩ := h; have hf : f.IsMonicOfDegree 2 := ⟨h f h4 ⟨e, he⟩, h3⟩
     subst g; let f₀ := f.coeff 0; let f₁ := f.coeff 1; let e₀ := e.coeff 0; let e₁ := e.coeff 1
     have : f₀*e₀ = a^2 + b ∧ f₀*e₁ + f₁*e₀ = 0 ∧ f₀ + f₁*e₁ + e₀ = -2*a ∧ f₁ + e₁ = 0 := by
-      have h : ∀ {t : F[X]}, t.IsMonicOfDegree 2 → t.coeff 2 = 1 ∧ t.coeff 3 = 0 := by
+      have h2 : ∀ {t : F[X]}, t.IsMonicOfDegree 2 → t.coeff 2 = 1 ∧ t.coeff 3 = 0 := by
         intro _ h; rw [←h.1]; simp [h.2, natDegree_le_iff_coeff_eq_zero.mp h.1.le]
       have hm := fun n ↦ (coeff_mul f e n).symm; simp only [←he, coeff_add, coeff_monomial] at hm
       open And in have hm' := intro (hm 0) (intro (hm 1) (intro (hm 2) (hm 3))); rw [he] at h1
-      simp [antidiagonal, h hf, h (hf.of_mul_left h1)] at hm'; ring_nf at hm' ⊢; exact hm'
+      simp [antidiagonal, h2 hf, h2 (hf.of_mul_left h1)] at hm'; ring_nf at hm' ⊢; exact hm'
     clear h1 h he; by_cases f₁ = 0; right; use f₀ + a; grind only; · left; use f₀; grind only
 
 /- A field containing a square root of -1 and admitting a finite extension which is algebraically
@@ -87,15 +86,15 @@ lemma finite_alg_closure_i [FiniteDimensional F K] (hm : IsSquare (-1 : F)) : Is
       rcases divisor_by_finrank' E K _ hr.dvd hp with ⟨z, hz⟩ | hz
       · have := neZero_iff.mpr ((CharP.charP_iff_prime_eq_zero hp).mpr.mt h_char)
         exact ⟨z, (mem_primitiveRoots hp.pos).mpr (isRoot_cyclotomic_iff.mp hz)⟩
-      · simp [hp.one_lt.not_ge, natDegree_cyclotomic p E, totient_prime hp] at hz
+      · simp [natDegree_cyclotomic p E, totient_prime hp, hp.one_lt.not_ge] at hz
     have h := fun hK ↦ (List.TFAE.out (isCyclic_tfae E K hK) 0 1).mp; rw [hr] at h hG
-    have ⟨a, h2, _⟩ := h hK ⟨inferInstance, isCyclic_of_prime_card hG⟩; have hp : p = 2 := by
-      by_contra h1; have h := fun n ↦ X_pow_sub_C_irreducible_iff_of_prime_pow hp h1 (K := E)
-        (n := n); have h := (h 2 (by simp)).mpr ((h 1 (by simp)).mp (by rw [pow_one]; exact h2))
+    have ⟨a, h2, _⟩ := h hK ⟨inferInstance, isCyclic_of_prime_card hG⟩
+    have h3 := (X_pow_sub_C_irreducible_iff_of_prime hp).mp h2; by_cases h1 : p = 2
+    · rw [h1] at h3 hr; absurd (isSquare_iff_exists_sq a).mp.mt (by aesop)
+      rcases quadratic_alg_closure _ K hr.dvd 0 a with h | h; · simp_all
+      · have := (hm.map (algebraMap F _)).mul h; simp_all
+    · have h := (X_pow_sub_C_irreducible_iff_of_prime_pow hp h1 (n := 2) (by simp)).mpr h3
       have h := finrank_divides _ K h; rw [hr] at h; simp_all [not_pos_pow_dvd hp.one_lt]
-    rw [hp] at h2 hr; let h := quadratic_alg_closure _ K hr.dvd 0 a; ring_nf at h
-    have ha := nthRoots_two_eq_zero_iff.mp (roots_eq_zero_of_irreducible_of_natDegree_ne_one h2 ?_)
-    have := (hm.map (algebraMap F _)).mul (h.resolve_left ha); repeat aesop
   have h := equivOfEq (bot_eq_top_iff_finrank_eq_one.mpr h)
   exact IsAlgClosed.of_ringEquiv K F (((botEquiv F K).symm.trans h).trans topEquiv).symm
 
@@ -111,13 +110,13 @@ omit Hac in lemma RealClosed_from_quadratic (h1 : ¬IsSquare (-1 : F))
     apply IsSumSq.rec'; simp; rintro a b ⟨y, rfl⟩ - h; by_cases h0 : b = 0; · simp_all
     contrapose h1; rw [←neg_div_self h0]; exact ((hq y b).resolve_left h1).div h
   have := isSemireal_iff_not_isSumSq_neg_one.mpr ((hssq _).mt h1)
-  let issquare := hq 0; ring_nf at issquare; refine ⟨issquare, ?_⟩; intro f _
-  rcases divisor_by_finrank' F F⟮i⟯ f hr prime_two with h | _; exact h; grind
+  let issquare := hq 0; ring_nf at issquare; refine ⟨issquare, ?_⟩; intro f h
+  exact (divisor_by_finrank' F F⟮i⟯ f hr prime_two).resolve_right h.not_two_dvd_nat
 
 /- The Artin-Schreier theorem: a field admitting a finite extension which is algebraically closed
    is either algebraically closed or real closed. -/
 theorem artin_schreier_thm [FiniteDimensional F K] : IsAlgClosed F ∨ IsRealClosed F := by
-  by_cases hF : IsSquare (-1 : F); left; exact finite_alg_closure_i F K hF; /- -/ right
-  have ⟨i, hi⟩ := Hac.exists_pow_nat_eq (-1) two_pos
-  refine RealClosed_from_quadratic F K hF ⟨i, ⟨hi, finite_alg_closure_i F⟮i⟯ K ?_⟩⟩
-  apply (isSquare_iff_exists_sq _).mpr; symm at hi; aesop
+  by_cases hF : IsSquare (-1 : F); · left; exact finite_alg_closure_i F K hF
+  · right; have ⟨i, hi⟩ := Hac.exists_pow_nat_eq (-1) two_pos
+    refine RealClosed_from_quadratic F K hF ⟨i, ⟨hi, finite_alg_closure_i F⟮i⟯ K ?_⟩⟩
+    apply (isSquare_iff_exists_sq _).mpr; symm at hi; aesop

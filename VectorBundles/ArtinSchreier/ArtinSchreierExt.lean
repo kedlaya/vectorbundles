@@ -50,13 +50,16 @@ lemma dvd_natDegree_from_irred (F : Type) [Field F] {n : ℕ} (f : F[X])
 
 lemma artinSchreierPoly_irred (F : Type) [Field F] {p : ℕ} [Hp: CharP F p] (a : F)
     (hp : p.Prime) (hr : (X ^ p - X - C a).roots = 0) : Irreducible (X ^ p - X - C a) := by
-  have hp0 := hp.pos; have hp0' := hp0; let pol := (X ^ p - X - C a); open AdjoinRoot Multiset in
+  have hp0 := hp.pos; let pol := (X ^ p - X - C a); open AdjoinRoot Multiset in
   have hmon := artinSchreierPoly_isMonicOfDegree a hp.one_lt
-  have h0 := IsMonicOfDegree.ne_zero hmon; rw [←hmon.1] at hp0'
-  have ⟨b, hb1, hb2, hb3⟩ := exists_monic_irreducible_factor _ (not_isUnit_of_natDegree_pos _ hp0')
-  have hbc : ∀ c, Irreducible c → c ∣ pol → b.natDegree ∣ c.natDegree := by
-    intro c hc hc1; have := fact_iff.mpr (irreducible_mul_leadingCoeff_inv.mpr hc)
-    have hc2 := hc.ne_zero; let K := AdjoinRoot (c * C c.leadingCoeff⁻¹); let i := algebraMap F K
+  have h0 := IsMonicOfDegree.ne_zero hmon; rw [←hmon.1] at hp0
+  have ⟨b, hb1, hb2, hb3⟩ := exists_monic_irreducible_factor _ (not_isUnit_of_natDegree_pos _ hp0)
+  have h : b.natDegree ≠ 1 ∧ b.natDegree ∣ pol.natDegree := by
+    constructor; contrapose hr; have ⟨x, hx⟩ := exists_root_of_natDegree_eq_one hr
+    have := (mem_roots h0).mpr (hx.dvd hb3); apply eq_zero_iff_forall_notMem.mp.mt; aesop
+    apply dvd_natDegree_from_irred F pol; intro c hc hc1; have hc2 := hc.ne_zero
+    have := fact_iff.mpr (irreducible_mul_leadingCoeff_inv.mpr hc)
+    let K := AdjoinRoot (c * C c.leadingCoeff⁻¹); let i := algebraMap F K
     have hm1 := AdjoinRoot.isAdjoinRootMonic _ (monic_mul_leadingCoeff_inv hc2)
     rw [←c.natDegree_mul_leadingCoeff_self_inv, ←hm1.finrank]; let pol' := pol.map i
     have := (Algebra.charP_iff F K p).mp Hp; have hm0 := map_ne_zero (f := i) h0
@@ -65,11 +68,8 @@ lemma artinSchreierPoly_irred (F : Type) [Field F] {p : ℕ} [Hp: CharP F p] (a 
     have hmap : pol' = X^p - X - C (i a) := ?_; subst pol'; rw [hmap] at hm0 hdiv h
     exact hb2.natDegree_dvd_finrank ((artinSchreierPoly_isRoot_splits _ _ hp h).of_dvd hm0 hdiv)
     repeat aesop
-  have h := dvd_natDegree_from_irred F pol hbc; rw [hmon.1] at h
-  rcases (Nat.dvd_prime hp).mp h with h | h1
-  · have ⟨x, hx⟩ := exists_root_of_natDegree_eq_one h
-    have := (mem_roots h0).mpr (hx.dvd hb3); aesop
-  · exact ((associated_of_dvd_of_natDegree_le hb3 h0) (hmon.1.trans h1.symm).le).irreducible hb2
+  rw [hmon.1] at h; have h1 := (((Nat.dvd_prime hp).mp h.2).resolve_left h.1).symm
+  exact ((associated_of_dvd_of_natDegree_le hb3 h0) (hmon.1.trans h1).le).irreducible hb2
 
 lemma artinSchreierPoly_irred_or_splits (F : Type) [Field F] {p : ℕ} [CharP F p] (a : F)
   (hp : p.Prime) : Irreducible (X ^ p - X - C a) ∨ Splits (X ^ p - X - C a) := by
@@ -119,7 +119,7 @@ lemma cyclic_char_p_as_param (F K : Type) [Field F] [Field K] [Algebra F K]
 /- A Galois field extension of degree p between fields of characteristic p is the splitting field
    of a polynomial of the form X^p - X - a. -/
 lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra F K]
-    [IsGalois F K] {p : ℕ} [Hp: CharP F p] (hp : p.Prime) (hrank : Module.finrank F K = p) :
+    [IsGalois F K] {p : ℕ} [Hp : CharP F p] (hp : p.Prime) (hrank : Module.finrank F K = p) :
     ∃ a : F, IsSplittingField F K (X ^ p - X - C a) := by open Function in
   have ⟨a, z, hz⟩ := cyclic_char_p_as_param F K hp hrank; let pol := X ^ p - X - C a
   let iota := algebraMap F K; have h_eval := minpoly.aeval F z; let pol' := pol.map iota
@@ -140,7 +140,7 @@ lemma cyclic_char_p_as_artin_schreier (F K : Type) [Field F] [Field K] [Algebra 
 /- For any field F of characteristic p, if an element x of an extension field of F has minimal
    polynomial X^p - X - C a for some a in F, then the polynomial X^p - X - C (a * x^(p-1)) has
    no root in F(x). -/
-lemma artin_schreier_tower (F : Type) (K : Type) [Field F] [Field K] [Algebra F K]
+lemma artin_schreier_tower (F : Type) (K : Type) [Field F] [Field K] [Algebra F K] {p : ℕ}
   [CharP F p] (hp : p.Prime) (a : F) (x : K) (hx : minpoly F x = X^p - X - C a) :
     ¬∃ y : F⟮x⟯, y^p - y - (algebraMap F K) a * x ^ (p-1) = 0 := by open minpoly in
   by_contra; obtain ⟨y, hy⟩ := this; have hp1 := hp.one_lt; have := fact_iff.mpr hp
